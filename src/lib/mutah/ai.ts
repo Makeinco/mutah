@@ -1,5 +1,5 @@
 import { INDICATOR_ORDER } from "./labels";
-import type { Facility, IndicatorEvidence } from "./types";
+import type { Facility, IndicatorEvidence, IndicatorKey } from "./types";
 
 /**
  * AI provider adapter (mock).
@@ -26,7 +26,7 @@ export const ANALYSIS_STEPS: AnalysisStep[] = [
  * because uncertainty is a product feature, not a defect.
  */
 export function analyseEntranceImage(facility: Facility | undefined): IndicatorEvidence[] {
-  const base: Record<string, IndicatorEvidence> = {
+  const base: Record<IndicatorKey, IndicatorEvidence> = {
     steps: { key: "steps", state: "present", note: "تظهر درجة واحدة أمام الباب الرئيسي." },
     ramp: { key: "ramp", state: "present", note: "يظهر منحدر بجانب المدخل." },
     handrail: { key: "handrail", state: "present", note: "يظهر درابزين بمحاذاة المنحدر." },
@@ -39,13 +39,13 @@ export function analyseEntranceImage(facility: Facility | undefined): IndicatorE
   };
 
   if (facility?.id === "pharmacy-rukn") {
-    base.ramp = { key: "ramp", state: "present", note: "يظهر منحدر معدني صغير أمام العتبة." };
-    base.obstruction = {
+    base['ramp'] = { key: "ramp", state: "present", note: "يظهر منحدر معدني صغير أمام العتبة." };
+    base['obstruction'] = {
       key: "obstruction",
       state: "absent",
       note: "تم إزاحة الأحواض؛ المسار يبدو خاليًا.",
     };
-    base.handrail = { key: "handrail", state: "not_visible", note: "جانب الباب خارج إطار الصورة." };
+    base['handrail'] = { key: "handrail", state: "not_visible", note: "جانب الباب خارج إطار الصورة." };
   }
 
   return INDICATOR_ORDER.map((k) => base[k]);
