@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as PreferencesRouteImport } from './routes/preferences'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ContributeIndexRouteImport } from './routes/contribute.index'
+import { Route as ContributeFacilityIdRouteImport } from './routes/contribute.$facilityId'
 import { Route as FacilityIdRouteImport } from './routes/facility.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -30,9 +32,19 @@ const PreferencesRoute = PreferencesRouteImport.update({
   path: '/preferences',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContributeIndexRoute = ContributeIndexRouteImport.update({
   id: '/contribute/',
   path: '/contribute/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContributeFacilityIdRoute = ContributeFacilityIdRouteImport.update({
+  id: '/contribute/$facilityId',
+  path: '/contribute/$facilityId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FacilityIdRoute = FacilityIdRouteImport.update({
@@ -45,6 +57,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/preferences': typeof PreferencesRoute
+  '/review': typeof ReviewRoute
+  '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute/': typeof ContributeIndexRoute
 }
@@ -52,6 +66,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/preferences': typeof PreferencesRoute
+  '/review': typeof ReviewRoute
+  '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute': typeof ContributeIndexRoute
 }
@@ -60,20 +76,37 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/preferences': typeof PreferencesRoute
+  '/review': typeof ReviewRoute
+  '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute/': typeof ContributeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/discover' | '/preferences' | '/facility/$id' | '/contribute/'
+    | '/'
+    | '/discover'
+    | '/preferences'
+    | '/review'
+    | '/contribute/$facilityId'
+    | '/facility/$id'
+    | '/contribute/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/discover' | '/preferences' | '/facility/$id' | '/contribute'
+  to:
+    | '/'
+    | '/discover'
+    | '/preferences'
+    | '/review'
+    | '/contribute/$facilityId'
+    | '/facility/$id'
+    | '/contribute'
   id:
     | '__root__'
     | '/'
     | '/discover'
     | '/preferences'
+    | '/review'
+    | '/contribute/$facilityId'
     | '/facility/$id'
     | '/contribute/'
   fileRoutesById: FileRoutesById
@@ -82,6 +115,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
   PreferencesRoute: typeof PreferencesRoute
+  ReviewRoute: typeof ReviewRoute
+  ContributeFacilityIdRoute: typeof ContributeFacilityIdRoute
   FacilityIdRoute: typeof FacilityIdRoute
   ContributeIndexRoute: typeof ContributeIndexRoute
 }
@@ -109,11 +144,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreferencesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contribute/': {
       id: '/contribute/'
       path: '/contribute'
       fullPath: '/contribute/'
       preLoaderRoute: typeof ContributeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contribute/$facilityId': {
+      id: '/contribute/$facilityId'
+      path: '/contribute/$facilityId'
+      fullPath: '/contribute/$facilityId'
+      preLoaderRoute: typeof ContributeFacilityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/facility/$id': {
@@ -130,6 +179,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
   PreferencesRoute: PreferencesRoute,
+  ReviewRoute: ReviewRoute,
+  ContributeFacilityIdRoute: ContributeFacilityIdRoute,
   FacilityIdRoute: FacilityIdRoute,
   ContributeIndexRoute: ContributeIndexRoute,
 }
