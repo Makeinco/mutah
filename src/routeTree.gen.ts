@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ContributeIndexRouteImport } from './routes/contribute.index'
@@ -22,9 +24,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PreferencesRoute = PreferencesRouteImport.update({
@@ -55,7 +67,9 @@ const FacilityIdRoute = FacilityIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/discover': typeof DiscoverRoute
+  '/insights': typeof InsightsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -64,7 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/discover': typeof DiscoverRoute
+  '/insights': typeof InsightsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -74,7 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/discover': typeof DiscoverRoute
+  '/insights': typeof InsightsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -85,7 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/discover'
+    | '/insights'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/discover'
+    | '/insights'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -103,7 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/discover'
+    | '/insights'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -113,7 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   DiscoverRoute: typeof DiscoverRoute
+  InsightsRoute: typeof InsightsRoute
   PreferencesRoute: typeof PreferencesRoute
   ReviewRoute: typeof ReviewRoute
   ContributeFacilityIdRoute: typeof ContributeFacilityIdRoute
@@ -130,11 +156,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/discover': {
       id: '/discover'
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/preferences': {
@@ -177,7 +217,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   DiscoverRoute: DiscoverRoute,
+  InsightsRoute: InsightsRoute,
   PreferencesRoute: PreferencesRoute,
   ReviewRoute: ReviewRoute,
   ContributeFacilityIdRoute: ContributeFacilityIdRoute,
