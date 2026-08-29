@@ -19,7 +19,7 @@ export const Route = createFileRoute("/review")({
       { property: "og:description", content: "لا نشر تلقائي: كل مساهمة تمر على مراجع بشري." },
     ],
   }),
-  component: ReviewCenter;
+  component: ReviewCenter,
 });
 
 const STATUS_LABEL: Record<ContributionStatus, string> = {
