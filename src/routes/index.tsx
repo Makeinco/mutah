@@ -38,11 +38,11 @@ function Home() {
       {/* Open door: a single quiet opening of space, not an icon. */}
       <div
         aria-hidden="true"
-        className="door-sweep pointer-events-none absolute inset-y-0 right-0 w-[42%] bg-primary-soft/60"
+        className="door-sweep pointer-events-none absolute right-0 top-0 h-[46vh] w-[38%] rounded-bl-[6rem] bg-primary-soft/50"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-[42%] w-1 bg-brand-green"
+        className="pointer-events-none absolute right-[38%] top-0 h-[22vh] w-1.5 rounded-b-full bg-brand-green"
       />
 
       <main id="main-content" className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-14">
