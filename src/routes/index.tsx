@@ -45,7 +45,7 @@ function Home() {
         className="pointer-events-none absolute inset-y-0 right-[42%] w-1 bg-brand-green"
       />
 
-      <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-14">
+      <main id="main-content" className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-14">
         <MutahLogo className="h-16 md:h-20" />
 
         <h1 className="mt-10 text-4xl font-bold md:text-5xl">اعرف قبل أن تصل</h1>
