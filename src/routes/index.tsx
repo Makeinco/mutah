@@ -42,7 +42,7 @@ function Home() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-[38%] top-0 h-[22vh] w-1.5 rounded-b-full bg-brand-green"
+        className="pointer-events-none absolute right-0 top-[46vh] h-1.5 w-[38%] rounded-l-full bg-brand-green"
       />
 
       <main id="main-content" className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-14">
