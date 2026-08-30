@@ -47,7 +47,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className={cn("mx-auto w-full flex-1 px-4 pb-28 pt-6 md:pb-12", wide ? "max-w-7xl" : "max-w-5xl")}>
+      <main id="main-content" className={cn("mx-auto w-full flex-1 px-4 pb-28 pt-6 md:pb-12", wide ? "max-w-7xl" : "max-w-5xl")}>
         {children}
       </main>
 

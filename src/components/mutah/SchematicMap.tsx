@@ -14,7 +14,7 @@ export function SchematicMap({
 }: {
   facilities: Facility[];
   needs: AccessNeed[];
-  selectedId?: string;
+  selectedId?: string | undefined;
   onSelect?: (id: string) => void;
 }) {
   return (
