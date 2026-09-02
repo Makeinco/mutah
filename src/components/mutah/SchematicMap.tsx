@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { decideFor } from "@/lib/mutah/decision";
+import { useLang } from "@/lib/mutah/i18n";
 import type { AccessNeed, Facility } from "@/lib/mutah/types";
 
 /**
@@ -17,6 +18,8 @@ export function SchematicMap({
   selectedId?: string | undefined;
   onSelect?: (id: string) => void;
 }) {
+  const { pick, lang } = useLang();
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-surface">
       <div
@@ -39,7 +42,7 @@ export function SchematicMap({
               onClick={() => onSelect?.(f.id)}
               aria-pressed={selected}
               style={{ insetInlineStart: `${f.point.x * 100}%`, top: `${f.point.y * 100}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-xl focus-visible:z-10"
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-xl transition-transform focus-visible:z-10 hover:scale-105"
             >
               <span
                 className={[
@@ -51,16 +54,16 @@ export function SchematicMap({
                   aria-hidden="true"
                   className={[
                     "inline-block h-5 w-1.5 rounded-full",
-                    verdict === "match"
+                    verdict === "available"
                       ? "bg-access"
-                      : verdict === "conflict"
+                      : verdict === "not_available"
                         ? "bg-caution"
                         : verdict === "partial"
                           ? "bg-primary"
                           : "bg-unknown",
                   ].join(" ")}
                 />
-                {f.name}
+                {pick(f.name)}
               </span>
             </button>
           );
@@ -68,7 +71,9 @@ export function SchematicMap({
       </div>
 
       <p className="border-t border-border bg-background px-4 py-3 text-sm text-muted-foreground">
-        عرض تخطيطي للمواقع. القائمة تحتوي على المعلومات نفسها بصيغة يمكن قراءتها بالكامل.
+        {lang === "ar"
+          ? "عرض تخطيطي للمواقع. القائمة تحتوي على المعلومات نفسها بصيغة يمكن قراءتها بالكامل."
+          : "A schematic view. The list holds the same information in a fully readable form."}
       </p>
 
       {selectedId ? (
@@ -78,7 +83,7 @@ export function SchematicMap({
             params={{ id: selectedId }}
             className="text-sm font-semibold text-primary hover:underline"
           >
-            عرض تفاصيل الموقع المحدد
+            {lang === "ar" ? "عرض تفاصيل الموقع المحدد" : "View the selected place"}
           </Link>
         </div>
       ) : null}
