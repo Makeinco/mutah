@@ -1,12 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { FACILITIES, INITIAL_CONTRIBUTIONS } from "./data";
-import { INDICATOR_ORDER } from "./labels";
+import { bi } from "./i18n";
 import type {
   AccessNeed,
   Contribution,
   Facility,
   IndicatorEvidence,
   IndicatorKey,
+  ZoneKey,
 } from "./types";
 
 /**
@@ -25,6 +26,7 @@ interface MutahState {
   getFacility: (id: string) => Facility | undefined;
   submitContribution: (input: {
     facilityId: string;
+    zone: ZoneKey;
     imageUrl: string;
     aiObservations: IndicatorEvidence[];
     confirmed: Contribution["confirmed"];
@@ -60,14 +62,15 @@ export function MutahProvider({ children }: { children: ReactNode }) {
   );
 
   const submitContribution: MutahState["submitContribution"] = useCallback(
-    ({ facilityId, imageUrl, aiObservations, confirmed }) => {
+    ({ facilityId, zone, imageUrl, aiObservations, confirmed }) => {
       const id = `c-${++seq}`;
       const facility = FACILITIES.find((f) => f.id === facilityId);
       setContributions((prev) => [
         {
           id,
           facilityId,
-          facilityName: facility?.name ?? "مرفق",
+          facilityName: facility?.name ?? bi("مرفق", "Facility"),
+          zone,
           imageUrl,
           submittedISO: new Date().toISOString().slice(0, 10),
           status: "pending_review",
@@ -95,26 +98,54 @@ export function MutahProvider({ children }: { children: ReactNode }) {
           prev.map((f) => {
             if (f.id !== contribution.facilityId) return f;
             const next = { ...f.indicators };
-            for (const key of INDICATOR_ORDER) {
-              const observed = contribution.aiObservations.find((o) => o.key === key);
+            for (const observed of contribution.aiObservations) {
+              const key = observed.key as IndicatorKey;
               const confirmed = contribution.confirmed[key];
-              if (!observed || !confirmed) continue;
+              if (!confirmed) continue;
               next[key] = {
                 key,
                 state: confirmed.state,
                 note:
                   confirmed.action === "corrected"
-                    ? "صححها المساهم بعد مراجعة الصورة."
+                    ? bi(
+                        "صححها المساهم بعد مراجعة الصورة.",
+                        "Corrected by the contributor after reviewing the photo.",
+                      )
                     : confirmed.action === "unsure"
-                      ? "لم يتمكن المساهم من التأكد من هذا العنصر."
+                      ? bi(
+                          "لم يتمكن المساهم من التأكد من هذا العنصر.",
+                          "The contributor could not confirm this item.",
+                        )
                       : observed.note,
               };
             }
+
+            const today = new Date().toISOString().slice(0, 10);
+            const zone = f.zones[contribution.zone];
+            const zones = {
+              ...f.zones,
+              [contribution.zone]: {
+                key: contribution.zone,
+                documented: true,
+                images: contribution.imageUrl
+                  ? [
+                      {
+                        url: contribution.imageUrl,
+                        alt: bi("صورة من مساهمة معتمدة.", "Photo from an approved contribution."),
+                        capturedISO: contribution.submittedISO,
+                      },
+                      ...zone.images,
+                    ]
+                  : zone.images,
+              },
+            } satisfies Facility["zones"];
+
             return {
               ...f,
               indicators: next,
+              zones,
               imageUrl: contribution.imageUrl || f.imageUrl,
-              lastVerifiedISO: new Date().toISOString().slice(0, 10),
+              lastVerifiedISO: today,
               verification: "team_reviewed",
               source: "contributor_image",
             } satisfies Facility;
