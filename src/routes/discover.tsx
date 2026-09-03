@@ -6,6 +6,7 @@ import { AppShell } from "@/components/mutah/AppShell";
 import { FacilityCard } from "@/components/mutah/FacilityCard";
 import { SchematicMap } from "@/components/mutah/SchematicMap";
 import { Button, Chip, EmptyState } from "@/components/mutah/ui";
+import { useLang } from "@/lib/mutah/i18n";
 import { ACCESS_NEEDS, ACCESS_NEED_LABEL } from "@/lib/mutah/labels";
 import { useMutah } from "@/lib/mutah/store";
 import type { AccessNeed } from "@/lib/mutah/types";
@@ -19,10 +20,13 @@ export const Route = createFileRoute("/discover")({
       { title: "استكشف الأماكن | مُتاح ماب" },
       {
         name: "description",
-        content: "ابحث عن المرافق وشاهد أدلة المدخل: منحدر، درجات، درابزين، عوائق المسار، وموقف مخصص.",
+        content: "ابحث عن الأماكن وشاهد أدلة الوصول: مسار الوصول، المدخل، المواقف، المصعد، ودورة المياه.",
       },
       { property: "og:title", content: "استكشف الأماكن | مُتاح ماب" },
-      { property: "og:description", content: "خريطة وقائمة لأدلة مداخل المرافق، مع توضيح ما هو غير معروف." },
+      {
+        property: "og:description",
+        content: "خريطة وقائمة لأدلة الوصول، مع توضيح ما هو غير معروف.",
+      },
     ],
   }),
   component: Discover,
@@ -31,14 +35,18 @@ export const Route = createFileRoute("/discover")({
 function Discover() {
   const { q } = Route.useSearch();
   const { facilities, needs, setNeeds } = useMutah();
+  const { t, pick, lang } = useLang();
   const [query, setQuery] = useState(q ?? "");
   const [view, setView] = useState<"list" | "map">("list");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
 
   const results = useMemo(() => {
-    const term = query.trim();
-    return facilities.filter(
-      (f) => !term || f.name.includes(term) || f.category.includes(term) || f.area.includes(term),
+    const term = query.trim().toLowerCase();
+    if (!term) return facilities;
+    return facilities.filter((f) =>
+      [f.name, f.category, f.area]
+        .flatMap((v) => [v.ar, v.en])
+        .some((v) => v.toLowerCase().includes(term)),
     );
   }, [facilities, query]);
 
@@ -46,19 +54,19 @@ function Discover() {
     setNeeds(needs.includes(n) ? needs.filter((x) => x !== n) : [...needs, n]);
 
   return (
-    <AppShell title="استكشف" wide>
-      <h1 className="text-2xl font-bold">استكشف الأماكن</h1>
+    <AppShell title={t("navDiscover")} wide>
+      <h1 className="text-2xl font-bold">{t("explore")}</h1>
 
-      <div className="mt-4 flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 focus-within:border-primary">
+      <div className="mt-4 flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary">
         <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
         <label htmlFor="discover-search" className="sr-only">
-          ابحث عن مكان
+          {t("searchLabel")}
         </label>
         <input
           id="discover-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="ابحث عن مكان..."
+          placeholder={t("search")}
           className="min-h-14 w-full bg-transparent text-base outline-none"
         />
       </div>
@@ -67,17 +75,17 @@ function Discover() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="filters-title" className="flex items-center gap-2 text-sm font-bold">
             <SlidersHorizontal className="size-4" aria-hidden="true" />
-            احتياجات الوصول
+            {t("accessNeeds")}
           </h2>
           <Link to="/preferences" className="text-sm font-semibold text-primary hover:underline">
-            تعديل الاحتياجات
+            {t("editNeeds")}
           </Link>
         </div>
         <ul className="mt-3 flex flex-wrap gap-2">
           {ACCESS_NEEDS.map((n) => (
             <li key={n}>
               <Chip selected={needs.includes(n)} onClick={() => toggleNeed(n)}>
-                {ACCESS_NEED_LABEL[n]}
+                {pick(ACCESS_NEED_LABEL[n])}
               </Chip>
             </li>
           ))}
@@ -86,28 +94,24 @@ function Discover() {
 
       <div className="mt-6 flex items-center justify-between gap-3">
         <p aria-live="polite" className="text-sm text-muted-foreground">
-          {results.length} نتيجة
+          {lang === "ar" ? `${results.length} نتيجة` : `${results.length} results`}
         </p>
-        <div
-          role="group"
-          aria-label="طريقة العرض"
-          className="inline-flex rounded-xl border-2 border-border p-1"
-        >
+        <div role="group" aria-label={t("viewMode")} className="inline-flex rounded-xl border-2 border-border p-1">
           <button
             type="button"
             aria-pressed={view === "map"}
             onClick={() => setView("map")}
-            className={`min-h-11 rounded-lg px-4 text-sm font-semibold ${view === "map" ? "bg-primary text-primary-foreground" : "text-foreground"}`}
+            className={`min-h-11 rounded-lg px-4 text-sm font-semibold transition-colors ${view === "map" ? "bg-primary text-primary-foreground" : "text-foreground"}`}
           >
-            الخريطة
+            {t("mapView")}
           </button>
           <button
             type="button"
             aria-pressed={view === "list"}
             onClick={() => setView("list")}
-            className={`min-h-11 rounded-lg px-4 text-sm font-semibold ${view === "list" ? "bg-primary text-primary-foreground" : "text-foreground"}`}
+            className={`min-h-11 rounded-lg px-4 text-sm font-semibold transition-colors ${view === "list" ? "bg-primary text-primary-foreground" : "text-foreground"}`}
           >
-            القائمة
+            {t("listView")}
           </button>
         </div>
       </div>
@@ -125,11 +129,11 @@ function Discover() {
         <div className={view === "list" ? "block" : "hidden lg:block"}>
           {results.length === 0 ? (
             <EmptyState
-              title="لا توجد نتائج مطابقة"
-              description="جرّب اسمًا آخر أو أزل بعض عوامل التصفية. يمكنك أيضًا المساهمة بصورة مدخل لمكان لم يُوثّق بعد."
+              title={t("noResults")}
+              description={t("noResultsBody")}
               action={
                 <Link to="/contribute">
-                  <Button variant="outline">اذهب إلى المساهمة</Button>
+                  <Button variant="outline">{t("goContribute")}</Button>
                 </Link>
               }
             />
