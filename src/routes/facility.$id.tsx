@@ -1,23 +1,36 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarClock, Camera, Flag, MapPin, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { DecisionSummary } from "@/components/mutah/DecisionSummary";
 import { EvidenceList } from "@/components/mutah/Evidence";
 import { Button, Card, EmptyState, SectionTitle, Tag } from "@/components/mutah/ui";
 import { decideFor } from "@/lib/mutah/decision";
-import { INDICATOR_ORDER, VERIFICATION_LABEL, formatArabicDate } from "@/lib/mutah/labels";
+import { useLang } from "@/lib/mutah/i18n";
+import {
+  VERIFICATION_LABEL,
+  ZONE_HINT,
+  ZONE_INDICATORS,
+  ZONE_LABEL,
+  ZONE_ORDER,
+  formatDate,
+} from "@/lib/mutah/labels";
 import { useMutah } from "@/lib/mutah/store";
+import type { Facility, ZoneKey } from "@/lib/mutah/types";
 
 export const Route = createFileRoute("/facility/$id")({
   head: () => ({
     meta: [
-      { title: "معلومات المدخل | مُتاح ماب" },
+      { title: "أدلة الوصول | مُتاح ماب" },
       {
         name: "description",
-        content: "أدلة مرئية عن مدخل المرفق: ما هو ظاهر، وما هو غير مرئي، ومتى جرى التحقق منه.",
+        content: "أدلة مرئية عن مسار الوصول والمدخل والمواقف والمصعد ودورة المياه، وما لا يزال غير مؤكد.",
       },
-      { property: "og:title", content: "معلومات المدخل | مُتاح ماب" },
-      { property: "og:description", content: "الأدلة أولًا: خمسة عناصر مرئية عند المدخل، مع توضيح ما لا نعرفه." },
+      { property: "og:title", content: "أدلة الوصول | مُتاح ماب" },
+      {
+        property: "og:description",
+        content: "الأدلة أولًا: خمسة مسارات، وحالة مخصصة لاحتياجاتك.",
+      },
     ],
   }),
   component: FacilityProfile,
@@ -27,17 +40,19 @@ function FacilityProfile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { getFacility, needs, contributions } = useMutah();
+  const { t, pick, lang } = useLang();
   const facility = getFacility(id);
+  const [activeZone, setActiveZone] = useState<ZoneKey>("entrance");
 
   if (!facility) {
     return (
-      <AppShell title="المرفق">
+      <AppShell>
         <EmptyState
-          title="لم نجد هذا المرفق"
-          description="ربما تغيّر الرابط. عد إلى الاستكشاف للبحث من جديد."
+          title={t("notFound")}
+          description={t("notFoundBody")}
           action={
             <Link to="/discover">
-              <Button>العودة إلى الاستكشاف</Button>
+              <Button>{t("backToDiscover")}</Button>
             </Link>
           }
         />
@@ -46,22 +61,21 @@ function FacilityProfile() {
   }
 
   const decision = decideFor(facility, needs);
-  const evidence = INDICATOR_ORDER.map((k) => facility.indicators[k]);
   const pending = contributions.filter(
     (c) => c.facilityId === facility.id && c.status === "pending_review",
   );
 
   return (
-    <AppShell title={facility.name}>
+    <AppShell title={pick(facility.name)}>
       <article className="mx-auto max-w-3xl">
         <header>
-          <h1 className="text-2xl font-bold">{facility.name}</h1>
+          <h1 className="text-2xl font-bold">{pick(facility.name)}</h1>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-muted-foreground">
-            <span>{facility.category}</span>
+            <span>{pick(facility.category)}</span>
             <span aria-hidden="true">·</span>
             <span className="flex items-center gap-1">
               <MapPin className="size-4" aria-hidden="true" />
-              {facility.area}
+              {pick(facility.area)}
             </span>
           </p>
         </header>
@@ -69,14 +83,14 @@ function FacilityProfile() {
         {facility.imageUrl ? (
           <img
             src={facility.imageUrl}
-            alt={facility.imageAlt}
+            alt={pick(facility.imageAlt)}
             width={1200}
             height={900}
-            className="mt-5 aspect-4/3 w-full rounded-2xl object-cover sm:aspect-video"
+            className="door-reveal mt-5 aspect-4/3 w-full rounded-2xl object-cover sm:aspect-video"
           />
         ) : (
           <div className="mt-5 rounded-2xl border-2 border-dashed border-input p-10 text-center text-sm text-muted-foreground">
-            لا توجد صورة حديثة لهذا المدخل. المساهمة بصورة تجعل المعلومات أوضح للجميع.
+            {t("noRecentPhoto")}
           </div>
         )}
 
@@ -86,52 +100,52 @@ function FacilityProfile() {
 
         {pending.length > 0 ? (
           <p className="mt-4 rounded-xl border-2 border-dashed border-input bg-unknown-soft p-4 text-sm">
-            توجد {pending.length} مساهمة قيد المراجعة لهذا المرفق. لن تُنشر قبل مراجعتها.
+            {pending.length} {t("pendingHere")}
           </p>
         ) : null}
 
-        <section aria-labelledby="entrance-title" className="mt-10">
-          <div id="entrance-title">
-            <SectionTitle hint="خمسة عناصر مرئية فقط. ما لا يظهر في الصور يبقى معروضًا كغير مؤكد.">
-              معلومات المدخل
-            </SectionTitle>
-          </div>
-          <EvidenceList items={evidence} />
-        </section>
+        <ZoneEvidence
+          facility={facility}
+          activeZone={activeZone}
+          onZoneChange={setActiveZone}
+        />
 
         <section aria-labelledby="analysis-title" className="mt-10">
           <div id="analysis-title">
-            <SectionTitle hint="تحليل أولي يحتاج إلى تحقق. الذكاء الاصطناعي يرصد، والبشر يتحققون.">
-              دليل التحليل
-            </SectionTitle>
+            <SectionTitle hint={t("analysisTrailHint")}>{t("analysisTrail")}</SectionTitle>
           </div>
           <Card className="bg-surface">
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>المصدر: {facility.source === "team_survey" ? "مسح ميداني من فريق مُتاح" : "صورة مساهم"}</li>
-              <li>المدخلات: صورة واحدة للمدخل ضمن إطار محدود.</li>
-              <li>لا يُعد هذا التحليل شهادة إتاحة، ولا يصف ما هو خارج إطار الصورة.</li>
+              <li>
+                {t("source")}:{" "}
+                {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
+              </li>
+              <li>{t("notCertification")}</li>
             </ul>
           </Card>
         </section>
 
         <section aria-labelledby="status-title" className="mt-10">
           <div id="status-title">
-            <SectionTitle>حالة المعلومة</SectionTitle>
+            <SectionTitle>{t("infoStatus")}</SectionTitle>
           </div>
           <Card>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
-                {VERIFICATION_LABEL[facility.verification]}
+                {pick(VERIFICATION_LABEL[facility.verification])}
               </li>
               <li className="flex items-center gap-2">
                 <CalendarClock className="size-5 text-primary" aria-hidden="true" />
-                آخر تحقق: {formatArabicDate(facility.lastVerifiedISO)}
+                {t("lastVerified")}: {formatDate(facility.lastVerifiedISO, lang)}
               </li>
               <li className="flex flex-wrap items-center gap-2">
-                <Tag>المصدر: {facility.source === "team_survey" ? "مسح فريق مُتاح" : "صورة مساهم"}</Tag>
-                <Tag tone={decision.completeness >= 4 ? "brand" : "warn"}>
-                  اكتمال المعلومات {decision.completeness}/5
+                <Tag>
+                  {t("source")}:{" "}
+                  {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
+                </Tag>
+                <Tag tone={decision.completeness >= decision.total * 0.7 ? "brand" : "warn"}>
+                  {t("completeness")} {decision.completeness}/{decision.total}
                 </Tag>
               </li>
             </ul>
@@ -142,21 +156,103 @@ function FacilityProfile() {
           <Button
             size="lg"
             className="sm:flex-1"
-            onClick={() => navigate({ to: "/contribute/$facilityId", params: { facilityId: facility.id } })}
+            onClick={() =>
+              navigate({ to: "/contribute/$facilityId", params: { facilityId: facility.id } })
+            }
           >
             <Camera className="size-5" aria-hidden="true" />
-            ساهم بصورة أحدث
+            {t("contributeNewer")}
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => navigate({ to: "/contribute" })}
-          >
+          <Button size="lg" variant="outline" onClick={() => navigate({ to: "/contribute" })}>
             <Flag className="size-5" aria-hidden="true" />
-            أبلغ عن تغير
+            {t("reportChange")}
           </Button>
         </div>
       </article>
     </AppShell>
+  );
+}
+
+function ZoneEvidence({
+  facility,
+  activeZone,
+  onZoneChange,
+}: {
+  facility: Facility;
+  activeZone: ZoneKey;
+  onZoneChange: (z: ZoneKey) => void;
+}) {
+  const { t, pick } = useLang();
+  const zone = facility.zones[activeZone];
+  const items = ZONE_INDICATORS[activeZone].map((k) => facility.indicators[k]);
+
+  return (
+    <section aria-labelledby="views-title" className="mt-10">
+      <div id="views-title">
+        <SectionTitle hint={t("evidenceViewsHint")}>{t("evidenceViews")}</SectionTitle>
+      </div>
+
+      <div role="tablist" aria-label={t("evidenceViews")} className="flex flex-wrap gap-2">
+        {ZONE_ORDER.map((z) => {
+          const documented = facility.zones[z].documented;
+          const selected = z === activeZone;
+          return (
+            <button
+              key={z}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => onZoneChange(z)}
+              className={[
+                "min-h-11 rounded-full border-2 px-4 text-sm font-semibold transition-colors",
+                selected
+                  ? "border-primary bg-primary-soft text-primary"
+                  : documented
+                    ? "border-border bg-background hover:bg-muted"
+                    : "border-dashed border-input bg-unknown-soft/60 text-muted-foreground",
+              ].join(" ")}
+            >
+              {pick(ZONE_LABEL[z])}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="door-reveal mt-5" key={activeZone}>
+        <p className="text-sm text-muted-foreground">{pick(ZONE_HINT[activeZone])}</p>
+
+        {zone.documented ? (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {zone.images.map((image, i) => (
+              <li key={`${image.url}-${i}`}>
+                <img
+                  src={image.url}
+                  alt={pick(image.alt)}
+                  loading="lazy"
+                  width={1200}
+                  height={900}
+                  className="aspect-4/3 w-full rounded-2xl object-cover"
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mt-4 rounded-2xl border-2 border-dashed border-input bg-unknown-soft/50 p-6 text-center text-sm">
+            <p className="font-semibold">{t("noEvidenceForZone")}</p>
+            <Link
+              to="/contribute/$facilityId"
+              params={{ facilityId: facility.id }}
+              className="mt-3 inline-flex min-h-11 items-center rounded-xl border-2 border-input bg-background px-4 font-semibold hover:bg-muted"
+            >
+              {t("contributeThisView")}
+            </Link>
+          </div>
+        )}
+
+        <div className="mt-5">
+          <EvidenceList items={items} />
+        </div>
+      </div>
+    </section>
   );
 }
