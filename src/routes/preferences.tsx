@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button } from "@/components/mutah/ui";
+import { useLang } from "@/lib/mutah/i18n";
 import { ACCESS_NEEDS, ACCESS_NEED_LABEL } from "@/lib/mutah/labels";
 import { useMutah } from "@/lib/mutah/store";
 import type { AccessNeed } from "@/lib/mutah/types";
@@ -12,10 +13,14 @@ export const Route = createFileRoute("/preferences")({
       { title: "احتياجات الوصول | مُتاح ماب" },
       {
         name: "description",
-        content: "اختر ما يجعل الزيارة أسهل عليك: مسار بلا درجات، منحدر، مسار خالٍ من العوائق، درابزين، أو موقف مخصص.",
+        content:
+          "اختر ما يجعل الزيارة أسهل: مسار بلا درجات، منحدر، مسار خالٍ، درابزين، موقف مخصص، مصعد، أو دورة مياه متاحة.",
       },
       { property: "og:title", content: "احتياجات الوصول | مُتاح ماب" },
-      { property: "og:description", content: "نستخدم احتياجاتك لشرح ما يطابقها وما لا يطابقها في كل مدخل." },
+      {
+        property: "og:description",
+        content: "نستخدم احتياجاتك لشرح ما يطابقها وما لا يطابقها في كل مكان.",
+      },
     ],
   }),
   component: Preferences,
@@ -24,21 +29,20 @@ export const Route = createFileRoute("/preferences")({
 function Preferences() {
   const navigate = useNavigate();
   const { needs, setNeeds, skipNeeds } = useMutah();
+  const { t, pick } = useLang();
   const [selected, setSelected] = useState<AccessNeed[]>(needs);
 
   const toggle = (n: AccessNeed) =>
     setSelected((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
 
   return (
-    <AppShell title="احتياجات الوصول">
+    <AppShell title={t("accessNeeds")}>
       <div className="mx-auto max-w-xl">
-        <h1 className="text-2xl font-bold">ما الذي تحتاجه لتكون الزيارة أسهل؟</h1>
-        <p className="mt-2 text-muted-foreground">
-          هذه احتياجات وصول، ولا نطلب أي معلومة طبية. يمكنك تغييرها في أي وقت.
-        </p>
+        <h1 className="text-2xl font-bold">{t("needsTitle")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("needsIntro")}</p>
 
         <fieldset className="mt-8">
-          <legend className="sr-only">اختر احتياجات الوصول</legend>
+          <legend className="sr-only">{t("needsLegend")}</legend>
           <ul className="space-y-3">
             {ACCESS_NEEDS.map((n) => {
               const checked = selected.includes(n);
@@ -46,7 +50,7 @@ function Preferences() {
                 <li key={n}>
                   <label
                     className={[
-                      "flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl border-2 p-4 text-base font-semibold",
+                      "flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl border-2 p-4 text-base font-semibold transition-colors",
                       checked ? "border-primary bg-primary-soft" : "border-border bg-card hover:bg-muted",
                     ].join(" ")}
                   >
@@ -56,7 +60,7 @@ function Preferences() {
                       onChange={() => toggle(n)}
                       className="size-6 accent-[var(--color-primary)]"
                     />
-                    {ACCESS_NEED_LABEL[n]}
+                    {pick(ACCESS_NEED_LABEL[n])}
                   </label>
                 </li>
               );
@@ -73,7 +77,7 @@ function Preferences() {
               navigate({ to: "/discover" });
             }}
           >
-            متابعة
+            {t("continueLabel")}
           </Button>
           <Button
             size="lg"
@@ -83,7 +87,7 @@ function Preferences() {
               navigate({ to: "/discover" });
             }}
           >
-            تخطي الآن
+            {t("skipForNow")}
           </Button>
         </div>
       </div>

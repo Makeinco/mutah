@@ -3,7 +3,10 @@ import { Camera, FileText, Flag } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button, Card, SectionTitle } from "@/components/mutah/ui";
+import { useLang } from "@/lib/mutah/i18n";
+import { ZONE_LABEL, ZONE_ORDER } from "@/lib/mutah/labels";
 import { useMutah } from "@/lib/mutah/store";
+import type { ZoneKey } from "@/lib/mutah/types";
 
 export const Route = createFileRoute("/contribute/")({
   head: () => ({
@@ -11,10 +14,13 @@ export const Route = createFileRoute("/contribute/")({
       { title: "ساهم | مُتاح ماب" },
       {
         name: "description",
-        content: "حدّث صورة مدخل أو أبلغ عن تغير، لتصبح معلومات الوصول أكثر وضوحًا وحداثة.",
+        content: "حدّث صورة مسار أو مدخل أو أبلغ عن تغير، لتصبح معلومات الوصول أوضح وأحدث.",
       },
       { property: "og:title", content: "ساهم | مُتاح ماب" },
-      { property: "og:description", content: "صورة واحدة للمدخل تساعد الآخرين على معرفة ما ينتظرهم قبل الوصول." },
+      {
+        property: "og:description",
+        content: "صورة واحدة تساعد الآخرين على معرفة ما ينتظرهم قبل الوصول.",
+      },
     ],
   }),
   component: Contribute,
@@ -23,16 +29,16 @@ export const Route = createFileRoute("/contribute/")({
 function Contribute() {
   const navigate = useNavigate();
   const { facilities } = useMutah();
+  const { t, pick, lang } = useLang();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
+  const [zone, setZone] = useState<ZoneKey>("entrance");
   const [reported, setReported] = useState(false);
 
   return (
-    <AppShell title="ساهم">
+    <AppShell title={t("contributeTitle")}>
       <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold">ساهم</h1>
-        <p className="mt-2 text-muted-foreground">
-          ساعد في جعل معلومات الوصول أكثر وضوحًا وحداثة.
-        </p>
+        <h1 className="text-2xl font-bold">{t("contributeTitle")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("contributeIntro")}</p>
 
         <Card className="mt-6 border-2 border-primary/30 bg-primary-soft/40">
           <div className="flex items-start gap-3">
@@ -40,16 +46,20 @@ function Contribute() {
               <Camera className="size-6" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-lg font-bold">حدّث صورة مدخل</h2>
+              <h2 className="text-lg font-bold">
+                {lang === "ar" ? "حدّث صورة مسار" : "Update a view with a photo"}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                أضف صورة حديثة تساعد الآخرين على معرفة ما ينتظرهم قبل الوصول.
+                {lang === "ar"
+                  ? "أضف صورة حديثة تساعد الآخرين على معرفة ما ينتظرهم قبل الوصول."
+                  : "Add a recent photo so others know what to expect before they arrive."}
               </p>
             </div>
           </div>
 
           <div className="mt-5">
             <label htmlFor="facility-select" className="mb-2 block text-sm font-semibold">
-              اختر المرفق
+              {t("chooseFacility")}
             </label>
             <select
               id="facility-select"
@@ -59,7 +69,25 @@ function Contribute() {
             >
               {facilities.map((f) => (
                 <option key={f.id} value={f.id}>
-                  {f.name} — {f.area}
+                  {pick(f.name)} — {pick(f.area)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="zone-select" className="mb-2 block text-sm font-semibold">
+              {t("chooseView")}
+            </label>
+            <select
+              id="zone-select"
+              value={zone}
+              onChange={(e) => setZone(e.target.value as ZoneKey)}
+              className="min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base"
+            >
+              {ZONE_ORDER.map((z) => (
+                <option key={z} value={z}>
+                  {pick(ZONE_LABEL[z])}
                 </option>
               ))}
             </select>
@@ -69,47 +97,56 @@ function Contribute() {
             size="lg"
             block
             className="mt-4"
-            onClick={() => navigate({ to: "/contribute/$facilityId", params: { facilityId } })}
+            onClick={() =>
+              navigate({ to: "/contribute/$facilityId", params: { facilityId }, search: { zone } })
+            }
           >
-            ابدأ المساهمة
+            {t("startContribution")}
           </Button>
         </Card>
 
         <div className="mt-8">
-          <SectionTitle>خيارات أخرى</SectionTitle>
+          <SectionTitle>{lang === "ar" ? "خيارات أخرى" : "Other options"}</SectionTitle>
           <div className="grid gap-4 sm:grid-cols-2">
             <Card>
               <FileText className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">أضف مرفقًا</h3>
+              <h3 className="mt-3 font-bold">{lang === "ar" ? "أضف مكانًا" : "Suggest a place"}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                مكان غير موجود في مُتاح؟ أرسل اسمه وموقعه ليُضاف لاحقًا.
+                {lang === "ar"
+                  ? "مكان غير موجود في مُتاح؟ أرسل اسمه وموقعه ليُضاف لاحقًا."
+                  : "A place missing from MUTAH? Send its name and location to be added."}
               </p>
               <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                إرسال اقتراح مرفق
+                {lang === "ar" ? "إرسال اقتراح" : "Send suggestion"}
               </Button>
             </Card>
             <Card>
               <Flag className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">أبلغ عن تغير</h3>
+              <h3 className="mt-3 font-bold">{t("reportChange")}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                تغيّر المدخل عمّا هو منشور؟ أخبرنا لنعيد التحقق منه.
+                {lang === "ar"
+                  ? "تغيّر المكان عمّا هو منشور؟ أخبرنا لنعيد التحقق منه."
+                  : "Has the place changed since it was published? Tell us so we re-verify."}
               </p>
               <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                إرسال بلاغ
+                {lang === "ar" ? "إرسال بلاغ" : "Send report"}
               </Button>
             </Card>
           </div>
           <p aria-live="polite" className="mt-4 text-sm font-semibold text-access-strong">
-            {reported ? "شكرًا لك. سجّلنا ملاحظتك وستتم مراجعتها قبل النشر." : ""}
+            {reported
+              ? lang === "ar"
+                ? "شكرًا لك. سجّلنا ملاحظتك وستتم مراجعتها قبل النشر."
+                : "Thank you. We've logged your note; it will be reviewed before publishing."
+              : ""}
           </p>
         </div>
 
         <p className="mt-10 text-sm text-muted-foreground">
-          تُراجع كل مساهمة قبل نشرها.{" "}
+          {t("reviewedBeforePublish")}{" "}
           <Link to="/review" className="font-semibold text-primary hover:underline">
-            مركز المراجعة
-          </Link>{" "}
-          تجربة مخصصة لفريق المراجعة.
+            {t("navReview")}
+          </Link>
         </p>
       </div>
     </AppShell>
