@@ -108,8 +108,8 @@ export interface Contribution {
   zone: ZoneKey;
   /** First image is retained for backwards-compatible reviewer cards. */
   imageUrl: string;
-  /** All images captured for this single facility zone. */
-  imageUrls: string[];
+  /** All images captured for this single facility zone. Legacy demo records may omit this. */
+  imageUrls?: string[];
   submittedISO: string;
   status: ContributionStatus;
   aiObservations: IndicatorEvidence[];
