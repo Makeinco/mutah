@@ -1,15 +1,15 @@
-import logoAsset from "@/assets/mutah-logo.png.asset.json";
-import iconAsset from "@/assets/mutah-icon.png.asset.json";
+import logoAsset from "@/assets/mutah-logo.svg";
+import iconAsset from "@/assets/mutah-icon.svg";
 import { cn } from "@/lib/utils";
 
-/** Locked brand asset — never redrawn or recoloured. */
+/** Locked MUTAH brand assets sourced from the approved logo PDFs. */
 export function MutahLogo({ className }: { className?: string }) {
   return (
     <img
-      src={logoAsset.url}
+      src={logoAsset}
       alt="مُتاح | MUTAH"
       width={340}
-      height={200}
+      height={208}
       className={cn("h-auto w-auto object-contain", className)}
     />
   );
@@ -18,7 +18,7 @@ export function MutahLogo({ className }: { className?: string }) {
 export function MutahMark({ className }: { className?: string }) {
   return (
     <img
-      src={iconAsset.url}
+      src={iconAsset}
       alt=""
       aria-hidden="true"
       width={64}
