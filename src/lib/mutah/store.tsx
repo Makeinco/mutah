@@ -12,8 +12,7 @@ import type {
 
 /**
  * Application state layer. Everything the UI mutates goes through here, so the
- * mock implementation can be swapped for Supabase mutations without touching
- * screens.
+ * mock implementation can be swapped for Supabase mutations without touching screens.
  */
 
 interface MutahState {
@@ -27,7 +26,7 @@ interface MutahState {
   submitContribution: (input: {
     facilityId: string;
     zone: ZoneKey;
-    imageUrl: string;
+    imageUrls: string[];
     aiObservations: IndicatorEvidence[];
     confirmed: Contribution["confirmed"];
   }) => string;
@@ -62,9 +61,11 @@ export function MutahProvider({ children }: { children: ReactNode }) {
   );
 
   const submitContribution: MutahState["submitContribution"] = useCallback(
-    ({ facilityId, zone, imageUrl, aiObservations, confirmed }) => {
+    ({ facilityId, zone, imageUrls, aiObservations, confirmed }) => {
       const id = `c-${++seq}`;
-      const facility = FACILITIES.find((f) => f.id === facilityId);
+      const facility = facilities.find((f) => f.id === facilityId);
+      const cleanUrls = imageUrls.filter(Boolean);
+      const imageUrl = cleanUrls[0] ?? "";
       setContributions((prev) => [
         {
           id,
@@ -72,6 +73,7 @@ export function MutahProvider({ children }: { children: ReactNode }) {
           facilityName: facility?.name ?? bi("مرفق", "Facility"),
           zone,
           imageUrl,
+          imageUrls: cleanUrls,
           submittedISO: new Date().toISOString().slice(0, 10),
           status: "pending_review",
           aiObservations,
@@ -84,7 +86,7 @@ export function MutahProvider({ children }: { children: ReactNode }) {
       );
       return id;
     },
-    [],
+    [facilities],
   );
 
   const approveContribution = useCallback((id: string, note: string) => {
@@ -108,8 +110,8 @@ export function MutahProvider({ children }: { children: ReactNode }) {
                 note:
                   confirmed.action === "corrected"
                     ? bi(
-                        "صححها المساهم بعد مراجعة الصورة.",
-                        "Corrected by the contributor after reviewing the photo.",
+                        "صححها المساهم بعد مراجعة الأدلة المرئية.",
+                        "Corrected by the contributor after reviewing the visual evidence.",
                       )
                     : confirmed.action === "unsure"
                       ? bi(
@@ -122,21 +124,26 @@ export function MutahProvider({ children }: { children: ReactNode }) {
 
             const today = new Date().toISOString().slice(0, 10);
             const zone = f.zones[contribution.zone];
+            const contributionImages = (contribution.imageUrls?.length
+              ? contribution.imageUrls
+              : contribution.imageUrl
+                ? [contribution.imageUrl]
+                : []
+            ).map((url, index) => ({
+              url,
+              alt: bi(
+                `صورة ${index + 1} من مساهمة معتمدة لهذا المسار.`,
+                `Photo ${index + 1} from an approved contribution for this zone.`,
+              ),
+              capturedISO: contribution.submittedISO,
+            }));
+
             const zones = {
               ...f.zones,
               [contribution.zone]: {
                 key: contribution.zone,
-                documented: true,
-                images: contribution.imageUrl
-                  ? [
-                      {
-                        url: contribution.imageUrl,
-                        alt: bi("صورة من مساهمة معتمدة.", "Photo from an approved contribution."),
-                        capturedISO: contribution.submittedISO,
-                      },
-                      ...zone.images,
-                    ]
-                  : zone.images,
+                documented: contributionImages.length > 0 || zone.documented,
+                images: [...contributionImages, ...zone.images],
               },
             } satisfies Facility["zones"];
 
