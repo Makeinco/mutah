@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Camera, Check, CircleHelp, ImagePlus, ImageUp, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 import { AppShell } from "@/components/mutah/AppShell";
 import { EvidenceItem } from "@/components/mutah/Evidence";
 import { Button, Card, EmptyState, SectionTitle } from "@/components/mutah/ui";
+import { analyseEvidenceServer } from "@/lib/mutah/ai.functions";
 import { ANALYSIS_STEPS, analyseZoneImage } from "@/lib/mutah/ai";
 import { useLang } from "@/lib/mutah/i18n";
 import { INDICATOR_LABEL, ZONE_HINT, ZONE_LABEL, ZONE_ORDER, stateLabel } from "@/lib/mutah/labels";
@@ -33,6 +34,8 @@ export const Route = createFileRoute("/contribute/$facilityId")({
 
 type Step = "capture" | "analysing" | "confirm" | "done";
 
+type AnalysisMode = "live" | "demo" | null;
+
 function ContributeFlow() {
   const { facilityId } = Route.useParams();
   const { zone: zoneParam } = Route.useSearch();
@@ -44,8 +47,11 @@ function ContributeFlow() {
   const [zone, setZone] = useState<ZoneKey>(zoneParam ?? "entrance");
   const [step, setStep] = useState<Step>("capture");
   const [previews, setPreviews] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [observations, setObservations] = useState<IndicatorEvidence[]>([]);
   const [confirmed, setConfirmed] = useState<Contribution["confirmed"] | null>(null);
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>(null);
+  const [analysisError, setAnalysisError] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!facility) {
@@ -65,20 +71,53 @@ function ContributeFlow() {
   }
 
   const addFiles = (files: FileList | File[]) => {
-    const urls = Array.from(files)
+    const accepted = Array.from(files)
       .filter((file) => file.type.startsWith("image/"))
-      .map((file) => URL.createObjectURL(file));
-    setPreviews((current) => [...current, ...urls].slice(0, 6));
+      .slice(0, Math.max(0, 6 - selectedFiles.length));
+    if (accepted.length === 0) return;
+
+    setSelectedFiles((current) => [...current, ...accepted].slice(0, 6));
+    setPreviews((current) => [
+      ...current,
+      ...accepted.map((file) => URL.createObjectURL(file)),
+    ].slice(0, 6));
   };
 
-  const startAnalysis = () => {
+  const removeFile = (index: number) => {
+    setPreviews((items) => items.filter((_, i) => i !== index));
+    setSelectedFiles((items) => items.filter((_, i) => i !== index));
+  };
+
+  const startAnalysis = async () => {
     if (previews.length === 0) return;
-    // Demo adapter currently returns one zone-level observation bundle. In production,
-    // Gemini/provider analysis will run per image and aggregate only after human review.
-    const result = analyseZoneImage(facility, zone);
-    setObservations(result);
-    setConfirmed(emptyConfirmations(result));
     setStep("analysing");
+    setAnalysisError(false);
+
+    try {
+      if (selectedFiles.length > 0) {
+        const formData = new FormData();
+        formData.set("zone", zone);
+        selectedFiles.forEach((file) => formData.append("images", file));
+        const result = await analyseEvidenceServer({ data: formData });
+        setObservations(result);
+        setConfirmed(emptyConfirmations(result));
+        setAnalysisMode("live");
+      } else {
+        const result = analyseZoneImage(facility, zone);
+        setObservations(result);
+        setConfirmed(emptyConfirmations(result));
+        setAnalysisMode("demo");
+      }
+      setStep("confirm");
+    } catch (error) {
+      console.error("Live evidence analysis failed", error);
+      const fallback = analyseZoneImage(facility, zone);
+      setObservations(fallback);
+      setConfirmed(emptyConfirmations(fallback));
+      setAnalysisMode("demo");
+      setAnalysisError(true);
+      setStep("confirm");
+    }
   };
 
   const steps: Array<[Step, string]> = [
@@ -129,6 +168,7 @@ function ContributeFlow() {
                       onChange={() => {
                         setZone(z);
                         setPreviews([]);
+                        setSelectedFiles([]);
                       }}
                       className="sr-only"
                     />
@@ -143,20 +183,18 @@ function ContributeFlow() {
               previews={previews}
               fallbackImage={facility.imageUrl}
               onAdd={addFiles}
-              onUseSample={() => facility.imageUrl && setPreviews([facility.imageUrl])}
-              onRemove={(index) => setPreviews((items) => items.filter((_, i) => i !== index))}
+              onUseSample={() => {
+                setSelectedFiles([]);
+                facility.imageUrl && setPreviews([facility.imageUrl]);
+              }}
+              onRemove={removeFile}
               onContinue={startAnalysis}
               fileRef={fileRef}
             />
           </>
         ) : null}
 
-        {step === "analysing" ? (
-          <AnalysingStep
-            count={previews.length}
-            onDone={() => setStep("confirm")}
-          />
-        ) : null}
+        {step === "analysing" ? <AnalysingStep count={previews.length} /> : null}
 
         {step === "confirm" && confirmed ? (
           <ConfirmStep
@@ -164,6 +202,8 @@ function ContributeFlow() {
             confirmed={confirmed}
             setConfirmed={setConfirmed}
             evidenceCount={previews.length}
+            analysisMode={analysisMode}
+            analysisError={analysisError}
             onSubmit={() => {
               submitContribution({
                 facilityId: facility.id,
@@ -332,50 +372,30 @@ function CaptureStep({
   );
 }
 
-function AnalysingStep({ onDone, count }: { onDone: () => void; count: number }) {
+function AnalysingStep({ count }: { count: number }) {
   const { t, pick, lang } = useLang();
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (index >= ANALYSIS_STEPS.length) {
-      const timer = setTimeout(onDone, 400);
-      return () => clearTimeout(timer);
-    }
-    const timer = setTimeout(() => setIndex((i) => i + 1), 650);
-    return () => clearTimeout(timer);
-  }, [index, onDone]);
 
   return (
-    <section aria-labelledby="analysing-title" className="mt-8">
+    <section aria-labelledby="analysing-title" className="mt-8" aria-live="polite">
       <h2 id="analysing-title" className="text-lg font-bold">{t("analysingTitle")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{t("analysingHint")}</p>
       <p className="mt-2 text-sm font-semibold">
-        {lang === "ar" ? `تحليل حزمة أدلة من ${count} صورة` : `Analysing an evidence bundle of ${count} image${count === 1 ? "" : "s"}`}
+        {lang === "ar"
+          ? `تحليل حزمة أدلة من ${count} صورة عبر Gemini…`
+          : `Analysing an evidence bundle of ${count} image${count === 1 ? "" : "s"} with Gemini…`}
       </p>
 
-      <ul className="mt-6 space-y-3" aria-live="polite">
-        {ANALYSIS_STEPS.map((s, i) => {
-          const done = i < index;
-          const current = i === index;
-          return (
-            <li
-              key={s.id}
-              className={`flex items-center gap-3 rounded-xl border p-4 transition-colors ${done ? "border-access bg-access-soft" : current ? "border-primary bg-primary-soft" : "border-border"}`}
-            >
-              <span aria-hidden="true" className="font-bold">{done ? "✓" : current ? "◌" : "·"}</span>
-              <span className="font-semibold">{pick(s.label)}</span>
-              <span className="sr-only">{done ? t("done") : current ? t("inProgress") : t("waiting")}</span>
-            </li>
-          );
-        })}
+      <ul className="mt-6 space-y-3">
+        {ANALYSIS_STEPS.map((s, i) => (
+          <li
+            key={s.id}
+            className={`flex items-center gap-3 rounded-xl border p-4 ${i === 3 ? "border-primary bg-primary-soft" : "border-border"}`}
+          >
+            <span aria-hidden="true" className="font-bold">{i === 3 ? "◌" : "·"}</span>
+            <span className="font-semibold">{pick(s.label)}</span>
+          </li>
+        ))}
       </ul>
-
-      <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full bg-primary transition-[width] duration-500"
-          style={{ width: `${Math.min(100, (index / ANALYSIS_STEPS.length) * 100)}%` }}
-        />
-      </div>
     </section>
   );
 }
@@ -388,12 +408,16 @@ function ConfirmStep({
   setConfirmed,
   onSubmit,
   evidenceCount,
+  analysisMode,
+  analysisError,
 }: {
   observations: IndicatorEvidence[];
   confirmed: Contribution["confirmed"];
   setConfirmed: (c: Contribution["confirmed"]) => void;
   onSubmit: () => void;
   evidenceCount: number;
+  analysisMode: AnalysisMode;
+  analysisError: boolean;
 }) {
   const { t, pick, lang } = useLang();
   const [editing, setEditing] = useState<string | null>(null);
@@ -403,6 +427,26 @@ function ConfirmStep({
       <div id="results-title">
         <SectionTitle hint={t("preliminaryHint")}>{t("preliminary")}</SectionTitle>
       </div>
+
+      <div className="mb-4 rounded-xl border border-border bg-surface p-3 text-sm">
+        <p className="font-semibold">
+          {analysisMode === "live"
+            ? lang === "ar"
+              ? "تحليل حي عبر Gemini — يحتاج تأكيدك قبل الإرسال."
+              : "Live Gemini analysis — your confirmation is required before submission."
+            : lang === "ar"
+              ? "عرض تجريبي محافظ — لا يُنشر أي شيء قبل المراجعة البشرية."
+              : "Conservative demo fallback — nothing is published before human review."}
+        </p>
+        {analysisError ? (
+          <p className="mt-1 text-muted-foreground">
+            {lang === "ar"
+              ? "تعذر الاتصال بالتحليل الحي، لذلك استخدمنا العرض التجريبي بدلًا منه لهذه المحاولة."
+              : "Live analysis could not be reached, so the demo fallback was used for this attempt."}
+          </p>
+        ) : null}
+      </div>
+
       <p className="mb-4 text-sm text-muted-foreground">
         {lang === "ar"
           ? `هذه ملاحظات أولية مستندة إلى ${evidenceCount} صورة. راجعها قبل الإرسال.`
