@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Info, Network, PlusCircle } from "lucide-react";
+import { Camera, Compass, Home, Shapes, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { MutahLogo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -8,15 +8,12 @@ import { UI } from "@/lib/mutah/i18n";
 import { cn } from "@/lib/utils";
 
 const NAV = [
+  { to: "/", key: "navHome", icon: Home },
   { to: "/discover", key: "navDiscover", icon: Compass },
-  { to: "/contribute", key: "navContribute", icon: PlusCircle },
-  { to: "/ecosystem", key: "navEcosystem", icon: Network },
-  { to: "/about", key: "navAbout", icon: Info },
-] as const satisfies ReadonlyArray<{
-  to: string;
-  key: keyof typeof UI;
-  icon: typeof Compass;
-}>;
+  { to: "/contribute", key: "navContribute", icon: Camera, primary: true },
+  { to: "/ecosystem", key: "navMutah", icon: Shapes },
+  { to: "/account", key: "navAccount", icon: UserRound },
+] as const;
 
 export function AppShell({
   children,
@@ -42,20 +39,23 @@ export function AppShell({
             <MutahLogo className="h-9" />
           </Link>
           {title ? (
-            <p className="hidden truncate text-sm font-semibold text-muted-foreground sm:block">
-              {title}
-            </p>
+            <p className="hidden truncate text-sm font-semibold text-muted-foreground sm:block">{title}</p>
           ) : null}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <nav aria-label={t("mainNav")} className="hidden items-center gap-1 md:flex">
-              {NAV.map(({ to, key }) => (
+              {NAV.map(({ to, key, primary }) => (
                 <Link
                   key={to}
                   to={to}
-                  className="min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-                  activeProps={{ className: "bg-primary-soft text-primary" }}
+                  className={cn(
+                    "min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors",
+                    primary
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "text-foreground hover:bg-muted",
+                  )}
+                  activeProps={!primary ? { className: "bg-primary-soft text-primary" } : undefined}
                 >
-                  {t(key)}
+                  {t(key as keyof typeof UI)}
                 </Link>
               ))}
             </nav>
@@ -78,16 +78,28 @@ export function AppShell({
         aria-label={t("bottomNav")}
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/98 backdrop-blur md:hidden"
       >
-        <ul className="mx-auto flex max-w-md">
-          {NAV.map(({ to, key, icon: Icon }) => (
-            <li key={to} className="flex-1">
+        <ul className="mx-auto grid max-w-md grid-cols-5 items-end px-1 pb-[max(.25rem,env(safe-area-inset-bottom))]">
+          {NAV.map(({ to, key, icon: Icon, primary }) => (
+            <li key={to} className="min-w-0">
               <Link
                 to={to}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted-foreground"
-                activeProps={{ className: "text-primary" }}
+                className={cn(
+                  "relative flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[11px] font-semibold text-muted-foreground transition-all duration-200",
+                  primary && "-translate-y-3 text-foreground",
+                )}
+                activeProps={!primary ? { className: "text-primary" } : undefined}
               >
-                <Icon className="size-6" aria-hidden="true" />
-                {t(key)}
+                <span
+                  className={cn(
+                    "flex items-center justify-center",
+                    primary
+                      ? "size-14 rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-sm"
+                      : "size-7",
+                  )}
+                >
+                  <Icon className={primary ? "size-7" : "size-6"} aria-hidden="true" />
+                </span>
+                <span className={cn(primary && "-mt-0.5")}>{t(key as keyof typeof UI)}</span>
               </Link>
             </li>
           ))}
