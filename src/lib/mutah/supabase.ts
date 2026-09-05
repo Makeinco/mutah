@@ -1,10 +1,13 @@
 import type { IndicatorState } from "./types";
 
 const DEFAULT_SUPABASE_URL = "https://lxwwdobvlysgqdgixniv.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_L-E_exDU3r8nhA5xz3gb4w_EzqgXiIv";
 
 function config() {
   const url = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+  // Supabase publishable keys are intentionally browser-safe. Environment values
+  // still override this project-scoped fallback to support rotation/deploy targets.
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
   return { url: url.replace(/\/$/, ""), key };
 }
 
@@ -36,7 +39,6 @@ export type ReviewedSummaryRow = {
 
 async function rest<T>(path: string): Promise<T> {
   const { url, key } = config();
-  if (!key) throw new Error("SUPABASE_NOT_CONFIGURED");
 
   const response = await fetch(`${url}/rest/v1/${path}`, {
     headers: {
@@ -69,9 +71,7 @@ export async function loadReviewedSummaries(): Promise<ReviewedSummaryRow[]> {
   );
 }
 
-export async function checkSupabaseConnection(): Promise<"connected" | "unconfigured" | "unavailable"> {
-  const { key } = config();
-  if (!key) return "unconfigured";
+export async function checkSupabaseConnection(): Promise<"connected" | "unavailable"> {
   try {
     await loadReviewedFacilities();
     return "connected";
