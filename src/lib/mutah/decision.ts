@@ -2,10 +2,6 @@ import { bi } from "./i18n";
 import { INDICATOR_ORDER } from "./labels";
 import type { AccessNeed, Facility, IndicatorKey, IndicatorState, L } from "./types";
 
-/**
- * Personalised status logic. Deliberately NOT a score.
- * Output is a status plus the reasons behind it, always bilingual.
- */
 export type NeedOutcome = "met" | "not_met" | "unknown";
 
 export interface NeedResult {
@@ -14,32 +10,31 @@ export interface NeedResult {
   reason: L;
 }
 
-/** Four personalised statuses. */
 export type Verdict = "available" | "partial" | "not_available" | "insufficient";
 
 export const VERDICT_LABEL: Record<Verdict, L> = {
   available: bi("متاح", "Available"),
   partial: bi("متاح جزئيًا", "Partially available"),
   not_available: bi("غير متاح وفق احتياجاتك الحالية", "Not available for your current needs"),
-  insufficient: bi("معلومات غير كافية", "Not enough information"),
+  insufficient: bi("معلومات غير كافية", "Insufficient information"),
 };
 
 export const VERDICT_DETAIL: Record<Verdict, L> = {
   available: bi(
-    "كل ما اخترته مؤكد في الأدلة المتاحة.",
-    "Everything you selected is confirmed in the available evidence.",
+    "الأدلة الموثقة تدعم احتياجات الوصول التي اخترتها.",
+    "Verified evidence supports the access needs you selected.",
   ),
   partial: bi(
-    "بعض احتياجاتك مؤكدة، وبعضها لا يزال غير مؤكد.",
-    "Some of your needs are confirmed; others remain unconfirmed.",
+    "بعض احتياجاتك مدعومة، مع وجود معلومات ناقصة أو عائق يحتاج الانتباه.",
+    "Some of your needs are supported, while other evidence is missing or requires attention.",
   ),
   not_available: bi(
-    "تظهر الأدلة حاجة أساسية غير متوفرة.",
-    "The evidence shows an essential need is not met.",
+    "يوجد عائق موثق يتعارض مع إحدى احتياجات الوصول الأساسية التي اخترتها.",
+    "Verified evidence shows a barrier that conflicts with one of your selected essential access needs.",
   ),
   insufficient: bi(
-    "الأدلة الحالية لا تكفي للحكم على احتياجاتك.",
-    "Current evidence is not enough to judge your needs.",
+    "لا توجد أدلة موثقة كافية لاتخاذ قرار واضح بعد.",
+    "There is not enough verified evidence yet to make a clear decision.",
   ),
 };
 
@@ -57,7 +52,7 @@ function evaluate(f: Facility, need: AccessNeed): NeedResult {
     case "step_free": {
       const curb = state(f, "curb_ramp");
       if (steps === "absent")
-        return { need, outcome: "met", reason: bi("لا تظهر درجات أو عتبة عند المدخل.", "No steps or raised threshold at the entrance.") };
+        return { need, outcome: "met", reason: bi("لا تظهر درجات أو عتبة عند المدخل.", "No steps or raised threshold are shown at the entrance.") };
       if (steps === "present" && ramp === "present")
         return {
           need,
@@ -65,63 +60,53 @@ function evaluate(f: Facility, need: AccessNeed): NeedResult {
           reason: bi(
             curb === "present"
               ? "توجد درجة، لكن يظهر منحدر عند المدخل ومنحدر رصيف على المسار."
-              : "توجد درجة، لكن يظهر منحدر بجانب المدخل.",
+              : "توجد درجة، لكن يظهر منحدر بديل بجانب المدخل.",
             curb === "present"
-              ? "There is a step, but a ramp at the entrance and a curb ramp on the route are visible."
-              : "There is a step, but a ramp is visible beside the entrance.",
+              ? "There is a step, but an entrance ramp and curb ramp are documented."
+              : "There is a step, but an alternative ramp is documented beside the entrance.",
           ),
         };
-      if (steps === "present")
-        return { need, outcome: "not_met", reason: bi("تظهر درجة عند المدخل ولا يظهر منحدر بديل.", "A step is visible with no alternative ramp.") };
-      return { need, outcome: "unknown", reason: bi("لا تكفي الصور الحالية لتأكيد وجود درجات من عدمه.", "Current photos can't confirm whether there are steps.") };
+      if (steps === "present" && ramp === "absent")
+        return { need, outcome: "not_met", reason: bi("تظهر درجة عند المدخل ولا يظهر منحدر بديل في الأدلة الحالية.", "A step is documented and no alternative ramp appears in the current evidence.") };
+      return { need, outcome: "unknown", reason: bi("لا تكفي الصور الحالية لتأكيد مسار بلا درجات.", "Current images do not provide enough evidence to confirm a step-free route.") };
     }
     case "ramp_when_raised": {
-      if (steps === "absent") return { need, outcome: "met", reason: bi("لا يوجد ارتفاع يستدعي منحدرًا.", "There is no rise that would need a ramp.") };
-      if (ramp === "present") return { need, outcome: "met", reason: bi("يظهر منحدر عند المدخل.", "A ramp is visible at the entrance.") };
+      if (steps === "absent") return { need, outcome: "met", reason: bi("لا تظهر عتبة أو درجة تستدعي منحدرًا في الأدلة الحالية.", "No raised threshold requiring a ramp is shown in the current evidence.") };
+      if (ramp === "present") return { need, outcome: "met", reason: bi("يظهر منحدر عند المدخل.", "A ramp is documented at the entrance.") };
       if (ramp === "absent" && steps === "present")
-        return { need, outcome: "not_met", reason: bi("يوجد ارتفاع ولا يظهر منحدر.", "There is a rise and no visible ramp.") };
-      return { need, outcome: "unknown", reason: bi("لم يتضح وجود منحدر في الصور الحالية.", "A ramp isn't clear in the current photos.") };
+        return { need, outcome: "not_met", reason: bi("يوجد ارتفاع موثق ولا يظهر منحدر بديل.", "A rise is documented and no alternative ramp is shown.") };
+      return { need, outcome: "unknown", reason: bi("لم يتضح وجود منحدر في الصور الحالية.", "A ramp cannot be confirmed from the current images.") };
     }
     case "clear_path": {
-      const o = state(f, "obstruction");
-      const surface = state(f, "path_surface");
-      if (o === "present") return { need, outcome: "not_met", reason: bi("يظهر عائق في مسار الوصول إلى الباب.", "An obstruction is visible on the route to the door.") };
-      if (o === "absent" && surface === "absent")
-        return { need, outcome: "not_met", reason: bi("المسار غير مستوٍ أو غير مرصوف.", "The route is uneven or unpaved.") };
-      if (o === "absent")
-        return { need, outcome: "met", reason: bi("لا يظهر عائق في مسار الوصول.", "No obstruction is visible on the route.") };
-      return { need, outcome: "unknown", reason: bi("مسار الوصول غير واضح بالكامل في الصور.", "The route isn't fully visible in the photos.") };
+      const obstruction = state(f, "obstruction");
+      if (obstruction === "present") return { need, outcome: "not_met", reason: bi("يظهر عائق في مسار الوصول إلى الباب.", "An obstruction is documented on the route to the entrance.") };
+      if (obstruction === "absent") return { need, outcome: "met", reason: bi("لا يظهر عائق في مسار الوصول ضمن الأدلة الحالية.", "No obstruction is shown on the documented route.") };
+      return { need, outcome: "unknown", reason: bi("مسار الوصول غير موثق بما يكفي بعد.", "The approach route is not documented well enough yet.") };
     }
     case "handrail": {
       const h = state(f, "handrail");
-      if (h === "present") return { need, outcome: "met", reason: bi("يظهر درابزين عند المدخل.", "A handrail is visible at the entrance.") };
-      if (h === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر درابزين في الصور الحالية.", "No handrail is visible in the current photos.") };
-      return { need, outcome: "unknown", reason: bi("لا يمكن تأكيد وجود درابزين.", "A handrail can't be confirmed.") };
+      if (h === "present") return { need, outcome: "met", reason: bi("يظهر درابزين عند المدخل.", "A handrail is documented at the entrance.") };
+      if (h === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر درابزين في الأدلة الحالية.", "No handrail appears in the current evidence.") };
+      return { need, outcome: "unknown", reason: bi("لا يمكن تأكيد وجود درابزين من الصور الحالية.", "A handrail cannot be confirmed from the current images.") };
     }
     case "parking": {
       const p = state(f, "parking");
-      const route = state(f, "parking_route");
-      if (p === "present" && route === "absent")
-        return { need, outcome: "not_met", reason: bi("يظهر موقف مخصص، لكن المسار منه إلى المدخل غير متاح.", "Designated parking is visible, but the route to the entrance is not accessible.") };
-      if (p === "present") return { need, outcome: "met", reason: bi("يظهر موقف مخصص أو علامة إتاحة.", "Designated parking or an access marking is visible.") };
-      if (p === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر موقف مخصص أو علامة إتاحة.", "No designated parking or access marking is visible.") };
-      return { need, outcome: "unknown", reason: bi("المواقف خارج إطار الصور الحالية، لذلك لا يمكن تأكيدها.", "Parking is outside the current photo frames, so it can't be confirmed.") };
+      if (p === "present") return { need, outcome: "met", reason: bi("يظهر موقف مخصص أو علامة إتاحة.", "Accessible parking or an access marking is documented.") };
+      if (p === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر موقف مخصص أو علامة إتاحة في الأدلة الحالية.", "No accessible parking or access marking appears in the current evidence.") };
+      return { need, outcome: "unknown", reason: bi("منطقة المواقف غير موثقة بما يكفي بعد.", "The parking area is not documented well enough yet.") };
     }
     case "elevator": {
       const e = state(f, "elevator");
-      const space = state(f, "elevator_space");
-      if (e === "present" && space === "absent")
-        return { need, outcome: "not_met", reason: bi("يوجد مصعد، لكن المساحة داخله تبدو غير كافية.", "There is an elevator, but the space inside looks insufficient.") };
-      if (e === "present") return { need, outcome: "met", reason: bi("يظهر مصعد داخل المبنى.", "An elevator is visible inside the building.") };
-      if (e === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر مصعد في المبنى.", "No elevator is visible in the building.") };
-      if (e === "not_applicable") return { need, outcome: "met", reason: bi("المبنى بطابق واحد، فلا حاجة لمصعد.", "The building is single-storey, so no elevator is needed.") };
-      return { need, outcome: "unknown", reason: bi("لا توجد أدلة موثقة عن المصعد بعد.", "No documented evidence about the elevator yet.") };
+      if (e === "present") return { need, outcome: "met", reason: bi("يوجد دليل بصري موثق على المصعد.", "Verified visual evidence documents an elevator.") };
+      if (e === "absent") return { need, outcome: "not_met", reason: bi("لا يظهر مصعد في الأدلة المراجعة المتاحة حاليًا.", "No elevator appears in the currently reviewed evidence.") };
+      if (e === "not_applicable") return { need, outcome: "met", reason: bi("تمت مراجعة هذه الحاجة باعتبارها غير منطبقة على هذا المرفق.", "This need has been reviewed as not applicable for this facility.") };
+      return { need, outcome: "unknown", reason: bi("لا توجد أدلة موثقة كافية عن المصعد بعد.", "There is not enough verified elevator evidence yet.") };
     }
     case "accessible_restroom": {
       const r = state(f, "accessible_restroom");
-      if (r === "present") return { need, outcome: "met", reason: bi("توجد دورة مياه مخصصة موثقة بالصور.", "A documented accessible restroom is visible.") };
-      if (r === "absent") return { need, outcome: "not_met", reason: bi("لا تظهر دورة مياه مخصصة في الأدلة الحالية.", "No accessible restroom appears in the current evidence.") };
-      return { need, outcome: "unknown", reason: bi("لا توجد أدلة موثقة عن دورة المياه بعد.", "No documented evidence about the restroom yet.") };
+      if (r === "present") return { need, outcome: "met", reason: bi("توجد دورة مياه مخصصة موثقة بالصور.", "A documented accessible restroom is shown in the evidence.") };
+      if (r === "absent") return { need, outcome: "not_met", reason: bi("لا تظهر دورة مياه مخصصة في الأدلة المراجعة المتاحة حاليًا.", "No accessible restroom appears in the currently reviewed evidence.") };
+      return { need, outcome: "unknown", reason: bi("لا توجد أدلة موثقة كافية عن دورة المياه المخصصة بعد.", "There is not enough verified accessible-restroom evidence yet.") };
     }
   }
 }
@@ -129,9 +114,7 @@ function evaluate(f: Facility, need: AccessNeed): NeedResult {
 export interface Decision {
   verdict: Verdict;
   results: NeedResult[];
-  /** Number of indicators with a known state. */
   completeness: number;
-  /** Total number of indicators tracked. */
   total: number;
 }
 
@@ -142,7 +125,7 @@ export function decideFor(facility: Facility, needs: AccessNeed[]): Decision {
 
   let verdict: Verdict;
   if (results.length === 0) {
-    verdict = completeness >= Math.ceil(total * 0.7) ? "available" : "insufficient";
+    verdict = "insufficient";
   } else if (results.some((r) => r.outcome === "not_met")) {
     verdict = "not_available";
   } else if (results.every((r) => r.outcome === "met")) {
