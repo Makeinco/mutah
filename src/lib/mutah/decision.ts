@@ -18,10 +18,10 @@ export interface NeedResult {
 export type Verdict = "available" | "partial" | "not_available" | "insufficient";
 
 export const VERDICT_LABEL: Record<Verdict, L> = {
-  available: bi("متاح لاحتياجاتك", "Available for your needs"),
+  available: bi("متاح", "Available"),
   partial: bi("متاح جزئيًا", "Partially available"),
-  not_available: bi("غير متاح لحاجة أساسية", "Not available for an essential need"),
-  insufficient: bi("المعلومات غير كافية", "Not enough information"),
+  not_available: bi("غير متاح وفق احتياجاتك الحالية", "Not available for your current needs"),
+  insufficient: bi("معلومات غير كافية", "Not enough information"),
 };
 
 export const VERDICT_DETAIL: Record<Verdict, L> = {
@@ -119,11 +119,8 @@ function evaluate(f: Facility, need: AccessNeed): NeedResult {
     }
     case "accessible_restroom": {
       const r = state(f, "accessible_restroom");
-      const door = state(f, "restroom_door");
-      if (r === "present" && door === "absent")
-        return { need, outcome: "not_met", reason: bi("توجد دورة مياه متاحة، لكن الباب يبدو ضيقًا.", "There is an accessible restroom, but the door looks narrow.") };
-      if (r === "present") return { need, outcome: "met", reason: bi("تظهر دورة مياه متاحة.", "An accessible restroom is visible.") };
-      if (r === "absent") return { need, outcome: "not_met", reason: bi("لا تظهر دورة مياه متاحة.", "No accessible restroom is visible.") };
+      if (r === "present") return { need, outcome: "met", reason: bi("توجد دورة مياه مخصصة موثقة بالصور.", "A documented accessible restroom is visible.") };
+      if (r === "absent") return { need, outcome: "not_met", reason: bi("لا تظهر دورة مياه مخصصة في الأدلة الحالية.", "No accessible restroom appears in the current evidence.") };
       return { need, outcome: "unknown", reason: bi("لا توجد أدلة موثقة عن دورة المياه بعد.", "No documented evidence about the restroom yet.") };
     }
   }
