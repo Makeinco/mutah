@@ -1,142 +1,86 @@
-# مُتاح | MUTAH
+# MUTAH MAP | مُتاح ماب
 
-**اعرف قبل أن تصل | Know Before You Go**
+MUTAH MAP is an evidence-first accessibility decision prototype built for a hackathon MVP.
 
-مُتاح ماب هو نموذج MVP لمنصة قرار مدعومة بالذكاء الاصطناعي تساعد المستخدم على فهم أدلة الوصول المرئية قبل زيارة المرفق.
+**Product promise:** اعرف قبل أن تصل | Know Before You Go
 
-> **AI Observes. Humans Verify.**
+## Product principles
 
-## نطاق الـMVP الحالي
+- Evidence → understanding → decision.
+- AI Observes. Humans Verify.
+- Not Visible ≠ Absent.
+- No universal accessibility score.
+- No certification or compliance claim.
+- Missing and conflicting evidence remain visible.
 
-المنتج لا يصدر شهادة إتاحة، ولا يمنح درجة رقمية عامة للمرفق. يعتمد على أدلة مرئية متعددة لمناطق مختارة داخل وخارج المرفق، ثم تمر المساهمة عبر تأكيد المستخدم والمراجعة البشرية قبل النشر.
+## Current scope
 
-### مناطق الأدلة
+The product uses multi-view facility evidence rather than a single entrance photo.
 
-- المدخل
-- مسار الوصول
-- المواقف
-- المصعد
-- دورة المياه المخصصة
+Facility zones:
+- Approach path / مسار الوصول
+- Entrance / المدخل
+- Parking / المواقف
+- Elevator / المصعد
+- Accessible restroom / دورة المياه المخصصة
 
-يمكن توثيق المنطقة الواحدة بصورة أو أكثر. عدم ظهور عنصر في صورة واحدة لا يعني أنه غير موجود.
+User-facing access needs:
+- Step-free route / مسار بلا درجات
+- Ramp / منحدر
+- Obstacle-free path / مسار خالٍ من العوائق
+- Handrail / درابزين
+- Accessible parking / موقف مخصص
+- Elevator / مصعد
+- Accessible restroom / دورة مياه مخصصة
 
-## احتياجات الوصول
+Personalized status uses four states only:
+- متاح
+- متاح جزئيًا
+- غير متاح وفق احتياجاتك الحالية
+- معلومات غير كافية
 
-يعرض مُتاح حالة مخصصة وفق الاحتياجات التي يحددها المستخدم:
+## Architecture
 
-1. مسار بلا درجات
-2. منحدر
-3. مسار خالٍ من العوائق
-4. درابزين
-5. موقف مخصص
-6. مصعد
-7. دورة مياه مخصصة
+Current frontend: React + TypeScript + TanStack Start, inherited from the Lovable prototype and retained to reduce hackathon delivery risk.
 
-الحالات المعتمدة:
+Backend project provisioned on Supabase in `eu-central-1` with core migration applied. The schema includes facilities, facility zones, evidence images, AI analyses, observations, contributor confirmations, moderation queue, facility summaries, reports, audit events, and pilot metrics. Row-level security is enabled; public reads are limited to reviewed facility data and sanitized reviewed images.
 
-- **متاح**
-- **متاح جزئيًا**
-- **غير متاح وفق احتياجاتك الحالية**
-- **معلومات غير كافية**
+Production data flow:
 
-هذه الحالة ليست تقييمًا عامًا للمبنى، بل نتيجة مخصصة تستند إلى احتياجات المستخدم والأدلة المراجعة المتاحة.
+`Facility → Facility Zone → Evidence Image(s) → AI Observation(s) → User Confirmation → Human Moderation → Verified Facility Summary`
 
-## رحلة المستخدم الأساسية
+The current UI still uses the local prototype repository as a resilient demo fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
 
-1. اختيار احتياجات الوصول.
-2. البحث عن مرفق عبر القائمة أو الخريطة.
-3. قراءة حالة الإتاحة المخصصة وسببها.
-4. فتح أدلة المرفق حسب المنطقة.
-5. اختيار منطقة للتوثيق.
-6. رفع صورة أو عدة صور حديثة.
-7. تحليل أولي للمؤشرات المرئية.
-8. تأكيد النتائج أو تصحيحها.
-9. إرسال المساهمة للمراجعة البشرية.
-10. نشر الأدلة فقط بعد الاعتماد.
+## Environment
 
-## حالات الأدلة
+Copy `.env.example` and provide values through your deployment environment. Never commit private server secrets.
 
-يدعم النموذج حالات عدم اليقين بوضوح:
+Expected services:
+- Supabase
+- Gemini Vision
+- MapTiler / map provider
+- Vercel
 
-- Present
-- Absent
-- Unknown
-- Not Visible
-- Not Documented
-- Conflicting Information
-- Not Applicable
+## Development
 
-**Not Visible ≠ Absent.**
+```bash
+bun install
+bun run dev
+```
 
-## حدود النموذج
+Quality gate:
 
-- لا يصدر شهادة إتاحة رسمية.
-- لا يتحقق من المطابقة النظامية أو كود البناء.
-- لا يصدر حكم سلامة أو حكمًا هندسيًا.
-- لا يستنتج القياسات الدقيقة أو عرض الأبواب أو ميل المنحدرات من الصور.
-- لا ينشر نتائج الذكاء الاصطناعي تلقائيًا.
-- لا يستنتج إتاحة كامل المبنى من صورة واحدة أو منطقة واحدة.
+```bash
+bun run lint
+bun run build
+```
 
-## الخصوصية
+GitHub Actions runs lint and production build on the refinement branch / pull request.
 
-- تجنب تصوير الوجوه ولوحات المركبات.
-- إزالة EXIF/بيانات الموقع حيثما يدعم مسار المعالجة ذلك.
-- حفظ الأدلة الخام بشكل خاص ومؤقت في البنية التشغيلية المستقبلية.
-- نشر الأدلة المنقحة والمراجعة فقط.
+## Demo journey
 
-## العلامة
+Home → choose access needs → Explore → Facility Profile → personalized status → why this result → inspect missing evidence → Contribute → choose zone → upload one or multiple images → AI preliminary observation → contributor confirms/corrects → human review → facility evidence updates.
 
-- العلامة الأم: **مُتاح | MUTAH**
-- المنتج الحالي: **مُتاح ماب | MUTAH MAP**
-- الوعد: **اعرف قبل أن تصل**
-- المبدأ: **Evidence → Understanding → Decision**
+## Data honesty
 
-ألوان الهوية الأساسية:
-
-- MUTAH Blue `#0066FF`
-- MUTAH Green `#00FF00`
-
-يُستخدم الأخضر كلون للفتح والإتاحة، مع مشتقات واجهة تحقق التباين المطلوب.
-
-## منظومة مُتاح
-
-مُتاح ماب هو المنتج الحالي ضمن رؤية أوسع تشمل:
-
-- مُتاح كير — رؤية مستقبلية
-- مُتاح ماركت — رؤية مستقبلية
-- مُتاح ووركس — رؤية مستقبلية
-- مُتاح كونكت — رؤية مستقبلية
-- مُتاح إنسايتس — Pilot / قيد التطوير
-
-لا تُعرض تكاملات أو شراكات أو أرقام وطنية غير مثبتة باعتبارها قدرات حالية.
-
-## التقنية
-
-النسخة الحالية الموروثة من Lovable مبنية بـ React + TypeScript + TanStack Start + Tailwind. نحافظ عليها في مرحلة تحسين الـMVP لتقليل التكلفة والمخاطر، مع فصل الواجهة عن البيانات ومنطق الذكاء الاصطناعي بحيث يمكن ربط الخدمات التشغيلية دون إعادة كتابة رحلة المستخدم.
-
-المسار المستهدف للتشغيل:
-
-- Frontend MVP: React + TypeScript + TanStack Start الحالي
-- Database/Auth/Storage: Supabase
-- AI: Gemini عبر provider adapter
-- Maps: MapLibre / MapTiler
-- Deployment: Vercel
-- Source of truth: GitHub
-
-قرار الانتقال إلى Next.js — إن لزم — يؤجل إلى ما بعد تثبيت الـMVP؛ لا توجد قيمة في إعادة كتابة واجهة تعمل أثناء الهاكاثون لمجرد تغيير الإطار.
-
-## حالة البيانات
-
-يجب وسم البيانات المستخدمة في المشروع عند الانتقال للبيانات التشغيلية بإحدى الحالات:
-
-- `demo`: بيانات تجريبية
-- `pilot`: بيانات جمعت خلال التجربة المحدودة
-- `verified`: بيانات راجعها الفريق وفق منهج المشروع
-
-## الجودة
-
-الهدف هو متطلبات مختارة من WCAG 2.2 AA، دون ادعاء امتثال شامل. يشمل ذلك RTL أصليًا، تباينًا مناسبًا، دعم لوحة المفاتيح، focus واضحًا، touch targets مناسبة، وعدم الاعتماد على اللون وحده.
-
----
-
-مُتاح ماب هو الخطوة الأولى، ومُتاح هي المنظومة الكاملة.
+Demo/sample information must be labeled as such. Do not present prototype facilities, sample metrics, model output, partnerships, integrations, national coverage, legal compliance, or accessibility certification as verified reality.
