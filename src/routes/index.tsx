@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Camera, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button } from "@/components/mutah/ui";
@@ -60,7 +60,7 @@ function Home() {
             <label htmlFor="home-search" className="sr-only">
               {t("searchLabel")}
             </label>
-            <div className="flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary">
+            <div className="flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
               <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <input
                 id="home-search"
@@ -81,18 +81,9 @@ function Home() {
               {t("setNeeds")}
             </Button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/contribute" })}
-            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-access/50 bg-access-soft px-5 text-base font-bold text-access-strong transition-colors hover:bg-access-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <Camera className="size-5" aria-hidden="true" />
-            {lang === "ar" ? "ساهم بتحديث دليل الوصول" : "Contribute updated access evidence"}
-          </button>
         </section>
 
-        <section aria-labelledby="recent-title" className="mt-4 pb-8">
+        <section aria-labelledby="recent-title" className="mt-2 pb-8">
           <h2 id="recent-title" className="text-sm font-bold text-muted-foreground">
             {t("recentlyUpdated")}
           </h2>
@@ -102,7 +93,7 @@ function Home() {
                 <Link
                   to="/facility/$id"
                   params={{ id: f.id }}
-                  className="flex min-h-14 items-center justify-between gap-3 py-3 text-sm transition-colors hover:text-primary"
+                  className="flex min-h-14 items-center justify-between gap-3 py-3 text-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <span className="font-semibold">{pick(f.name)}</span>
                   <span className="text-muted-foreground">{relativeDate(f.lastVerifiedISO, lang)}</span>
