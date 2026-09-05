@@ -51,16 +51,6 @@ Production data flow:
 
 The current UI still uses the local prototype repository as a resilient demo fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
 
-## Environment
-
-Copy `.env.example` and provide values through your deployment environment. Never commit private server secrets.
-
-Expected services:
-- Supabase
-- Gemini Vision
-- MapTiler / map provider
-- Vercel
-
 ## Development
 
 ```bash
@@ -74,8 +64,6 @@ Quality gate:
 bun run lint
 bun run build
 ```
-
-GitHub Actions runs lint and production build on the refinement branch / pull request.
 
 ## Demo journey
 
