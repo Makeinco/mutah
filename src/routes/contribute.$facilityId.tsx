@@ -1,6 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Camera, Check, CircleHelp, ImagePlus, ImageUp, Pencil, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  Accessibility,
+  Camera,
+  Check,
+  CheckCircle2,
+  CircleHelp,
+  CircleParking,
+  DoorOpen,
+  Footprints,
+  ImagePlus,
+  ImageUp,
+  LoaderCircle,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import type { ComponentType } from "react";
 import { z } from "zod";
 import { AppShell } from "@/components/mutah/AppShell";
 import { EvidenceItem } from "@/components/mutah/Evidence";
@@ -10,7 +25,7 @@ import { ANALYSIS_STEPS, analyseZoneImage } from "@/lib/mutah/ai";
 import { useLang } from "@/lib/mutah/i18n";
 import { INDICATOR_LABEL, ZONE_HINT, ZONE_LABEL, ZONE_ORDER, stateLabel } from "@/lib/mutah/labels";
 import { emptyConfirmations, useMutah } from "@/lib/mutah/store";
-import type { Contribution, IndicatorEvidence, IndicatorState, ZoneKey } from "@/lib/mutah/types";
+import type { Contribution, IndicatorEvidence, IndicatorState, L, ZoneKey } from "@/lib/mutah/types";
 
 const zoneSchema = z.object({
   zone: z.enum(["approach", "entrance", "parking", "elevator", "restroom"]).optional(),
@@ -33,8 +48,67 @@ export const Route = createFileRoute("/contribute/$facilityId")({
 });
 
 type Step = "capture" | "analysing" | "confirm" | "done";
-
 type AnalysisMode = "live" | "demo" | null;
+
+type ZoneGuide = {
+  image: string;
+  icon: ComponentType<{ className?: string }>;
+  title: L;
+  points: L[];
+};
+
+const ZONE_GUIDE: Record<ZoneKey, ZoneGuide> = {
+  approach: {
+    image: "/guides/approach.svg",
+    icon: Footprints,
+    title: { ar: "مثال لمسار الوصول المناسب", en: "Example of a useful approach-path photo" },
+    points: [
+      { ar: "أظهر الطريق من نقطة الوصول حتى المدخل.", en: "Show the route from the arrival point to the entrance." },
+      { ar: "أظهر الرصيف والمنحدر والعوائق إن وجدت.", en: "Include the curb, curb ramp, and any visible obstacles." },
+      { ar: "استخدم زاوية واسعة قدر الإمكان.", en: "Use a wide angle whenever possible." },
+    ],
+  },
+  entrance: {
+    image: "/guides/entrance.svg",
+    icon: DoorOpen,
+    title: { ar: "مثال لصورة المدخل المناسبة", en: "Example of a useful entrance photo" },
+    points: [
+      { ar: "أظهر الباب والمساحة أمامه بوضوح.", en: "Show the door and the space immediately in front of it." },
+      { ar: "أظهر الدرج أو المنحدر إن وجد.", en: "Include any visible steps or ramp." },
+      { ar: "أضف زاوية ثانية إذا لم يظهر المسار كاملًا.", en: "Add a second angle if the full route is not visible." },
+    ],
+  },
+  parking: {
+    image: "/guides/parking.svg",
+    icon: CircleParking,
+    title: { ar: "مثال لصورة المواقف المناسبة", en: "Example of a useful parking photo" },
+    points: [
+      { ar: "أظهر الموقف المخصص أو علامة الإتاحة إن وجدت.", en: "Show the accessible bay or access marking if present." },
+      { ar: "حاول إظهار علاقته بمسار الوصول للمبنى.", en: "Try to show how it connects to the route toward the building." },
+      { ar: "تجنب تصوير لوحات المركبات.", en: "Avoid capturing vehicle licence plates." },
+    ],
+  },
+  elevator: {
+    image: "/guides/elevator.svg",
+    icon: Accessibility,
+    title: { ar: "مثال لصورة المصعد المناسبة", en: "Example of a useful elevator photo" },
+    points: [
+      { ar: "أظهر باب المصعد والمنطقة المحيطة.", en: "Show the elevator doors and surrounding area." },
+      { ar: "يمكن إضافة صورة للوحة الأزرار إذا كانت واضحة.", en: "Add a second photo of the call buttons when useful." },
+      { ar: "لا تستنتج أبعاد المصعد من الصورة.", en: "Do not infer elevator dimensions from the photo." },
+    ],
+  },
+  restroom: {
+    image: "/guides/restroom.svg",
+    icon: Accessibility,
+    title: { ar: "مثال لصورة دورة المياه المخصصة", en: "Example of a useful accessible-restroom photo" },
+    points: [
+      { ar: "أظهر المدخل والعلامة الخارجية بوضوح.", en: "Show the entrance and external access sign clearly." },
+      { ar: "أضف صورة أخرى للعناصر المرئية المهمة عند الحاجة.", en: "Add another image for relevant visible features when needed." },
+      { ar: "لا تصوّر الأشخاص داخل دورة المياه.", en: "Do not photograph people inside the restroom." },
+    ],
+  },
+};
 
 function ContributeFlow() {
   const { facilityId } = Route.useParams();
@@ -154,30 +228,42 @@ function ContributeFlow() {
         {step === "capture" ? (
           <>
             <fieldset className="mt-8">
-              <legend className="text-base font-bold">{t("whatToDocument")}</legend>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {ZONE_ORDER.map((z) => (
-                  <label
-                    key={z}
-                    className={`flex min-h-12 cursor-pointer items-center justify-center rounded-xl border-2 px-3 text-center text-sm font-semibold transition-colors ${zone === z ? "border-primary bg-primary-soft text-primary" : "border-border hover:bg-muted"}`}
-                  >
-                    <input
-                      type="radio"
-                      name="zone"
-                      checked={zone === z}
-                      onChange={() => {
-                        setZone(z);
-                        setPreviews([]);
-                        setSelectedFiles([]);
-                      }}
-                      className="sr-only"
-                    />
-                    {pick(ZONE_LABEL[z])}
-                  </label>
-                ))}
+              <legend className="text-lg font-bold">
+                {lang === "ar" ? "اختر الجزء الذي تظهره الصورة" : "Choose the area shown in the photo"}
+              </legend>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {lang === "ar"
+                  ? "اختر قسمًا واحدًا فقط لكل حزمة صور. سنعرض لك مثالًا لما نحتاج أن يظهر."
+                  : "Choose one zone per image bundle. We will show an example of what the photo should capture."}
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                {ZONE_ORDER.map((z) => {
+                  const Icon = ZONE_GUIDE[z].icon;
+                  return (
+                    <label
+                      key={z}
+                      className={`flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-3 text-center text-sm font-semibold transition-colors ${zone === z ? "border-primary bg-primary-soft text-primary" : "border-border bg-card hover:bg-muted"}`}
+                    >
+                      <input
+                        type="radio"
+                        name="zone"
+                        checked={zone === z}
+                        onChange={() => {
+                          setZone(z);
+                          setPreviews([]);
+                          setSelectedFiles([]);
+                        }}
+                        className="sr-only"
+                      />
+                      <Icon className="size-6" aria-hidden="true" />
+                      <span>{pick(ZONE_LABEL[z])}</span>
+                    </label>
+                  );
+                })}
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">{pick(ZONE_HINT[zone])}</p>
             </fieldset>
+
+            <ZoneGuideCard zone={zone} />
 
             <CaptureStep
               previews={previews}
@@ -238,6 +324,38 @@ function ContributeFlow() {
         ) : null}
       </div>
     </AppShell>
+  );
+}
+
+function ZoneGuideCard({ zone }: { zone: ZoneKey }) {
+  const { pick, lang } = useLang();
+  const guide = ZONE_GUIDE[zone];
+
+  return (
+    <section className="door-reveal mt-6 overflow-hidden rounded-3xl border border-border bg-surface" aria-labelledby="zone-guide-title">
+      <div className="grid gap-0 sm:grid-cols-[220px_1fr]">
+        <img
+          src={guide.image}
+          alt={lang === "ar" ? `مثال إرشادي لـ ${pick(ZONE_LABEL[zone])}` : `Illustrated guide for ${pick(ZONE_LABEL[zone])}`}
+          className="aspect-[16/8] w-full bg-primary-soft object-cover sm:aspect-auto sm:h-full"
+        />
+        <div className="p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-primary">
+            {lang === "ar" ? "مثال إرشادي للصورة" : "Photo guide example"}
+          </p>
+          <h2 id="zone-guide-title" className="mt-1 text-lg font-bold">{pick(guide.title)}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{pick(ZONE_HINT[zone])}</p>
+          <ul className="mt-4 space-y-2">
+            {guide.points.map((point) => (
+              <li key={pick(point)} className="flex gap-2 text-sm">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-access-strong" aria-hidden="true" />
+                <span>{pick(point)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -374,27 +492,79 @@ function CaptureStep({
 
 function AnalysingStep({ count }: { count: number }) {
   const { t, pick, lang } = useLang();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => Math.min(current + 1, ANALYSIS_STEPS.length - 1));
+    }, 900);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const progress = Math.max(8, Math.round(((activeIndex + 0.45) / ANALYSIS_STEPS.length) * 100));
 
   return (
     <section aria-labelledby="analysing-title" className="mt-8" aria-live="polite">
-      <h2 id="analysing-title" className="text-lg font-bold">{t("analysingTitle")}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t("analysingHint")}</p>
-      <p className="mt-2 text-sm font-semibold">
-        {lang === "ar"
-          ? `تحليل حزمة أدلة من ${count} صورة عبر Gemini…`
-          : `Analysing an evidence bundle of ${count} image${count === 1 ? "" : "s"} with Gemini…`}
-      </p>
+      <div className="flex items-start gap-4">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+          <LoaderCircle className="size-7 animate-spin" aria-hidden="true" />
+        </span>
+        <div>
+          <h2 id="analysing-title" className="text-xl font-bold">{t("analysingTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("analysingHint")}</p>
+          <p className="mt-2 text-sm font-semibold">
+            {lang === "ar"
+              ? `تحليل حزمة أدلة من ${count} صورة عبر Gemini…`
+              : `Analysing an evidence bundle of ${count} image${count === 1 ? "" : "s"} with Gemini…`}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6" aria-label={lang === "ar" ? "تقدم التحليل" : "Analysis progress"}>
+        <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs font-semibold text-muted-foreground">
+          <span>{progress}%</span>
+          <span>
+            {lang === "ar"
+              ? "قد يستغرق التحليل بضع ثوانٍ حسب جودة الصورة والاتصال."
+              : "Analysis may take a few seconds depending on image quality and connection."}
+          </span>
+        </div>
+      </div>
 
       <ul className="mt-6 space-y-3">
-        {ANALYSIS_STEPS.map((s, i) => (
-          <li
-            key={s.id}
-            className={`flex items-center gap-3 rounded-xl border p-4 ${i === 3 ? "border-primary bg-primary-soft" : "border-border"}`}
-          >
-            <span aria-hidden="true" className="font-bold">{i === 3 ? "◌" : "·"}</span>
-            <span className="font-semibold">{pick(s.label)}</span>
-          </li>
-        ))}
+        {ANALYSIS_STEPS.map((s, i) => {
+          const done = i < activeIndex;
+          const active = i === activeIndex;
+          return (
+            <li
+              key={s.id}
+              className={`flex items-center gap-3 rounded-2xl border p-4 transition-colors ${active ? "border-primary bg-primary-soft" : "border-border"}`}
+            >
+              <span className={`flex size-8 shrink-0 items-center justify-center rounded-full ${done ? "bg-access-soft text-access-strong" : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                {done ? (
+                  <Check className="size-4" aria-hidden="true" />
+                ) : active ? (
+                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <span className="size-2 rounded-full bg-current" aria-hidden="true" />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="font-semibold">{pick(s.label)}</span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {done
+                    ? lang === "ar" ? "تم" : "Done"
+                    : active
+                      ? lang === "ar" ? "قيد التنفيذ" : "In progress"
+                      : lang === "ar" ? "التالي" : "Next"}
+                </p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
