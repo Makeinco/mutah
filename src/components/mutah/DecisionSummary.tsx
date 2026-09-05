@@ -10,8 +10,8 @@ const VERDICT_STYLE: Record<
   { icon: ComponentType<{ className?: string }>; frame: string; accent: string }
 > = {
   available: { icon: CircleCheck, frame: "border-access bg-access-soft", accent: "text-access-strong" },
-  partial: { icon: CircleAlert, frame: "border-primary bg-primary-soft", accent: "text-primary" },
-  not_available: { icon: CircleSlash, frame: "border-caution bg-caution-soft", accent: "text-caution" },
+  partial: { icon: CircleAlert, frame: "border-caution bg-caution-soft", accent: "text-caution" },
+  not_available: { icon: CircleSlash, frame: "border-destructive/50 bg-destructive/5", accent: "text-destructive" },
   insufficient: {
     icon: CircleHelp,
     frame: "border-input border-dashed bg-unknown-soft",
@@ -26,21 +26,23 @@ export function DecisionSummary({
   decision: Decision;
   hasNeeds: boolean;
 }) {
-  const { pick, t } = useLang();
-  const [open, setOpen] = useState(true);
+  const { pick, t, lang } = useLang();
+  const [open, setOpen] = useState(false);
   const style = VERDICT_STYLE[decision.verdict];
   const Icon = style.icon;
+  const missing = Math.max(0, decision.total - decision.completeness);
 
   return (
     <section
       aria-labelledby="decision-title"
       className={cn("door-reveal rounded-2xl border-2 p-5", style.frame)}
     >
+      <p className="mb-2 text-sm font-semibold text-muted-foreground">{t("personalStatus")}</p>
       <div className="flex items-start gap-3">
         <Icon className={cn("mt-0.5 size-7 shrink-0", style.accent)} aria-hidden="true" />
         <div>
           <h2 id="decision-title" className={cn("text-xl font-bold", style.accent)}>
-            {pick(VERDICT_LABEL[decision.verdict])}
+            {hasNeeds ? pick(VERDICT_LABEL[decision.verdict]) : t("infoLimited")}
           </h2>
           <p className="mt-1 text-sm text-foreground/80">
             {hasNeeds ? pick(VERDICT_DETAIL[decision.verdict]) : t("noNeedsYet")}
@@ -77,8 +79,12 @@ export function DecisionSummary({
         </>
       ) : null}
 
-      <p className="mt-4 text-sm font-semibold">
-        {t("completeness")}: {decision.completeness} {t("confirmedOf")} {decision.total}
+      <p className="mt-4 text-sm text-muted-foreground">
+        {missing === 0
+          ? t("infoComplete")
+          : lang === "ar"
+            ? `توجد أدلة ناقصة في ${missing === 1 ? "عنصر واحد" : "بعض العناصر"}.`
+            : `Evidence is still missing for ${missing === 1 ? "one item" : "some items"}.`}
       </p>
     </section>
   );
