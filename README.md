@@ -41,15 +41,15 @@ Personalized status uses four states only:
 
 ## Architecture
 
-Current frontend: React + TypeScript + TanStack Start, inherited from the Lovable prototype and retained to reduce hackathon delivery risk.
+Frontend: React + TypeScript + TanStack Start.
 
-Backend project provisioned on Supabase in `eu-central-1` with core migration applied. The schema includes facilities, facility zones, evidence images, AI analyses, observations, contributor confirmations, moderation queue, facility summaries, reports, audit events, and pilot metrics. Row-level security is enabled; public reads are limited to reviewed facility data and sanitized reviewed images.
+Backend project is provisioned on Supabase in `eu-central-1` with the core migration applied. The schema includes facilities, facility zones, evidence images, AI analyses, observations, contributor confirmations, moderation queue, facility summaries, reports, audit events, and pilot metrics. Row-level security is enabled; public reads are limited to reviewed facility data and sanitized reviewed images.
 
 Production data flow:
 
 `Facility → Facility Zone → Evidence Image(s) → AI Observation(s) → User Confirmation → Human Moderation → Verified Facility Summary`
 
-The current UI still uses the local prototype repository as a resilient demo fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
+The current UI keeps local demo data as a resilient fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
 
 ## Development
 
