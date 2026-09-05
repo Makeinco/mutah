@@ -26,18 +26,21 @@ export const ZONE_HINT: Record<ZoneKey, L> = {
     "صوّر المسار من نقطة الوصول حتى المدخل بوضوح.",
     "Capture the route from the arrival point to the entrance clearly.",
   ),
-  entrance: bi("صوّر المدخل والطريق المؤدي إليه بوضوح.", "Capture the entrance and the path leading to it clearly."),
+  entrance: bi(
+    "صوّر المدخل والطريق المؤدي إليه بوضوح، ويمكن إضافة أكثر من زاوية عند الحاجة.",
+    "Capture the entrance and path clearly; add another angle when useful.",
+  ),
   parking: bi(
     "حاول إظهار الموقف المخصص وعلاقته بمسار الوصول.",
     "Try to show the accessible parking space and its relationship to the access route.",
   ),
   elevator: bi(
-    "صوّر مدخل المصعد والمنطقة المحيطة به بوضوح.",
-    "Capture the elevator entrance and surrounding area clearly.",
+    "صوّر مدخل المصعد والمنطقة المحيطة به. أضف صورة أخرى إذا احتجت لإظهار جانب مختلف.",
+    "Capture the elevator entrance and surrounding area. Add another photo if another view is needed.",
   ),
   restroom: bi(
-    "صوّر المدخل والعناصر المهمة بوضوح دون تصوير الأشخاص.",
-    "Capture the entrance and relevant visible features without photographing people.",
+    "صوّر المدخل والعناصر المهمة بوضوح دون تصوير الأشخاص. يمكن إضافة أكثر من صورة عند الحاجة.",
+    "Capture the entrance and relevant visible features without photographing people. Add more than one photo when useful.",
   ),
 };
 
@@ -91,9 +94,16 @@ export function stateLabel(key: IndicatorKey, state: IndicatorState): L {
     case "present":
       return bi(f ? "موثقة في الصور" : "موثق في الصور", "Documented in images");
     case "absent":
-      return bi(f ? "غير ظاهرة في الأدلة الحالية" : "غير ظاهر في الأدلة الحالية", "Not shown in current evidence");
+      return bi(
+        f ? "غير ظاهرة في الأدلة المراجعة" : "غير ظاهر في الأدلة المراجعة",
+        "Not shown in reviewed evidence",
+      );
     case "not_visible":
-      return bi("غير ظاهر في الصور الحالية", "Not visible in current images");
+      return bi("خارج إطار الصور الحالية", "Outside the current image frames");
+    case "not_documented":
+      return bi("غير موثق بعد", "Not documented yet");
+    case "conflicting":
+      return bi("معلومات متعارضة", "Conflicting information");
     case "not_applicable":
       return bi("لا ينطبق", "Not applicable");
     default:
