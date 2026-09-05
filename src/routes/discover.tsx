@@ -98,7 +98,7 @@ function Discover() {
         </ul>
       </section>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <p aria-live="polite" className="text-sm text-muted-foreground">
           {lang === "ar" ? `${results.length} نتيجة` : `${results.length} results`}
         </p>
@@ -125,6 +125,14 @@ function Discover() {
           </button>
         </div>
       </div>
+
+      {view === "map" ? (
+        <p className="mt-2 text-xs text-muted-foreground lg:hidden">
+          {lang === "ar"
+            ? "يمكنك التحويل إلى «القائمة» في أي وقت للحصول على بديل نصي كامل للخريطة."
+            : "Switch to List at any time for a complete text alternative to the map."}
+        </p>
+      ) : null}
 
       <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className={view === "map" ? "block" : "hidden lg:block"}>
