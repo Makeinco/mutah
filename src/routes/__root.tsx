@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { MutahProvider } from "../lib/mutah/store";
+import { LangProvider } from "../lib/mutah/i18n";
 
 function NotFoundComponent() {
   return (
@@ -134,10 +135,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MutahProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-      </MutahProvider>
+      <LangProvider>
+        <MutahProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </MutahProvider>
+      </LangProvider>
     </QueryClientProvider>
   );
 }
