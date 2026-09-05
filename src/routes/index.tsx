@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, Search } from "lucide-react";
 import { useState } from "react";
-import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
-import { MutahLogo } from "@/components/mutah/Logo";
+import { AppShell } from "@/components/mutah/AppShell";
 import { Button } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
 import { relativeDate } from "@/lib/mutah/labels";
@@ -15,7 +14,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "معلومات واضحة عن مداخل الأماكن ومساراتها، مبنية على أدلة مرئية يراجعها البشر، بالعربية والإنجليزية.",
+          "معلومات واضحة عن الوصول إلى الأماكن، مبنية على أدلة مرئية متعددة يراجعها البشر، بالعربية والإنجليزية.",
       },
       { property: "og:title", content: "مُتاح ماب | اعرف قبل أن تصل" },
       {
@@ -39,63 +38,61 @@ function Home() {
     .slice(0, 3);
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
-      {/* Open door: a single quiet opening of space, not an icon. */}
-      <div
-        aria-hidden="true"
-        className="door-sweep pointer-events-none absolute end-0 top-0 h-[46vh] w-[38%] rounded-es-[6rem] bg-primary-soft/50"
-      />
+    <AppShell>
+      <div className="relative mx-auto max-w-2xl overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="door-sweep pointer-events-none absolute end-0 top-0 h-56 w-[38%] rounded-es-[5rem] bg-primary-soft/50"
+        />
 
-      <main
-        id="main-content"
-        className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-14"
-      >
-        <div className="flex items-start justify-between gap-4">
-          <MutahLogo className="h-16 md:h-20" />
-          <LanguageSwitcher />
-        </div>
+        <section className="relative py-8 md:py-14">
+          <p className="text-sm font-bold text-primary">مُتاح ماب | MUTAH MAP</p>
+          <h1 className="door-reveal mt-3 text-4xl font-bold md:text-5xl">{t("tagline")}</h1>
+          <p className="mt-3 max-w-lg text-lg text-muted-foreground">{t("taglineSub")}</p>
 
-        <h1 className="door-reveal mt-10 text-4xl font-bold md:text-5xl">{t("tagline")}</h1>
-        <p className="mt-3 max-w-md text-lg text-muted-foreground">{t("taglineSub")}</p>
-
-        <form
-          className="mt-8"
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate({ to: "/discover", search: { q: query || undefined } });
-          }}
-        >
-          <label htmlFor="home-search" className="sr-only">
-            {t("searchLabel")}
-          </label>
-          <div className="flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary">
-            <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <input
-              id="home-search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("search")}
-              className="min-h-14 w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
-            />
-          </div>
-        </form>
-
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button size="lg" onClick={() => navigate({ to: "/discover" })} className="sm:flex-1">
-            {t("explore")}
-            <Arrow className="size-5" aria-hidden="true" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => navigate({ to: "/preferences" })}
-            className="sm:flex-1"
+          <form
+            className="mt-8"
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate({ to: "/discover", search: { q: query || undefined } });
+            }}
           >
-            {t("setNeeds")}
-          </Button>
-        </div>
+            <label htmlFor="home-search" className="sr-only">
+              {t("searchLabel")}
+            </label>
+            <div className="flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary">
+              <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <input
+                id="home-search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("search")}
+                className="min-h-14 w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          </form>
 
-        <section aria-labelledby="recent-title" className="mt-12">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Button size="lg" onClick={() => navigate({ to: "/discover" })}>
+              {t("explore")}
+              <Arrow className="size-5" aria-hidden="true" />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate({ to: "/preferences" })}>
+              {t("setNeeds")}
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/contribute" })}
+            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-access/50 bg-access-soft px-5 text-base font-bold text-access-strong transition-colors hover:bg-access-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Camera className="size-5" aria-hidden="true" />
+            {lang === "ar" ? "ساهم بتحديث دليل الوصول" : "Contribute updated access evidence"}
+          </button>
+        </section>
+
+        <section aria-labelledby="recent-title" className="mt-4 pb-8">
           <h2 id="recent-title" className="text-sm font-bold text-muted-foreground">
             {t("recentlyUpdated")}
           </h2>
@@ -108,15 +105,13 @@ function Home() {
                   className="flex min-h-14 items-center justify-between gap-3 py-3 text-sm transition-colors hover:text-primary"
                 >
                   <span className="font-semibold">{pick(f.name)}</span>
-                  <span className="text-muted-foreground">
-                    {relativeDate(f.lastVerifiedISO, lang)}
-                  </span>
+                  <span className="text-muted-foreground">{relativeDate(f.lastVerifiedISO, lang)}</span>
                 </Link>
               </li>
             ))}
           </ul>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
