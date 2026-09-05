@@ -166,6 +166,7 @@
   }
 }
 
+/* The door opens from the inline start edge, so it follows the reading direction. */
 @utility door-reveal {
   animation: door-open 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
   transform-origin: right center;
@@ -174,6 +175,26 @@
 @utility door-sweep {
   animation: door-sweep 700ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
   transform-origin: right center;
+}
+
+[dir="ltr"] .door-reveal,
+[dir="ltr"] .door-sweep {
+  transform-origin: left center;
+}
+
+@keyframes door-open-ltr {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75rem) scaleX(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[dir="ltr"] .door-reveal {
+  animation-name: door-open-ltr;
 }
 
 @media (prefers-reduced-motion: reduce) {

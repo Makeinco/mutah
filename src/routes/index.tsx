@@ -43,7 +43,7 @@ function Home() {
       {/* Open door: a single quiet opening of space, not an icon. */}
       <div
         aria-hidden="true"
-        className="door-sweep pointer-events-none absolute inset-inline-start-0 top-0 h-[46vh] w-[38%] rounded-bl-[6rem] bg-primary-soft/50 ltr:left-auto ltr:right-0 ltr:rounded-bl-none ltr:rounded-br-[6rem] rtl:right-0"
+        className="door-sweep pointer-events-none absolute end-0 top-0 h-[46vh] w-[38%] rounded-es-[6rem] bg-primary-soft/50"
       />
 
       <main
