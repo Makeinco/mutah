@@ -12,10 +12,13 @@ export const Route = createFileRoute("/insights")({
       { title: "مُتاح إنسايتس | مُتاح ماب" },
       {
         name: "description",
-        content: "عرض بيانات وأثر للمرحلة التجريبية: التغطية، الصور، اكتمال البيانات، وأكثر الحواجز المرصودة.",
+        content: "عرض بيانات تجريبية: تغطية مناطق الأدلة، المساهمات، اكتمال البيانات، والحواجز المرصودة.",
       },
       { property: "og:title", content: "مُتاح إنسايتس | مُتاح ماب" },
-      { property: "og:description", content: "بيانات تجريبية فقط، بلا أرقام وطنية وبلا ترتيب للمدن." },
+      {
+        property: "og:description",
+        content: "بيانات تجريبية للعرض فقط، بلا أرقام وطنية وبلا ترتيب للمدن.",
+      },
     ],
   }),
   component: Insights,
@@ -28,7 +31,11 @@ function Insights() {
   const { pick, lang, t } = useLang();
   const ar = lang === "ar";
 
-  const withImages = facilities.filter((f) => f.imageUrl).length;
+  const totalImages = facilities.reduce(
+    (sum, facility) =>
+      sum + Object.values(facility.zones).reduce((zoneSum, zone) => zoneSum + zone.images.length, 0),
+    0,
+  );
   const reviewed = contributions.filter((c) => c.status === "approved").length;
   const totalKnown = facilities.reduce(
     (sum, f) =>
@@ -39,11 +46,10 @@ function Insights() {
       }).length,
     0,
   );
-  const completeness = Math.round(
-    (totalKnown / (facilities.length * INDICATOR_ORDER.length)) * 100,
-  );
+  const denominator = Math.max(1, facilities.length * INDICATOR_ORDER.length);
+  const completeness = Math.round((totalKnown / denominator) * 100);
   const needsUpdate = facilities.filter((f) => f.verification === "stale").length;
-  const documentedViews = facilities.reduce(
+  const documentedZones = facilities.reduce(
     (sum, f) => sum + Object.values(f.zones).filter((z) => z.documented).length,
     0,
   );
@@ -70,21 +76,24 @@ function Insights() {
     <AppShell title={t("navInsights")} wide>
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">{t("navInsights")}</h1>
-        <Tag tone="warn">{ar ? "بيانات تجريبية" : "Pilot data"}</Tag>
+        <Tag tone="warn">{ar ? "بيانات تجريبية للعرض" : "Demo data"}</Tag>
       </div>
-      <p className="mt-1 text-muted-foreground">
+      <p className="mt-1 max-w-3xl text-muted-foreground">
         {ar
-          ? "عرض للبيانات والأثر ضمن نطاق المرحلة التجريبية فقط."
-          : "A data and impact view within the pilot scope only."}
+          ? "هذه الأرقام مولدة من بيانات النموذج التجريبي داخل التطبيق وليست نتائج ميدانية أو مؤشرات وطنية. في الـPilot ستُستبدل ببيانات مراجعة فعلية."
+          : "These figures come from the in-app demo dataset. They are not field results or national indicators and will be replaced by reviewed pilot data."}
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Metric label={ar ? "الأماكن المغطاة" : "Places covered"} value={facilities.length} />
-        <Metric label={ar ? "أماكن لها صور" : "Places with photos"} value={withImages} />
-        <Metric label={ar ? "المسارات الموثقة" : "Documented views"} value={documentedViews} />
+        <Metric label={ar ? "المرافق التجريبية" : "Demo facilities"} value={facilities.length} />
+        <Metric label={ar ? "صور الأدلة" : "Evidence images"} value={totalImages} />
+        <Metric label={ar ? "مناطق الأدلة الموثقة" : "Documented evidence zones"} value={documentedZones} />
         <Metric label={ar ? "مساهمات معتمدة" : "Approved contributions"} value={reviewed} />
-        <Metric label={ar ? "نسبة اكتمال البيانات" : "Data completeness"} value={`${completeness}%`} />
-        <Metric label={ar ? "معلومات تحتاج تحديثًا" : "Needs updating"} value={needsUpdate} />
+        <Metric
+          label={ar ? "اكتمال بيانات العينة التجريبية" : "Demo dataset completeness"}
+          value={`${completeness}%`}
+        />
+        <Metric label={ar ? "مرافق تحتاج تحديثًا" : "Facilities needing updates"} value={needsUpdate} />
       </div>
 
       <section aria-labelledby="barriers-title" className="mt-10">
@@ -92,55 +101,63 @@ function Insights() {
           <SectionTitle
             hint={
               ar
-                ? "عدد الأماكن التي رُصد فيها كل حاجز ضمن العينة التجريبية."
-                : "How many places show each barrier within the pilot sample."
+                ? "عدّ وصفي داخل بيانات العرض الحالية، وليس ترتيبًا أو مؤشرًا رسميًا."
+                : "A descriptive count within the current demo data, not a ranking or official indicator."
             }
           >
-            {ar ? "أكثر الحواجز المرصودة" : "Most observed barriers"}
+            {ar ? "الحواجز المرصودة في بيانات العرض" : "Barriers observed in demo data"}
           </SectionTitle>
         </div>
 
         <Card>
-          <ul className="space-y-4" aria-hidden="true">
-            {barriers.map((b) => (
-              <li key={b.key}>
-                <div className="flex justify-between text-sm font-semibold">
-                  <span>{barrierLabel(b.key)}</span>
-                  <span>{b.count}</span>
-                </div>
-                <div className="mt-1 h-3 rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-700"
-                    style={{ width: `${(b.count / maxBarrier) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+          {barriers.length > 0 ? (
+            <>
+              <ul className="space-y-4" aria-hidden="true">
+                {barriers.map((b) => (
+                  <li key={b.key}>
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>{barrierLabel(b.key)}</span>
+                      <span>{b.count}</span>
+                    </div>
+                    <div className="mt-1 h-3 rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-[width] duration-700"
+                        style={{ width: `${(b.count / maxBarrier) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
 
-          <table className="mt-6 w-full text-start text-sm">
-            <caption className="mb-2 text-start font-semibold">
-              {ar ? "جدول بديل لأكثر الحواجز المرصودة" : "Alternative table of observed barriers"}
-            </caption>
-            <thead>
-              <tr className="border-b border-border text-muted-foreground">
-                <th scope="col" className="py-2 text-start">
-                  {ar ? "الحاجز" : "Barrier"}
-                </th>
-                <th scope="col" className="py-2 text-start">
-                  {ar ? "عدد الأماكن" : "Places"}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {barriers.map((b) => (
-                <tr key={b.key} className="border-b border-border/60">
-                  <td className="py-2">{barrierLabel(b.key)}</td>
-                  <td className="py-2">{b.count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              <table className="mt-6 w-full text-start text-sm">
+                <caption className="mb-2 text-start font-semibold">
+                  {ar ? "جدول بديل للحواجز المرصودة" : "Alternative table of observed barriers"}
+                </caption>
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground">
+                    <th scope="col" className="py-2 text-start">
+                      {ar ? "الحاجز" : "Barrier"}
+                    </th>
+                    <th scope="col" className="py-2 text-start">
+                      {ar ? "عدد المرافق" : "Facilities"}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {barriers.map((b) => (
+                    <tr key={b.key} className="border-b border-border/60">
+                      <td className="py-2">{barrierLabel(b.key)}</td>
+                      <td className="py-2">{b.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {ar ? "لا توجد حواجز موثقة في بيانات العرض الحالية." : "No barriers are documented in the current demo data."}
+            </p>
+          )}
         </Card>
       </section>
     </AppShell>
