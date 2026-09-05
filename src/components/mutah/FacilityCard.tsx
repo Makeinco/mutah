@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin } from "lucide-react";
+import { CircleAlert, CircleCheck, Clock3, MapPin } from "lucide-react";
 import { decideFor, VERDICT_LABEL } from "@/lib/mutah/decision";
 import { useLang } from "@/lib/mutah/i18n";
 import {
@@ -9,7 +9,6 @@ import {
   stateLabel,
 } from "@/lib/mutah/labels";
 import type { AccessNeed, Facility, IndicatorKey } from "@/lib/mutah/types";
-import { StateChip } from "./Evidence";
 import { Tag } from "./ui";
 
 const HIGHLIGHT: IndicatorKey[] = ["steps", "ramp", "parking"];
@@ -18,6 +17,10 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
   const { pick, t, lang } = useLang();
   const decision = decideFor(facility, needs);
   const name = pick(facility.name);
+  const missing = Math.max(0, decision.total - decision.completeness);
+  const evidenceLabel =
+    missing === 0 ? t("infoComplete") : decision.completeness === 0 ? t("infoLimited") : t("infoMissing");
+  const EvidenceIcon = missing === 0 ? CircleCheck : decision.completeness === 0 ? CircleAlert : Clock3;
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-md">
@@ -52,8 +55,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
               : ""}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {pick(VERIFICATION_LABEL[facility.verification])} · {t("lastVerified")}{" "}
-            {relativeDate(facility.lastVerifiedISO, lang)}
+            {pick(VERIFICATION_LABEL[facility.verification])} · {t("lastVerified")} {relativeDate(facility.lastVerifiedISO, lang)}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Tag
@@ -67,9 +69,10 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
             >
               {pick(VERDICT_LABEL[decision.verdict])}
             </Tag>
-            <Tag>
-              {t("completeness")} {decision.completeness}/{decision.total}
-            </Tag>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+              <EvidenceIcon className="size-4" aria-hidden="true" />
+              {evidenceLabel}
+            </span>
           </div>
         </div>
       </div>
