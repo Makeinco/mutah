@@ -12,7 +12,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "مُتاح ماب منصة قرار عن الوصول: الذكاء الاصطناعي يرصد، والبشر يتحققون، والمعلومة غير المؤكدة تبقى ظاهرة.",
+          "مُتاح ماب منصة قرار عن الوصول: أدلة مرئية متعددة، الذكاء الاصطناعي يرصد، والبشر يتحققون، وعدم اليقين يبقى ظاهرًا.",
       },
       { property: "og:title", content: "عن مُتاح | مُتاح ماب" },
       { property: "og:description", content: "الأدلة → الفهم → القرار." },
@@ -32,8 +32,8 @@ function About() {
         <h1 className="mt-8 text-2xl font-bold">{t("tagline")}</h1>
         <p className="mt-3 text-muted-foreground">
           {ar
-            ? "مُتاح ماب يساعدك على فهم ما ينتظرك في المكان قبل الزيارة، اعتمادًا على أدلة مرئية واضحة: ماذا نعرف؟ وما الذي لا نعرفه؟ ولماذا؟"
-            : "MUTAH MAP helps you understand what awaits you at a place before you visit, using clear visual evidence: what we know, what we don't, and why."}
+            ? "مُتاح ماب يساعدك على فهم ما ينتظرك في المكان قبل الزيارة، اعتمادًا على أدلة مرئية من مناطق مختارة داخل وخارج المرفق: ماذا نعرف؟ وما الذي لا نعرفه؟ ولماذا؟"
+            : "MUTAH MAP helps you understand what to expect before a visit using visual evidence from selected areas inside and outside a facility: what we know, what we do not know, and why."}
         </p>
 
         <div className="mt-10">
@@ -43,15 +43,23 @@ function About() {
           <Card className="bg-surface">
             <ol className="list-inside list-decimal space-y-1 text-sm text-muted-foreground">
               {(ar
-                ? ["صورة للمسار", "فحص جودة الصورة", "حماية الخصوصية", "تحليل أولي", "تأكيد المساهم", "مراجعة بشرية", "النشر"]
+                ? [
+                    "اختيار منطقة المرفق",
+                    "صورة أو أكثر للمنطقة",
+                    "فحص الجودة والخصوصية",
+                    "رصد أولي لما يظهر",
+                    "تأكيد المساهم أو تصحيحه",
+                    "مراجعة بشرية",
+                    "نشر الأدلة المراجعة",
+                  ]
                 : [
-                    "A photo of the view",
-                    "Photo quality check",
-                    "Privacy protection",
-                    "Preliminary analysis",
-                    "Contributor confirmation",
+                    "Choose a facility zone",
+                    "One or more images of that zone",
+                    "Quality and privacy checks",
+                    "Preliminary observation of what is visible",
+                    "Contributor confirmation or correction",
                     "Human review",
-                    "Publication",
+                    "Publication of reviewed evidence",
                   ]
               ).map((s) => (
                 <li key={s}>{s}</li>
@@ -60,14 +68,20 @@ function About() {
           </Card>
           <p className="mt-3 text-sm text-muted-foreground">
             {ar
-              ? "لا يمنح مُتاح شهادة إتاحة لأي مبنى، ولا يعرض درجة أو نسبة عامة. الأدلة أهم من الدرجة."
-              : "MUTAH never certifies a building and never shows an overall score. Evidence matters more than a rating."}
+              ? "لا يمنح مُتاح شهادة إتاحة لأي مبنى، ولا يعرض درجة أو نسبة عامة للمرفق، ولا يستنتج القياسات الدقيقة من الصور. الأدلة أهم من الدرجة."
+              : "MUTAH never certifies a building, never shows an overall facility score, and does not infer exact measurements from images. Evidence matters more than a rating."}
           </p>
         </div>
 
         <div className="mt-10">
-          <SectionTitle hint={ar ? "خمسة مسارات، لكل منها أدلته." : "Five views, each with its own evidence."}>
-            {ar ? "نطاق ما نحلله" : "What we analyse"}
+          <SectionTitle
+            hint={
+              ar
+                ? "خمس مناطق أدلة، ويمكن أن تحتوي كل منطقة على عدة صور."
+                : "Five evidence zones, each of which may contain multiple images."
+            }
+          >
+            {ar ? "نطاق الأدلة" : "Evidence scope"}
           </SectionTitle>
           <ul className="space-y-4">
             {ZONE_ORDER.map((z) => (
@@ -83,8 +97,8 @@ function About() {
           </ul>
           <p className="mt-3 text-sm text-muted-foreground">
             {ar
-              ? "«غير مرئي» لا يعني «غير موجود». المعلومة غير المؤكدة تبقى ظاهرة دائمًا."
-              : "\"Not visible\" never means \"not there\". Unconfirmed information always stays visible."}
+              ? "«خارج إطار الصور» و«غير موثق بعد» لا يعنيان «غير موجود». وإذا تعارضت الأدلة، تبقى الحالة متعارضة حتى المراجعة البشرية."
+              : '“Outside the image frame” and “not documented yet” do not mean “absent.” If evidence conflicts, it remains conflicting until human review.'}
           </p>
         </div>
 
