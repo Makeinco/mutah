@@ -20,12 +20,13 @@ export const Route = createFileRoute("/discover")({
       { title: "استكشف الأماكن | مُتاح ماب" },
       {
         name: "description",
-        content: "ابحث عن الأماكن وشاهد أدلة الوصول: مسار الوصول، المدخل، المواقف، المصعد، ودورة المياه.",
+        content:
+          "ابحث عن الأماكن وشاهد أدلة الوصول حسب المنطقة: مسار الوصول، المدخل، المواقف، المصعد، ودورة المياه المخصصة.",
       },
       { property: "og:title", content: "استكشف الأماكن | مُتاح ماب" },
       {
         property: "og:description",
-        content: "خريطة وقائمة لأدلة الوصول، مع توضيح ما هو غير معروف.",
+        content: "خريطة وقائمة لأدلة الوصول، مع إبقاء المعلومات غير الموثقة وغير المؤكدة ظاهرة.",
       },
     ],
   }),
@@ -56,6 +57,11 @@ function Discover() {
   return (
     <AppShell title={t("navDiscover")} wide>
       <h1 className="text-2xl font-bold">{t("explore")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {lang === "ar"
+          ? "اختر احتياجاتك لعرض حالة مخصصة. المعلومات غير الموثقة لا تُعامل على أنها غير موجودة."
+          : "Choose your access needs for a personalised status. Undocumented information is never treated as absent."}
+      </p>
 
       <div className="mt-4 flex items-center gap-2 rounded-2xl border-2 border-input bg-background px-4 transition-colors focus-within:border-primary">
         <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -96,7 +102,11 @@ function Discover() {
         <p aria-live="polite" className="text-sm text-muted-foreground">
           {lang === "ar" ? `${results.length} نتيجة` : `${results.length} results`}
         </p>
-        <div role="group" aria-label={t("viewMode")} className="inline-flex rounded-xl border-2 border-border p-1">
+        <div
+          role="group"
+          aria-label={t("viewMode")}
+          className="inline-flex rounded-xl border-2 border-border p-1"
+        >
           <button
             type="button"
             aria-pressed={view === "map"}
