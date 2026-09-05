@@ -11,7 +11,16 @@ import {
 import type { AccessNeed, Facility, IndicatorKey } from "@/lib/mutah/types";
 import { Tag } from "./ui";
 
-const HIGHLIGHT: IndicatorKey[] = ["steps", "ramp", "parking"];
+const DEFAULT_HIGHLIGHT: IndicatorKey[] = ["steps", "ramp", "parking"];
+const NEED_HIGHLIGHT: Record<AccessNeed, IndicatorKey> = {
+  step_free: "steps",
+  ramp_when_raised: "ramp",
+  clear_path: "obstruction",
+  handrail: "handrail",
+  parking: "parking",
+  elevator: "elevator",
+  accessible_restroom: "accessible_restroom",
+};
 
 export function FacilityCard({ facility, needs }: { facility: Facility; needs: AccessNeed[] }) {
   const { pick, t, lang } = useLang();
@@ -21,9 +30,13 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
   const evidenceLabel =
     missing === 0 ? t("infoComplete") : decision.completeness === 0 ? t("infoLimited") : t("infoMissing");
   const EvidenceIcon = missing === 0 ? CircleCheck : decision.completeness === 0 ? CircleAlert : Clock3;
+  const highlights =
+    needs.length > 0
+      ? [...new Set(needs.map((need) => NEED_HIGHLIGHT[need]))].slice(0, 3)
+      : DEFAULT_HIGHLIGHT;
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-md">
+    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/30">
       <div className="flex gap-4 p-4">
         {facility.imageUrl ? (
           <img
@@ -42,7 +55,11 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
 
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-bold">
-            <Link to="/facility/$id" params={{ id: facility.id }} className="hover:underline">
+            <Link
+              to="/facility/$id"
+              params={{ id: facility.id }}
+              className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               {name}
             </Link>
           </h3>
@@ -57,7 +74,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
           <p className="mt-1 text-sm text-muted-foreground">
             {pick(VERIFICATION_LABEL[facility.verification])} · {t("lastVerified")} {relativeDate(facility.lastVerifiedISO, lang)}
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <Tag
               tone={
                 decision.verdict === "available"
@@ -78,10 +95,10 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
       </div>
 
       <ul className="grid gap-2 border-t border-border bg-surface px-4 py-3 text-sm sm:grid-cols-3">
-        {HIGHLIGHT.map((k) => (
-          <li key={k} className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground">{pick(INDICATOR_LABEL[k])}:</span>
-            <span className="font-semibold">{pick(stateLabel(k, facility.indicators[k].state))}</span>
+        {highlights.map((key) => (
+          <li key={key} className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground">{pick(INDICATOR_LABEL[key])}:</span>
+            <span className="font-semibold">{pick(stateLabel(key, facility.indicators[key].state))}</span>
           </li>
         ))}
       </ul>
@@ -94,7 +111,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
         <Link
           to="/facility/$id"
           params={{ id: facility.id }}
-          className="min-h-11 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="min-h-11 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {t("viewDetails")}
           <span className="sr-only"> {t("about")} {name}</span>
