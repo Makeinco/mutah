@@ -40,17 +40,13 @@ function extractJson(text: string): unknown {
  */
 export async function analyseEvidenceWithGemini({ zone, images }: GeminiInput): Promise<IndicatorEvidence[]> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("[MUTAH AI] GEMINI_NOT_CONFIGURED");
-    throw new Error("GEMINI_NOT_CONFIGURED");
-  }
+  if (!apiKey) throw new Error("GEMINI_NOT_CONFIGURED");
 
   if (images.length === 0 || images.length > 6) {
-    console.error("[MUTAH AI] INVALID_IMAGE_COUNT", { count: images.length });
     throw new Error("INVALID_IMAGE_COUNT");
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
   const allowed = ZONE_INDICATORS[zone];
   const prompt = [
     "You are the MUTAH MAP visual evidence observer.",
@@ -76,7 +72,6 @@ export async function analyseEvidenceWithGemini({ zone, images }: GeminiInput): 
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
-        "x-goog-api-client": "mutah-map/0.1",
       },
       body: JSON.stringify({
         contents: [{ role: "user", parts }],
@@ -89,14 +84,14 @@ export async function analyseEvidenceWithGemini({ zone, images }: GeminiInput): 
   );
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
+    const responseText = await response.text();
     console.error("[MUTAH AI] Gemini request failed", {
       status: response.status,
       model,
       zone,
       imageCount: images.length,
       mimeTypes: images.map((image) => image.mimeType),
-      response: body.slice(0, 600),
+      response: responseText.slice(0, 1200),
     });
     throw new Error(`GEMINI_HTTP_${response.status}`);
   }
@@ -105,35 +100,25 @@ export async function analyseEvidenceWithGemini({ zone, images }: GeminiInput): 
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   };
   const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
+  const parsed = responseSchema.parse(extractJson(text));
 
-  try {
-    const parsed = responseSchema.parse(extractJson(text));
-    const byCode = new Map(parsed.observations.map((item) => [item.indicator_code, item]));
-    return allowed.map((key: IndicatorKey) => {
-      const item = byCode.get(key);
-      if (!item) {
-        return {
-          key,
-          state: "unknown",
-          note: {
-            ar: "لم يُرجع التحليل دليلًا كافيًا لهذا العنصر.",
-            en: "The analysis did not return sufficient evidence for this feature.",
-          },
-        };
-      }
+  const byCode = new Map(parsed.observations.map((item) => [item.indicator_code, item]));
+  return allowed.map((key: IndicatorKey) => {
+    const item = byCode.get(key);
+    if (!item) {
       return {
         key,
-        state: item.state,
-        note: { ar: item.explanation_ar, en: item.explanation_en },
+        state: "unknown",
+        note: {
+          ar: "لم يُرجع التحليل دليلًا كافيًا لهذا العنصر.",
+          en: "The analysis did not return sufficient evidence for this feature.",
+        },
       };
-    });
-  } catch (error) {
-    console.error("[MUTAH AI] Gemini response parse failed", {
-      model,
-      zone,
-      message: error instanceof Error ? error.message : "UNKNOWN_PARSE_ERROR",
-      responseLength: text.length,
-    });
-    throw new Error("GEMINI_INVALID_RESPONSE");
-  }
+    }
+    return {
+      key,
+      state: item.state,
+      note: { ar: item.explanation_ar, en: item.explanation_en },
+    };
+  });
 }
