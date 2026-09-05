@@ -1,10 +1,11 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# MUTAH MVP — Repository Guidance
+
+This repository is the working source for MUTAH MAP.
+
+- Preserve the evidence-first product model.
+- AI observes; humans verify before publication.
+- Not Visible is not equivalent to Absent.
+- Do not introduce universal accessibility scores, certification, or compliance claims.
+- Keep Arabic RTL and English LTR behavior intact.
+- Prefer incremental changes on the current React + TypeScript + TanStack Start stack until the hackathon MVP is complete.
+- Keep secrets out of source control; use environment variables for Supabase, Gemini, maps, and deployment services.
