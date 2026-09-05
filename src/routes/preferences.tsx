@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { Accessibility, Bath, CircleParking, Footprints, MoveUpRight, Route as RouteIcon, Rows3 } from "lucide-react";
+import { useState, type ComponentType } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/preferences")({
       {
         name: "description",
         content:
-          "اختر ما يجعل الزيارة أسهل: مسار بلا درجات، منحدر، مسار خالٍ، درابزين، موقف مخصص، مصعد، أو دورة مياه متاحة.",
+          "اختر ما يجعل الزيارة أسهل: مسار بلا درجات، منحدر، مسار خالٍ من العوائق، درابزين، موقف مخصص، مصعد، أو دورة مياه مخصصة.",
       },
       { property: "og:title", content: "احتياجات الوصول | مُتاح ماب" },
       {
@@ -26,10 +27,20 @@ export const Route = createFileRoute("/preferences")({
   component: Preferences,
 });
 
+const NEED_ICON: Record<AccessNeed, ComponentType<{ className?: string }>> = {
+  step_free: RouteIcon,
+  ramp_when_raised: MoveUpRight,
+  clear_path: Footprints,
+  handrail: Rows3,
+  parking: CircleParking,
+  elevator: Accessibility,
+  accessible_restroom: Bath,
+};
+
 function Preferences() {
   const navigate = useNavigate();
   const { needs, setNeeds, skipNeeds } = useMutah();
-  const { t, pick } = useLang();
+  const { t, pick, lang } = useLang();
   const [selected, setSelected] = useState<AccessNeed[]>(needs);
 
   const toggle = (n: AccessNeed) =>
@@ -40,27 +51,43 @@ function Preferences() {
       <div className="mx-auto max-w-xl">
         <h1 className="text-2xl font-bold">{t("needsTitle")}</h1>
         <p className="mt-2 text-muted-foreground">{t("needsIntro")}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {lang === "ar"
+            ? "اختر فقط ما يهمك. سيستخدم مُتاح هذه الاختيارات لشرح حالة كل مرفق وفق احتياجاتك."
+            : "Choose only what matters to you. MUTAH uses these selections to explain each facility against your needs."}
+        </p>
 
         <fieldset className="mt-8">
           <legend className="sr-only">{t("needsLegend")}</legend>
-          <ul className="space-y-3">
+          <ul className="grid gap-3 sm:grid-cols-2">
             {ACCESS_NEEDS.map((n) => {
               const checked = selected.includes(n);
+              const Icon = NEED_ICON[n];
               return (
                 <li key={n}>
                   <label
                     className={[
-                      "flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl border-2 p-4 text-base font-semibold transition-colors",
-                      checked ? "border-primary bg-primary-soft" : "border-border bg-card hover:bg-muted",
+                      "flex min-h-20 cursor-pointer items-center gap-3 rounded-2xl border-2 p-4 text-base font-semibold transition-colors",
+                      checked ? "border-primary bg-primary-soft text-primary" : "border-border bg-card hover:bg-muted",
                     ].join(" ")}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggle(n)}
-                      className="size-6 accent-[var(--color-primary)]"
+                      className="sr-only"
                     />
-                    {pick(ACCESS_NEED_LABEL[n])}
+                    <span
+                      className={[
+                        "flex size-11 shrink-0 items-center justify-center rounded-xl border",
+                        checked ? "border-primary/20 bg-background" : "border-border bg-surface",
+                      ].join(" ")}
+                      aria-hidden="true"
+                    >
+                      <Icon className="size-5" />
+                    </span>
+                    <span className="flex-1">{pick(ACCESS_NEED_LABEL[n])}</span>
+                    <span className="sr-only">{checked ? (lang === "ar" ? "محدد" : "selected") : ""}</span>
                   </label>
                 </li>
               );
