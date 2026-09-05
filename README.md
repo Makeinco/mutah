@@ -112,16 +112,18 @@
 
 ## التقنية
 
-النسخة الحالية مبنية بـ React + TypeScript + TanStack Start + Tailwind. البنية مفصولة بحيث يمكن استبدال البيانات التجريبية لاحقًا بـ Supabase وربط تحليل الصور عبر AI provider adapter.
+النسخة الحالية الموروثة من Lovable مبنية بـ React + TypeScript + TanStack Start + Tailwind. نحافظ عليها في مرحلة تحسين الـMVP لتقليل التكلفة والمخاطر، مع فصل الواجهة عن البيانات ومنطق الذكاء الاصطناعي بحيث يمكن ربط الخدمات التشغيلية دون إعادة كتابة رحلة المستخدم.
 
 المسار المستهدف للتشغيل:
 
-- Frontend: React/TanStack Start حاليًا، مع قابلية النقل إلى Next.js عند الحاجة
+- Frontend MVP: React + TypeScript + TanStack Start الحالي
 - Database/Auth/Storage: Supabase
 - AI: Gemini عبر provider adapter
 - Maps: MapLibre / MapTiler
 - Deployment: Vercel
 - Source of truth: GitHub
+
+قرار الانتقال إلى Next.js — إن لزم — يؤجل إلى ما بعد تثبيت الـMVP؛ لا توجد قيمة في إعادة كتابة واجهة تعمل أثناء الهاكاثون لمجرد تغيير الإطار.
 
 ## حالة البيانات
 
