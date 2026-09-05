@@ -69,6 +69,10 @@ bun run build
 
 Home → choose access needs → Explore → Facility Profile → personalized status → why this result → inspect missing evidence → Contribute → choose zone → upload one or multiple images → AI preliminary observation → contributor confirms/corrects → human review → facility evidence updates.
 
+## Deployment
+
+Preview validation is performed from the `mutah/refinement-v3` branch before merging into `main`.
+
 ## Data honesty
 
 Demo/sample information must be labeled as such. Do not present prototype facilities, sample metrics, model output, partnerships, integrations, national coverage, legal compliance, or accessibility certification as verified reality.
