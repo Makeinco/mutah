@@ -1,21 +1,46 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Languages, LockKeyhole, LogIn, LogOut, SlidersHorizontal, UploadCloud, UserRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button, Card } from "@/components/mutah/ui";
 import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { useAuth } from "@/lib/mutah/auth";
 import { useLang } from "@/lib/mutah/i18n";
+import { listMyContributions, type PersistedContribution } from "@/lib/mutah/operational";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
 
+const STATUS_LABEL: Record<PersistedContribution["status"], { ar: string; en: string }> = {
+  draft: { ar: "قيد التجهيز", en: "Draft" },
+  processing: { ar: "قيد التجهيز", en: "Processing" },
+  awaiting_confirmation: { ar: "بانتظار تأكيدك", en: "Awaiting your confirmation" },
+  pending_review: { ar: "قيد المراجعة", en: "Under review" },
+  clarification_requested: { ar: "يحتاج توضيحًا", en: "Needs clarification" },
+  approved: { ar: "تمت المراجعة", en: "Reviewed" },
+  rejected: { ar: "لم تُعتمد", en: "Not approved" },
+};
+
 function AccountPage() {
   const { lang } = useLang();
-  const { ready, user, profile, signInWithEmail, signOut } = useAuth();
+  const { ready, user, profile, signInWithEmail, signOut, canReview } = useAuth();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [contributions, setContributions] = useState<PersistedContribution[]>([]);
+  const [loadingContributions, setLoadingContributions] = useState(false);
   const ar = lang === "ar";
+
+  useEffect(() => {
+    if (!user) {
+      setContributions([]);
+      return;
+    }
+    setLoadingContributions(true);
+    void listMyContributions()
+      .then(setContributions)
+      .catch(() => setContributions([]))
+      .finally(() => setLoadingContributions(false));
+  }, [user]);
 
   const submitLogin = async () => {
     if (!email.trim()) return;
@@ -93,14 +118,25 @@ function AccountPage() {
                   <h2 className="font-bold">{profile?.display_name || user.email}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
                   <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                    {ar ? "حساب مساهم" : "Contributor account"}
+                    {profile?.role === "admin"
+                      ? ar ? "مدير مُتاح" : "MUTAH admin"
+                      : profile?.role === "reviewer"
+                        ? ar ? "مراجع مُتاح" : "MUTAH reviewer"
+                        : ar ? "حساب مساهم" : "Contributor account"}
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={() => void signOut()}>
-                <LogOut className="size-4" aria-hidden="true" />
-                {ar ? "تسجيل الخروج" : "Sign out"}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {canReview ? (
+                  <Link to="/ops">
+                    <Button size="sm">{ar ? "مركز العمليات" : "Operations"}</Button>
+                  </Link>
+                ) : null}
+                <Button variant="outline" size="sm" onClick={() => void signOut()}>
+                  <LogOut className="size-4" aria-hidden="true" />
+                  {ar ? "تسجيل الخروج" : "Sign out"}
+                </Button>
+              </div>
             </div>
           </Card>
         )}
@@ -136,17 +172,44 @@ function AccountPage() {
         <Card>
           <div className="flex items-start gap-3">
             <UploadCloud className="mt-1 size-5 text-primary" aria-hidden="true" />
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="font-bold">{ar ? "مساهماتي" : "My contributions"}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {user
-                  ? ar
-                    ? "سيتم ربط قائمة مساهماتك وحالات المراجعة هنا في مرحلة الحفظ التشغيلي التالية."
-                    : "Your persisted contribution list and review states will be connected here in the next operational persistence step."
-                  : ar
-                    ? "سجّل الدخول لتتمكن من متابعة مساهماتك وطلبات التوضيح."
-                    : "Sign in to track contributions and clarification requests."}
-              </p>
+              {!user ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {ar ? "سجّل الدخول لتتمكن من متابعة مساهماتك وطلبات التوضيح." : "Sign in to track contributions and clarification requests."}
+                </p>
+              ) : loadingContributions ? (
+                <p className="mt-2 text-sm text-muted-foreground">{ar ? "جارٍ تحميل مساهماتك…" : "Loading your contributions…"}</p>
+              ) : contributions.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {ar ? "لا توجد مساهمات محفوظة في حسابك بعد." : "No persisted contributions in your account yet."}
+                </p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {contributions.map((item) => (
+                    <li key={item.id} className="rounded-xl border border-border p-3">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold">
+                            {ar ? item.facility?.name_ar : item.facility?.name_en || item.facility?.name_ar}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {ar ? item.zone?.label_ar : item.zone?.label_en || item.zone?.label_ar}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+                          {ar ? STATUS_LABEL[item.status].ar : STATUS_LABEL[item.status].en}
+                        </span>
+                      </div>
+                      {item.clarification_note ? (
+                        <p className="mt-3 rounded-lg bg-unknown-soft p-3 text-sm">
+                          {item.clarification_note}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </Card>
