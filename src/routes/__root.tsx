@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { MutahProvider } from "../lib/mutah/store";
 import { LangProvider } from "../lib/mutah/i18n";
+import { AuthProvider } from "../lib/mutah/auth";
 
 function NotFoundComponent() {
   return (
@@ -134,9 +135,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
-        <MutahProvider>
-          <Outlet />
-        </MutahProvider>
+        <AuthProvider>
+          <MutahProvider>
+            <Outlet />
+          </MutahProvider>
+        </AuthProvider>
       </LangProvider>
     </QueryClientProvider>
   );
