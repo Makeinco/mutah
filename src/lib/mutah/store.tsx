@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { FACILITIES, INITIAL_CONTRIBUTIONS } from "./data";
 import { bi } from "./i18n";
+import { persistLiveContribution } from "./operational";
+import { supabase } from "./supabase-client";
 import type {
   AccessNeed,
   Contribution,
@@ -11,8 +13,9 @@ import type {
 } from "./types";
 
 /**
- * Application state layer. Everything the UI mutates goes through here, so the
- * mock implementation can be swapped for Supabase mutations without touching screens.
+ * Application state layer. Public demo fixtures remain local, while signed-in
+ * contributions created from real browser-selected files are also persisted
+ * through the operational Supabase workflow.
  */
 
 interface MutahState {
@@ -38,6 +41,41 @@ interface MutahState {
 const MutahContext = createContext<MutahState | null>(null);
 
 let seq = 2000;
+
+async function persistSignedInLiveContribution(input: {
+  facilityId: string;
+  zone: ZoneKey;
+  imageUrls: string[];
+  aiObservations: IndicatorEvidence[];
+  confirmed: Contribution["confirmed"];
+}) {
+  const liveUrls = input.imageUrls.filter((url) => url.startsWith("blob:"));
+  if (liveUrls.length === 0) return;
+
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  if (!user) return;
+
+  const files = await Promise.all(
+    liveUrls.map(async (url, index) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("LOCAL_IMAGE_UNAVAILABLE");
+      const blob = await response.blob();
+      const type = blob.type || "image/jpeg";
+      const extension = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+      return new File([blob], `mutah-evidence-${index + 1}.${extension}`, { type });
+    }),
+  );
+
+  await persistLiveContribution({
+    facilityExternalKey: input.facilityId,
+    zone: input.zone,
+    userId: user.id,
+    files,
+    observations: input.aiObservations,
+    confirmations: input.confirmed,
+  });
+}
 
 export function MutahProvider({ children }: { children: ReactNode }) {
   const [facilities, setFacilities] = useState<Facility[]>(FACILITIES);
@@ -84,6 +122,20 @@ export function MutahProvider({ children }: { children: ReactNode }) {
       setFacilities((prev) =>
         prev.map((f) => (f.id === facilityId ? { ...f, verification: "pending_review" } : f)),
       );
+
+      void persistSignedInLiveContribution({
+        facilityId,
+        zone,
+        imageUrls: cleanUrls,
+        aiObservations,
+        confirmed,
+      }).catch((error) => {
+        console.error("Operational contribution persistence failed", {
+          localContributionId: id,
+          message: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        });
+      });
+
       return id;
     },
     [facilities],
