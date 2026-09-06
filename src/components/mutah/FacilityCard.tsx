@@ -36,10 +36,33 @@ const NEED_ICON: Record<AccessNeed, ComponentType<{ className?: string }>> = {
   accessible_restroom: Accessibility,
 };
 
-const OUTCOME_STYLE: Record<NeedOutcome, { icon: ComponentType<{ className?: string }>; className: string }> = {
-  met: { icon: CircleCheck, className: "text-access-strong" },
-  not_met: { icon: CircleAlert, className: "text-warn-strong" },
-  unknown: { icon: CircleHelp, className: "text-muted-foreground" },
+const OUTCOME_STYLE: Record<
+  NeedOutcome,
+  {
+    icon: ComponentType<{ className?: string }>;
+    className: string;
+    iconWrap: string;
+    card: string;
+  }
+> = {
+  met: {
+    icon: CircleCheck,
+    className: "text-access-strong",
+    iconWrap: "bg-access-soft text-access-strong",
+    card: "border-access/20 bg-access-soft/25",
+  },
+  not_met: {
+    icon: CircleAlert,
+    className: "text-warn-strong",
+    iconWrap: "bg-caution-soft text-caution",
+    card: "border-caution/20 bg-caution-soft/20",
+  },
+  unknown: {
+    icon: CircleHelp,
+    className: "text-muted-foreground",
+    iconWrap: "bg-muted text-muted-foreground",
+    card: "border-border bg-surface",
+  },
 };
 
 export function FacilityCard({ facility, needs }: { facility: Facility; needs: AccessNeed[] }) {
@@ -94,7 +117,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
             <Tag
               tone={
                 decision.verdict === "available"
-                  ? "brand"
+                  ? "access"
                   : decision.verdict === "not_available"
                     ? "warn"
                     : "neutral"
@@ -135,15 +158,15 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
               <li
                 key={result.need}
                 title={pick(result.reason)}
-                className="relative flex min-h-24 flex-col items-center justify-center gap-1.5 rounded-2xl bg-surface px-2 py-3 text-center"
+                className={`relative flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2.5 text-center ${outcome.card}`}
               >
-                <span className="flex size-9 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <NeedIcon className="size-5" aria-hidden="true" />
+                <span className={`flex size-7 items-center justify-center rounded-lg ${outcome.iconWrap}`}>
+                  <NeedIcon className="size-4" aria-hidden="true" />
                 </span>
-                <span className="line-clamp-2 text-[11px] font-semibold leading-tight">
+                <span className="line-clamp-2 text-[10px] font-semibold leading-tight sm:text-[11px]">
                   {pick(ACCESS_NEED_LABEL[result.need])}
                 </span>
-                <OutcomeIcon className={`absolute end-2 top-2 size-4 ${outcome.className}`} aria-hidden="true" />
+                <OutcomeIcon className={`absolute end-1.5 top-1.5 size-3.5 ${outcome.className}`} aria-hidden="true" />
                 <span className="sr-only">{pick(result.reason)}</span>
               </li>
             );
