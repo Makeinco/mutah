@@ -123,12 +123,19 @@ export function Chip({
   );
 }
 
-export function Tag({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "brand" | "warn" }) {
+export function Tag({
+  children,
+  tone = "neutral",
+}: {
+  children: ReactNode;
+  tone?: "neutral" | "brand" | "access" | "warn";
+}) {
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
         tone === "brand" && "bg-primary-soft text-primary",
+        tone === "access" && "bg-access-soft text-access-strong",
         tone === "warn" && "bg-caution-soft text-caution",
         tone === "neutral" && "bg-muted text-muted-foreground",
       )}
