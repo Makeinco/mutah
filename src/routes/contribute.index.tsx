@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Camera, FileText, Flag } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
@@ -142,12 +142,7 @@ function Contribute() {
           </p>
         </div>
 
-        <p className="mt-10 text-sm text-muted-foreground">
-          {t("reviewedBeforePublish")}{" "}
-          <Link to="/review" className="font-semibold text-primary hover:underline">
-            {t("navReview")}
-          </Link>
-        </p>
+        <p className="mt-10 text-sm text-muted-foreground">{t("reviewedBeforePublish")}</p>
       </div>
     </AppShell>
   );
