@@ -519,38 +519,14 @@ export function ContributeFlowOperational({
 }
 
 function GuideImage({ asset }: { asset: GuideAsset }) {
-  const { pick, lang } = useLang();
-  const [source, setSource] = useState(asset.image);
-  const [unavailable, setUnavailable] = useState(false);
-
-  useEffect(() => {
-    setSource(asset.image);
-    setUnavailable(false);
-  }, [asset]);
-
-  if (unavailable) {
-    return (
-      <div className="flex min-h-36 items-center justify-center bg-muted/50 p-6 text-center text-sm font-semibold text-muted-foreground sm:min-h-48">
-        {lang === "ar"
-          ? "الصورة الإرشادية المعتمدة ستُضاف قريبًا."
-          : "The approved photo guide will be added soon."}
-      </div>
-    );
-  }
+  const { pick } = useLang();
 
   return (
     <div className="flex min-h-36 items-center justify-center bg-muted/40 p-3 sm:min-h-48 sm:p-5">
       <img
-        src={source}
+        src={asset.image}
         alt={pick(asset.alt)}
         className="max-h-56 w-full object-contain sm:max-h-64"
-        onError={() => {
-          if (asset.fallbackImage && source !== asset.fallbackImage) {
-            setSource(asset.fallbackImage);
-          } else {
-            setUnavailable(true);
-          }
-        }}
       />
     </div>
   );

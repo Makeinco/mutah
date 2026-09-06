@@ -5,7 +5,6 @@ export type FocusIndicator = "general" | "ramp" | "handrail" | "path_obstruction
 export type GuideAsset = {
   assetKey: string;
   image: string;
-  fallbackImage?: string;
   title: L;
   helper: L;
   bullets: L[];
@@ -36,7 +35,6 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   approach: {
     assetKey: "approach-path",
     image: "/guides/approach-path.webp",
-    fallbackImage: "/guides/approach.svg",
     title: { ar: "مثال لمسار الوصول المناسب", en: "Example of a useful approach-path photo" },
     helper: {
       ar: "صوّر المسار من نقطة الوصول حتى المدخل، مع إبقاء العناصر المحيطة ظاهرة.",
@@ -58,7 +56,6 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   entrance: {
     assetKey: "entrance",
     image: "/guides/entrance.webp",
-    fallbackImage: "/guides/entrance.svg",
     title: { ar: "مثال لصورة المدخل المناسبة", en: "Example of a useful entrance photo" },
     helper: {
       ar: "صوّر المدخل والمساحة المؤدية إليه بحيث يظهر اتصال المسار بالباب.",
@@ -80,7 +77,6 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   parking: {
     assetKey: "parking",
     image: "/guides/parking.webp",
-    fallbackImage: "/guides/parking.svg",
     title: { ar: "مثال لصورة المواقف المناسبة", en: "Example of a useful parking photo" },
     helper: {
       ar: "صوّر الموقف والعلامات المرئية وصلته بمسار الوصول إلى المبنى.",
@@ -102,7 +98,6 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   elevator: {
     assetKey: "elevator",
     image: "/guides/elevator.webp",
-    fallbackImage: "/guides/elevator.svg",
     title: { ar: "مثال لصورة المصعد المناسبة", en: "Example of a useful elevator photo" },
     helper: {
       ar: "صوّر باب المصعد والمنطقة أمامه، وأضف زاوية أخرى للأزرار عند الحاجة.",
@@ -127,7 +122,6 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   restroom: {
     assetKey: "accessible-restroom",
     image: "/guides/accessible-restroom.webp",
-    fallbackImage: "/guides/restroom.svg",
     title: {
       ar: "مثال لصورة دورة المياه المخصصة",
       en: "Example of a useful accessible-restroom photo",
