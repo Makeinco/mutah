@@ -128,8 +128,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = public
-as $$;
-
+as $$
 declare
   v_image_id uuid;
 begin
