@@ -26,6 +26,55 @@ export type PersistedContribution = {
   zone: { zone_type: string; label_ar: string | null; label_en: string | null } | null;
 };
 
+export type ReviewObservation = {
+  id: string;
+  indicator_code: string;
+  ai_state: string;
+  explanation_ar: string | null;
+  explanation_en: string | null;
+  confirmations: Array<{
+    id: string;
+    confirmed_state: string;
+    action: "confirmed" | "corrected" | "unsure";
+    note: string | null;
+    created_at: string;
+  }>;
+};
+
+export type ReviewContribution = {
+  id: string;
+  status: PersistedContribution["status"];
+  submitted_by: string;
+  submitted_at: string | null;
+  created_at: string;
+  clarification_note: string | null;
+  facility: {
+    name_ar: string;
+    name_en: string | null;
+    external_key: string | null;
+  } | null;
+  zone: {
+    zone_type: string;
+    label_ar: string | null;
+    label_en: string | null;
+  } | null;
+  images: Array<{
+    id: string;
+    storage_path: string;
+    mime_type: string;
+    created_at: string;
+    signed_url: string | null;
+  }>;
+  analyses: Array<{
+    id: string;
+    provider: string;
+    model: string;
+    prompt_version: string;
+    created_at: string;
+    observations: ReviewObservation[];
+  }>;
+};
+
 export async function createContributionDraft(facilityExternalKey: string, zone: ZoneKey) {
   const { data, error } = await supabase.rpc("create_contribution_draft", {
     p_external_key: facilityExternalKey,
@@ -119,4 +168,47 @@ export async function listMyContributions(): Promise<PersistedContribution[]> {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as PersistedContribution[];
+}
+
+export async function listReviewContributions(): Promise<ReviewContribution[]> {
+  const { data, error } = await supabase
+    .from("contributions")
+    .select(
+      "id,status,submitted_by,submitted_at,created_at,clarification_note,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),images:contribution_images(id,storage_path,mime_type,created_at),analyses(id,provider,model,prompt_version,created_at,observations(id,indicator_code,ai_state,explanation_ar,explanation_en,confirmations(id,confirmed_state,action,note,created_at)))",
+    )
+    .in("status", ["pending_review", "clarification_requested"])
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as ReviewContribution[];
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      images: await Promise.all(
+        (row.images ?? []).map(async (image) => {
+          const { data: signed } = await supabase.storage
+            .from("mutah-raw-evidence")
+            .createSignedUrl(image.storage_path, 15 * 60);
+          return { ...image, signed_url: signed?.signedUrl ?? null };
+        }),
+      ),
+    })),
+  );
+}
+
+export async function reviewContribution({
+  contributionId,
+  decision,
+  note,
+}: {
+  contributionId: string;
+  decision: "approved" | "rejected" | "clarification";
+  note?: string;
+}) {
+  const { error } = await supabase.rpc("review_contribution", {
+    p_contribution_id: contributionId,
+    p_decision: decision,
+    p_reviewer_note: note?.trim() || null,
+  });
+  if (error) throw error;
 }
