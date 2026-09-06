@@ -1,7 +1,11 @@
 import { supabase } from "./supabase-client";
+import type { FocusIndicator } from "./guide-assets";
 import type { Contribution, IndicatorEvidence, ZoneKey } from "./types";
 
-const ZONE_TO_DB: Record<ZoneKey, "approach_path" | "entrance" | "parking" | "elevator" | "accessible_restroom"> = {
+const ZONE_TO_DB: Record<
+  ZoneKey,
+  "approach_path" | "entrance" | "parking" | "elevator" | "accessible_restroom"
+> = {
   approach: "approach_path",
   entrance: "entrance",
   parking: "parking",
@@ -22,6 +26,7 @@ export type PersistedContribution = {
   submitted_at: string | null;
   created_at: string;
   clarification_note: string | null;
+  focus_indicator: FocusIndicator | null;
   facility: { name_ar: string; name_en: string | null; external_key: string | null } | null;
   zone: { zone_type: string; label_ar: string | null; label_en: string | null } | null;
 };
@@ -48,6 +53,7 @@ export type ReviewContribution = {
   submitted_at: string | null;
   created_at: string;
   clarification_note: string | null;
+  focus_indicator: FocusIndicator | null;
   facility: {
     name_ar: string;
     name_en: string | null;
@@ -84,10 +90,15 @@ export type OpsOverview = {
   contributors: number;
 };
 
-export async function createContributionDraft(facilityExternalKey: string, zone: ZoneKey) {
+export async function createContributionDraft(
+  facilityExternalKey: string,
+  zone: ZoneKey,
+  focusIndicator: FocusIndicator,
+) {
   const { data, error } = await supabase.rpc("create_contribution_draft", {
     p_external_key: facilityExternalKey,
     p_zone_type: ZONE_TO_DB[zone],
+    p_focus_indicator: focusIndicator,
   });
   if (error) throw error;
   return data as string;
@@ -147,6 +158,7 @@ export async function finalizeContributionForReview({
 export async function persistLiveContribution({
   facilityExternalKey,
   zone,
+  focusIndicator,
   userId,
   files,
   observations,
@@ -154,13 +166,14 @@ export async function persistLiveContribution({
 }: {
   facilityExternalKey: string;
   zone: ZoneKey;
+  focusIndicator: FocusIndicator;
   userId: string;
   files: File[];
   observations: IndicatorEvidence[];
   confirmations: Contribution["confirmed"];
 }) {
   if (files.length === 0) throw new Error("LIVE_IMAGES_REQUIRED");
-  const contributionId = await createContributionDraft(facilityExternalKey, zone);
+  const contributionId = await createContributionDraft(facilityExternalKey, zone, focusIndicator);
   for (const [index, file] of files.entries()) {
     await uploadRawContributionImage({ contributionId, userId, file, index });
   }
@@ -172,7 +185,7 @@ export async function listMyContributions(): Promise<PersistedContribution[]> {
   const { data, error } = await supabase
     .from("contributions")
     .select(
-      "id,status,submitted_at,created_at,clarification_note,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en)",
+      "id,status,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en)",
     )
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -183,7 +196,7 @@ export async function listReviewContributions(): Promise<ReviewContribution[]> {
   const { data, error } = await supabase
     .from("contributions")
     .select(
-      "id,status,submitted_by,submitted_at,created_at,clarification_note,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),images:contribution_images(id,storage_path,mime_type,created_at),analyses(id,provider,model,prompt_version,created_at,observations(id,indicator_code,ai_state,explanation_ar,explanation_en,confirmations(id,confirmed_state,action,note,created_at)))",
+      "id,status,submitted_by,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),images:contribution_images(id,storage_path,mime_type,created_at),analyses(id,provider,model,prompt_version,created_at,observations(id,indicator_code,ai_state,explanation_ar,explanation_en,confirmations(id,confirmed_state,action,note,created_at)))",
     )
     .in("status", ["pending_review", "clarification_requested"])
     .order("created_at", { ascending: true });

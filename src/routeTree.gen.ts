@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as EcosystemRouteImport } from './routes/ecosystem'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ContributeIndexRouteImport } from './routes/contribute.index'
@@ -30,6 +32,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
@@ -43,6 +50,11 @@ const EcosystemRoute = EcosystemRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PreferencesRoute = PreferencesRouteImport.update({
@@ -74,9 +86,11 @@ const FacilityIdRoute = FacilityIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/discover': typeof DiscoverRoute
   '/ecosystem': typeof EcosystemRoute
   '/insights': typeof InsightsRoute
+  '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -86,9 +100,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/discover': typeof DiscoverRoute
   '/ecosystem': typeof EcosystemRoute
   '/insights': typeof InsightsRoute
+  '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -99,9 +115,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/discover': typeof DiscoverRoute
   '/ecosystem': typeof EcosystemRoute
   '/insights': typeof InsightsRoute
+  '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
@@ -113,9 +131,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/discover'
     | '/ecosystem'
     | '/insights'
+    | '/ops'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -125,9 +145,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/discover'
     | '/ecosystem'
     | '/insights'
+    | '/ops'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -137,9 +159,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/discover'
     | '/ecosystem'
     | '/insights'
+    | '/ops'
     | '/preferences'
     | '/review'
     | '/contribute/$facilityId'
@@ -150,9 +174,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
   DiscoverRoute: typeof DiscoverRoute
   EcosystemRoute: typeof EcosystemRoute
   InsightsRoute: typeof InsightsRoute
+  OpsRoute: typeof OpsRoute
   PreferencesRoute: typeof PreferencesRoute
   ReviewRoute: typeof ReviewRoute
   ContributeFacilityIdRoute: typeof ContributeFacilityIdRoute
@@ -176,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/discover': {
       id: '/discover'
       path: '/discover'
@@ -195,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/preferences': {
@@ -238,9 +278,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
   DiscoverRoute: DiscoverRoute,
   EcosystemRoute: EcosystemRoute,
   InsightsRoute: InsightsRoute,
+  OpsRoute: OpsRoute,
   PreferencesRoute: PreferencesRoute,
   ReviewRoute: ReviewRoute,
   ContributeFacilityIdRoute: ContributeFacilityIdRoute,

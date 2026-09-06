@@ -1,10 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Languages, LockKeyhole, LogIn, LogOut, SlidersHorizontal, UploadCloud, UserRound } from "lucide-react";
+import {
+  Languages,
+  LockKeyhole,
+  LogIn,
+  LogOut,
+  SlidersHorizontal,
+  UploadCloud,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { Button, Card } from "@/components/mutah/ui";
 import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { useAuth } from "@/lib/mutah/auth";
+import { FOCUS_LABEL } from "@/lib/mutah/guide-assets";
 import { useLang } from "@/lib/mutah/i18n";
 import { listMyContributions, type PersistedContribution } from "@/lib/mutah/operational";
 
@@ -73,7 +82,9 @@ function AccountPage() {
 
         {!ready ? (
           <Card>
-            <p className="text-sm text-muted-foreground">{ar ? "جاري التحقق من الحساب…" : "Checking your account…"}</p>
+            <p className="text-sm text-muted-foreground">
+              {ar ? "جاري التحقق من الحساب…" : "Checking your account…"}
+            </p>
           </Card>
         ) : !user ? (
           <Card className="border-2 border-primary/20">
@@ -101,7 +112,13 @@ function AccountPage() {
                   placeholder="name@example.com"
                 />
                 <Button className="mt-3" onClick={submitLogin} disabled={sending || !email.trim()}>
-                  {sending ? (ar ? "جاري الإرسال…" : "Sending…") : ar ? "أرسل رابط الدخول" : "Send sign-in link"}
+                  {sending
+                    ? ar
+                      ? "جاري الإرسال…"
+                      : "Sending…"
+                    : ar
+                      ? "أرسل رابط الدخول"
+                      : "Send sign-in link"}
                 </Button>
                 <p aria-live="polite" className="mt-3 text-sm font-semibold text-muted-foreground">
                   {message}
@@ -119,10 +136,16 @@ function AccountPage() {
                   <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
                   <p className="mt-2 text-xs font-semibold text-muted-foreground">
                     {profile?.role === "admin"
-                      ? ar ? "مدير مُتاح" : "MUTAH admin"
+                      ? ar
+                        ? "مدير مُتاح"
+                        : "MUTAH admin"
                       : profile?.role === "reviewer"
-                        ? ar ? "مراجع مُتاح" : "MUTAH reviewer"
-                        : ar ? "حساب مساهم" : "Contributor account"}
+                        ? ar
+                          ? "مراجع مُتاح"
+                          : "MUTAH reviewer"
+                        : ar
+                          ? "حساب مساهم"
+                          : "Contributor account"}
                   </p>
                 </div>
               </div>
@@ -147,9 +170,14 @@ function AccountPage() {
             <div className="flex-1">
               <h2 className="font-bold">{ar ? "احتياجات الوصول" : "Access needs"}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {ar ? "عدّل ما تحتاجه لتكون الزيارة أسهل." : "Update what makes a visit easier for you."}
+                {ar
+                  ? "عدّل ما تحتاجه لتكون الزيارة أسهل."
+                  : "Update what makes a visit easier for you."}
               </p>
-              <Link to="/preferences" className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-input px-4 text-sm font-semibold hover:bg-muted">
+              <Link
+                to="/preferences"
+                className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-input px-4 text-sm font-semibold hover:bg-muted"
+              >
                 {ar ? "تعديل الاحتياجات" : "Edit access needs"}
               </Link>
             </div>
@@ -162,7 +190,9 @@ function AccountPage() {
               <Languages className="mt-1 size-5 text-primary" aria-hidden="true" />
               <div>
                 <h2 className="font-bold">{ar ? "اللغة" : "Language"}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{ar ? "العربية هي اللغة الافتراضية." : "Arabic is the default language."}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {ar ? "العربية هي اللغة الافتراضية." : "Arabic is the default language."}
+                </p>
               </div>
             </div>
             <LanguageSwitcher />
@@ -176,13 +206,19 @@ function AccountPage() {
               <h2 className="font-bold">{ar ? "مساهماتي" : "My contributions"}</h2>
               {!user ? (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {ar ? "سجّل الدخول لتتمكن من متابعة مساهماتك وطلبات التوضيح." : "Sign in to track contributions and clarification requests."}
+                  {ar
+                    ? "سجّل الدخول لتتمكن من متابعة مساهماتك وطلبات التوضيح."
+                    : "Sign in to track contributions and clarification requests."}
                 </p>
               ) : loadingContributions ? (
-                <p className="mt-2 text-sm text-muted-foreground">{ar ? "جارٍ تحميل مساهماتك…" : "Loading your contributions…"}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {ar ? "جارٍ تحميل مساهماتك…" : "Loading your contributions…"}
+                </p>
               ) : contributions.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {ar ? "لا توجد مساهمات محفوظة في حسابك بعد." : "No persisted contributions in your account yet."}
+                  {ar
+                    ? "لا توجد مساهمات محفوظة في حسابك بعد."
+                    : "No persisted contributions in your account yet."}
                 </p>
               ) : (
                 <ul className="mt-4 space-y-3">
@@ -191,11 +227,20 @@ function AccountPage() {
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
                           <p className="font-semibold">
-                            {ar ? item.facility?.name_ar : item.facility?.name_en || item.facility?.name_ar}
+                            {ar
+                              ? item.facility?.name_ar
+                              : item.facility?.name_en || item.facility?.name_ar}
                           </p>
                           <p className="mt-1 text-xs text-muted-foreground">
                             {ar ? item.zone?.label_ar : item.zone?.label_en || item.zone?.label_ar}
                           </p>
+                          {item.focus_indicator && item.focus_indicator !== "general" ? (
+                            <p className="mt-1 text-xs font-semibold text-primary">
+                              {ar
+                                ? FOCUS_LABEL[item.focus_indicator].ar
+                                : FOCUS_LABEL[item.focus_indicator].en}
+                            </p>
+                          ) : null}
                         </div>
                         <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
                           {ar ? STATUS_LABEL[item.status].ar : STATUS_LABEL[item.status].en}
