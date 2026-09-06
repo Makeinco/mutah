@@ -75,6 +75,15 @@ export type ReviewContribution = {
   }>;
 };
 
+export type OpsOverview = {
+  pending_review: number;
+  clarification_requested: number;
+  approved: number;
+  open_reports: number;
+  stale_facilities: number;
+  contributors: number;
+};
+
 export async function createContributionDraft(facilityExternalKey: string, zone: ZoneKey) {
   const { data, error } = await supabase.rpc("create_contribution_draft", {
     p_external_key: facilityExternalKey,
@@ -211,4 +220,18 @@ export async function reviewContribution({
     p_reviewer_note: note?.trim() || null,
   });
   if (error) throw error;
+}
+
+export async function getOpsOverview(): Promise<OpsOverview> {
+  const { data, error } = await supabase.rpc("get_mutah_ops_overview");
+  if (error) throw error;
+  const row = (data ?? {}) as Partial<OpsOverview>;
+  return {
+    pending_review: Number(row.pending_review ?? 0),
+    clarification_requested: Number(row.clarification_requested ?? 0),
+    approved: Number(row.approved ?? 0),
+    open_reports: Number(row.open_reports ?? 0),
+    stale_facilities: Number(row.stale_facilities ?? 0),
+    contributors: Number(row.contributors ?? 0),
+  };
 }
