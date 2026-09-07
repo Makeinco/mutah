@@ -29,6 +29,22 @@ export type PersistedContribution = {
   focus_indicator: FocusIndicator | null;
   facility: { name_ar: string; name_en: string | null; external_key: string | null } | null;
   zone: { zone_type: string; label_ar: string | null; label_en: string | null } | null;
+  clarification_responses: ClarificationResponse[];
+  review_history: ReviewDecision[];
+};
+
+export type ReviewDecision = {
+  id: string;
+  decision: "approved" | "rejected" | "clarification";
+  reviewer_note: string | null;
+  created_at: string;
+};
+
+export type ClarificationResponse = {
+  id: string;
+  clarification_round: number;
+  contributor_note: string | null;
+  created_at: string;
 };
 
 export type ReviewObservation = {
@@ -69,6 +85,7 @@ export type ReviewContribution = {
     storage_path: string;
     mime_type: string;
     created_at: string;
+    clarification_round: number;
     signed_url: string | null;
   }>;
   analyses: Array<{
@@ -77,8 +94,11 @@ export type ReviewContribution = {
     model: string;
     prompt_version: string;
     created_at: string;
+    clarification_round: number;
     observations: ReviewObservation[];
   }>;
+  clarification_responses: ClarificationResponse[];
+  review_history: ReviewDecision[];
 };
 
 export type OpsOverview = {
@@ -155,6 +175,56 @@ export async function finalizeContributionForReview({
   if (error) throw error;
 }
 
+export async function resubmitClarificationForReview({
+  contributionId,
+  contributorNote,
+  observations,
+  confirmations,
+}: {
+  contributionId: string;
+  contributorNote?: string;
+  observations: IndicatorEvidence[];
+  confirmations: Contribution["confirmed"];
+}) {
+  const { error } = await supabase.rpc("resubmit_contribution_for_review", {
+    p_contribution_id: contributionId,
+    p_provider: "google",
+    p_model: "gemini-3.6-flash",
+    p_prompt_version: "mutah-evidence-v1",
+    p_observations: observations,
+    p_confirmations: confirmations,
+    p_contributor_note: contributorNote?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function persistClarificationResponse({
+  contributionId,
+  userId,
+  files,
+  contributorNote,
+  observations,
+  confirmations,
+}: {
+  contributionId: string;
+  userId: string;
+  files: File[];
+  contributorNote?: string;
+  observations: IndicatorEvidence[];
+  confirmations: Contribution["confirmed"];
+}) {
+  if (files.length === 0) throw new Error("CLARIFICATION_IMAGES_REQUIRED");
+  for (const [index, file] of files.entries()) {
+    await uploadRawContributionImage({ contributionId, userId, file, index });
+  }
+  await resubmitClarificationForReview({
+    contributionId,
+    ...(contributorNote === undefined ? {} : { contributorNote }),
+    observations,
+    confirmations,
+  });
+}
+
 export async function persistLiveContribution({
   facilityExternalKey,
   zone,
@@ -185,7 +255,7 @@ export async function listMyContributions(): Promise<PersistedContribution[]> {
   const { data, error } = await supabase
     .from("contributions")
     .select(
-      "id,status,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en)",
+      "id,status,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),clarification_responses(id,clarification_round,contributor_note:note,created_at),review_history:moderation_decisions(id,decision,reviewer_note,created_at)",
     )
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -196,7 +266,7 @@ export async function listReviewContributions(): Promise<ReviewContribution[]> {
   const { data, error } = await supabase
     .from("contributions")
     .select(
-      "id,status,submitted_by,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),images:contribution_images(id,storage_path,mime_type,created_at),analyses(id,provider,model,prompt_version,created_at,observations(id,indicator_code,ai_state,explanation_ar,explanation_en,confirmations(id,confirmed_state,action,note,created_at)))",
+      "id,status,submitted_by,submitted_at,created_at,clarification_note,focus_indicator,facility:facilities(name_ar,name_en,external_key),zone:facility_zones(zone_type,label_ar,label_en),images:contribution_images(id,storage_path,mime_type,created_at,clarification_round),analyses(id,provider,model,prompt_version,created_at,clarification_round,observations(id,indicator_code,ai_state,explanation_ar,explanation_en,confirmations(id,confirmed_state,action,note,created_at))),clarification_responses(id,clarification_round,contributor_note:note,created_at),review_history:moderation_decisions(id,decision,reviewer_note,created_at)",
     )
     .in("status", ["pending_review", "clarification_requested"])
     .order("created_at", { ascending: true });

@@ -37,6 +37,16 @@ const ACTION_EN: Record<string, string> = {
   corrected: "Corrected",
   unsure: "Unsure",
 };
+const DECISION_AR: Record<string, string> = {
+  approved: "اعتماد",
+  rejected: "رفض",
+  clarification: "طلب توضيح",
+};
+const DECISION_EN: Record<string, string> = {
+  approved: "Approved",
+  rejected: "Rejected",
+  clarification: "Clarification requested",
+};
 
 function dateLabel(value: string | null, locale: "ar" | "en") {
   if (!value) return locale === "ar" ? "غير محدد" : "Not set";
@@ -44,6 +54,93 @@ function dateLabel(value: string | null, locale: "ar" | "en") {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function EvidenceGallery({ images, ar }: { images: ReviewContribution["images"]; ar: boolean }) {
+  if (!images.length)
+    return (
+      <p className="mt-3 text-sm text-muted-foreground">
+        {ar ? "لا توجد صور في هذا القسم." : "No images in this section."}
+      </p>
+    );
+  return (
+    <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {images.map((image, index) => (
+        <li key={image.id}>
+          {image.signed_url ? (
+            <img
+              src={image.signed_url}
+              alt={`${ar ? "دليل مرئي خاص" : "Private visual evidence"} ${index + 1}`}
+              className="aspect-4/3 w-full rounded-2xl object-cover"
+            />
+          ) : (
+            <div className="flex aspect-4/3 items-center justify-center rounded-2xl border border-dashed border-input text-sm text-muted-foreground">
+              {ar ? "تعذر إنشاء رابط الصورة" : "Image link unavailable"}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ObservationCards({
+  analyses,
+  ar,
+}: {
+  analyses: ReviewContribution["analyses"];
+  ar: boolean;
+}) {
+  const observations = analyses.flatMap((analysis) => analysis.observations ?? []);
+  if (!observations.length)
+    return (
+      <p className="mt-3 text-sm text-muted-foreground">
+        {ar ? "لا توجد ملاحظات AI في هذا القسم." : "No AI observations in this section."}
+      </p>
+    );
+  return (
+    <ul className="mt-4 grid gap-3 md:grid-cols-2">
+      {observations.map((observation) => {
+        const confirmation = observation.confirmations?.[0];
+        return (
+          <li key={observation.id} className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-start justify-between gap-3">
+              <h4 className="font-bold">{observation.indicator_code}</h4>
+              <Tag tone={confirmation?.action === "corrected" ? "brand" : "neutral"}>
+                {confirmation
+                  ? ar
+                    ? ACTION_AR[confirmation.action]
+                    : ACTION_EN[confirmation.action]
+                  : ar
+                    ? "بدون تأكيد"
+                    : "No confirmation"}
+              </Tag>
+            </div>
+            <p className="mt-2 text-sm font-semibold">
+              {ar
+                ? (STATE_AR[observation.ai_state] ?? observation.ai_state)
+                : (STATE_EN[observation.ai_state] ?? observation.ai_state)}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {ar
+                ? observation.explanation_ar
+                : observation.explanation_en || observation.explanation_ar}
+            </p>
+            {confirmation ? (
+              <div className="mt-3 border-t border-border pt-3 text-sm">
+                <span className="font-semibold">
+                  {ar ? "بعد مراجعة المساهم: " : "After contributor review: "}
+                </span>
+                {ar
+                  ? (STATE_AR[confirmation.confirmed_state] ?? confirmation.confirmed_state)
+                  : (STATE_EN[confirmation.confirmed_state] ?? confirmation.confirmed_state)}
+              </div>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 export function ReviewCenterLive() {
@@ -81,15 +178,13 @@ export function ReviewCenterLive() {
   useEffect(() => {
     void load();
   }, [load]);
-
   const selected = useMemo(
     () => rows.find((item) => item.id === selectedId) ?? rows[0],
     [rows, selectedId],
   );
-  const observations = selected?.analyses?.flatMap((analysis) => analysis.observations ?? []) ?? [];
 
   const decide = async (decision: "approved" | "rejected" | "clarification") => {
-    if (!selected || busy) return;
+    if (!selected || busy || selected.status !== "pending_review") return;
     if (decision !== "approved" && note.trim().length < 4) {
       setMessage(
         ar
@@ -110,8 +205,8 @@ export function ReviewCenterLive() {
             : "Contribution approved and the reviewer decision was recorded."
           : decision === "clarification"
             ? ar
-              ? "تم إرسال المساهمة إلى حالة «يحتاج توضيحًا»."
-              : "The contribution now requires clarification."
+              ? "تم إرسال طلب التوضيح إلى المساهم."
+              : "The clarification request was sent to the contributor."
             : ar
               ? "تم رفض المساهمة ولم تُنشر."
               : "The contribution was rejected and was not published.",
@@ -129,7 +224,7 @@ export function ReviewCenterLive() {
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <Card className="mt-6 flex items-center gap-3">
         <LoaderCircle className="size-5 animate-spin text-primary" aria-hidden="true" />
@@ -138,9 +233,7 @@ export function ReviewCenterLive() {
         </p>
       </Card>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
       <Card className="mt-6">
         <div className="flex items-start gap-3">
@@ -155,9 +248,7 @@ export function ReviewCenterLive() {
         </div>
       </Card>
     );
-  }
-
-  if (rows.length === 0) {
+  if (rows.length === 0)
     return (
       <div className="mt-8">
         <EmptyState
@@ -176,7 +267,35 @@ export function ReviewCenterLive() {
         />
       </div>
     );
-  }
+
+  const originalImages = selected?.images.filter((image) => image.clarification_round === 0) ?? [];
+  const originalAnalyses =
+    selected?.analyses.filter((analysis) => analysis.clarification_round === 0) ?? [];
+  const clarificationRequests =
+    selected?.review_history
+      .filter((event) => event.decision === "clarification")
+      .sort((a, b) => a.created_at.localeCompare(b.created_at)) ?? [];
+  const responses = [...(selected?.clarification_responses ?? [])].sort(
+    (a, b) => a.clarification_round - b.clarification_round,
+  );
+  const history = selected
+    ? [
+        ...selected.review_history.map((event) => ({
+          id: event.id,
+          created_at: event.created_at,
+          title: ar ? DECISION_AR[event.decision] : DECISION_EN[event.decision],
+          note: event.reviewer_note,
+        })),
+        ...selected.clarification_responses.map((response) => ({
+          id: response.id,
+          created_at: response.created_at,
+          title: ar
+            ? `إعادة إرسال التوضيح ${response.clarification_round}`
+            : `Clarification ${response.clarification_round} resubmitted`,
+          note: response.contributor_note,
+        })),
+      ].sort((a, b) => a.created_at.localeCompare(b.created_at))
+    : [];
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -224,7 +343,13 @@ export function ReviewCenterLive() {
                   {dateLabel(item.submitted_at ?? item.created_at, lang)}
                 </span>
                 <span className="mt-2 inline-flex rounded-full bg-muted px-2 py-1 text-xs font-semibold">
-                  {item.images.length} {ar ? "صورة" : item.images.length === 1 ? "image" : "images"}
+                  {item.status === "clarification_requested"
+                    ? ar
+                      ? "بانتظار توضيح المساهم"
+                      : "Awaiting contributor clarification"
+                    : ar
+                      ? "جاهزة للمراجعة"
+                      : "Ready for review"}
                 </span>
               </button>
             </li>
@@ -233,153 +358,186 @@ export function ReviewCenterLive() {
       </section>
 
       {selected ? (
-        <section className="space-y-6" aria-labelledby="live-review-detail-title">
+        <section className="min-w-0 space-y-6" aria-labelledby="live-review-detail-title">
           <div id="live-review-detail-title">
             <SectionTitle hint={`${ar ? "رقم المساهمة" : "Contribution"} ${selected.id}`}>
               {ar
                 ? selected.facility?.name_ar
                 : selected.facility?.name_en || selected.facility?.name_ar}
             </SectionTitle>
-          </div>
-
-          <Card>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="font-bold">
-                  {ar ? "حزمة الأدلة الخاصة" : "Private evidence bundle"}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {ar
-                    ? "روابط الصور مؤقتة ومخصصة للمراجعين فقط."
-                    : "Image links are temporary and reviewer-only."}
-                </p>
-              </div>
-              <Tag>
-                {ar ? selected.zone?.label_ar : selected.zone?.label_en || selected.zone?.zone_type}
-              </Tag>
-            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {ar ? selected.zone?.label_ar : selected.zone?.label_en || selected.zone?.zone_type}
+            </p>
             {selected.focus_indicator && selected.focus_indicator !== "general" ? (
-              <p className="mt-3 text-sm font-semibold text-primary">
-                {ar ? "العنصر الذي قصده المساهم: " : "Contributor focus: "}
+              <p className="mt-1 text-sm font-semibold text-primary">
+                {ar ? "تركيز المساهم: " : "Contributor focus: "}
                 {ar
                   ? FOCUS_LABEL[selected.focus_indicator].ar
                   : FOCUS_LABEL[selected.focus_indicator].en}
               </p>
             ) : null}
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {selected.images.map((image, index) => (
-                <li key={image.id}>
-                  {image.signed_url ? (
-                    <img
-                      src={image.signed_url}
-                      alt={`${ar ? "دليل مرئي" : "Visual evidence"} ${index + 1}`}
-                      className="aspect-4/3 w-full rounded-2xl object-cover"
-                    />
-                  ) : (
-                    <div className="flex aspect-4/3 items-center justify-center rounded-2xl border border-dashed border-input text-sm text-muted-foreground">
-                      {ar ? "تعذر إنشاء رابط الصورة" : "Image link unavailable"}
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <div>
-            <h3 className="mb-3 font-bold">
-              {ar
-                ? "رصد Gemini وتأكيد المساهم"
-                : "Gemini observations and contributor confirmation"}
-            </h3>
-            <p className="mb-3 text-sm text-muted-foreground">
-              {ar
-                ? "الملاحظات أدلة أولية فقط؛ قرارك البشري هو بوابة النشر."
-                : "Observations are preliminary evidence; your human decision is the publication gate."}
-            </p>
-            <ul className="grid gap-3 md:grid-cols-2">
-              {observations.map((observation) => {
-                const confirmation = observation.confirmations?.[0];
-                return (
-                  <li key={observation.id} className="rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <h4 className="font-bold">{observation.indicator_code}</h4>
-                      <Tag tone={confirmation?.action === "corrected" ? "brand" : "neutral"}>
-                        {confirmation
-                          ? ar
-                            ? ACTION_AR[confirmation.action]
-                            : ACTION_EN[confirmation.action]
-                          : ar
-                            ? "بدون تأكيد"
-                            : "No confirmation"}
-                      </Tag>
-                    </div>
-                    <p className="mt-2 text-sm font-semibold">
-                      {ar
-                        ? (STATE_AR[observation.ai_state] ?? observation.ai_state)
-                        : (STATE_EN[observation.ai_state] ?? observation.ai_state)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {ar
-                        ? observation.explanation_ar
-                        : observation.explanation_en || observation.explanation_ar}
-                    </p>
-                    {confirmation ? (
-                      <div className="mt-3 border-t border-border pt-3 text-sm">
-                        <span className="font-semibold">
-                          {ar ? "بعد مراجعة المساهم: " : "After contributor review: "}
-                        </span>
-                        {ar
-                          ? (STATE_AR[confirmation.confirmed_state] ?? confirmation.confirmed_state)
-                          : (STATE_EN[confirmation.confirmed_state] ??
-                            confirmation.confirmed_state)}
-                      </div>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
           </div>
 
           <Card>
-            <label htmlFor="live-review-note" className="block font-bold">
-              {ar ? "سبب القرار" : "Reason for the decision"}
-            </label>
+            <h3 className="font-bold">{ar ? "المساهمة الأصلية" : "Original submission"}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {ar
-                ? "مطلوب للتوضيح أو الرفض، واختياري عند الاعتماد. إذا لم تكفِ الصور، اطلب توضيحًا بدل التخمين."
-                : "Required for clarification or rejection, optional for approval. If evidence is insufficient, request clarification rather than guessing."}
+                ? "الأدلة الأصلية محفوظة ولم تُستبدل."
+                : "Original evidence is retained and was not replaced."}
             </p>
-            <textarea
-              id="live-review-note"
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              rows={3}
-              className="mt-3 w-full rounded-xl border-2 border-input bg-background p-3 text-base"
-            />
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button disabled={busy} onClick={() => void decide("approved")}>
-                {busy ? (
-                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <CheckCircle2 className="size-4" aria-hidden="true" />
-                )}
-                {ar ? "اعتماد" : "Approve"}
-              </Button>
-              <Button
-                disabled={busy}
-                variant="outline"
-                onClick={() => void decide("clarification")}
-              >
-                {ar ? "طلب توضيح" : "Request clarification"}
-              </Button>
-              <Button disabled={busy} variant="danger" onClick={() => void decide("rejected")}>
-                {ar ? "رفض" : "Reject"}
-              </Button>
-            </div>
-            <p aria-live="polite" className="mt-3 text-sm font-semibold">
-              {message}
-            </p>
+            <EvidenceGallery images={originalImages} ar={ar} />
+            <h4 className="mt-5 font-bold">
+              {ar ? "رصد AI الأصلي وتأكيدات المساهم" : "Original AI observations and confirmations"}
+            </h4>
+            <ObservationCards analyses={originalAnalyses} ar={ar} />
           </Card>
+
+          {clarificationRequests.length ? (
+            <Card>
+              <h3 className="font-bold">{ar ? "طلبات التوضيح" : "Clarification requests"}</h3>
+              <ol className="mt-3 space-y-3">
+                {clarificationRequests.map((request, index) => (
+                  <li
+                    key={request.id}
+                    className="rounded-xl border border-warning/30 bg-unknown-soft p-3"
+                  >
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      {ar ? `الطلب ${index + 1}` : `Request ${index + 1}`} ·{" "}
+                      {dateLabel(request.created_at, lang)}
+                    </p>
+                    <p className="mt-1 text-sm">{request.reviewer_note}</p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          ) : null}
+
+          {responses.length ? (
+            <Card>
+              <h3 className="font-bold">
+                {ar ? "ردود المساهم على التوضيح" : "Contributor clarification responses"}
+              </h3>
+              <ol className="mt-3 space-y-3">
+                {responses.map((response) => (
+                  <li key={response.id} className="rounded-xl border border-border p-3">
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      {ar
+                        ? `جولة ${response.clarification_round}`
+                        : `Round ${response.clarification_round}`}{" "}
+                      · {dateLabel(response.created_at, lang)}
+                    </p>
+                    <p className="mt-1 text-sm">
+                      {response.contributor_note ||
+                        (ar ? "لم يضف المساهم ملاحظة نصية." : "No written note was added.")}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          ) : null}
+
+          {responses.map((response) => {
+            const roundImages = selected.images.filter(
+              (image) => image.clarification_round === response.clarification_round,
+            );
+            const roundAnalyses = selected.analyses.filter(
+              (analysis) => analysis.clarification_round === response.clarification_round,
+            );
+            return (
+              <Card key={`round-${response.clarification_round}`}>
+                <h3 className="font-bold">
+                  {ar
+                    ? `الأدلة الجديدة — جولة ${response.clarification_round}`
+                    : `New evidence — round ${response.clarification_round}`}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {ar ? "روابط خاصة ومؤقتة للمراجع." : "Private, temporary reviewer links."}
+                </p>
+                <EvidenceGallery images={roundImages} ar={ar} />
+                <h4 className="mt-5 font-bold">
+                  {ar
+                    ? "رصد AI الجديد وتأكيدات المساهم"
+                    : "New AI observations and contributor confirmations"}
+                </h4>
+                <ObservationCards analyses={roundAnalyses} ar={ar} />
+              </Card>
+            );
+          })}
+
+          <Card>
+            <h3 className="font-bold">{ar ? "سجل المراجعة الكامل" : "Full review history"}</h3>
+            {history.length ? (
+              <ol className="mt-3 space-y-3">
+                {history.map((event) => (
+                  <li key={event.id} className="border-s-2 border-primary ps-3">
+                    <p className="font-semibold">{event.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dateLabel(event.created_at, lang)}
+                    </p>
+                    {event.note ? <p className="mt-1 text-sm">{event.note}</p> : null}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {ar ? "لا توجد قرارات سابقة." : "No previous decisions."}
+              </p>
+            )}
+          </Card>
+
+          {selected.status === "pending_review" ? (
+            <Card>
+              <label htmlFor="live-review-note" className="block font-bold">
+                {ar ? "سبب القرار" : "Reason for the decision"}
+              </label>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {ar
+                  ? "مطلوب للتوضيح أو الرفض، واختياري عند الاعتماد. إذا لم تكفِ الصور، اطلب توضيحًا بدل التخمين."
+                  : "Required for clarification or rejection, optional for approval. If evidence is insufficient, request clarification rather than guessing."}
+              </p>
+              <textarea
+                id="live-review-note"
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                rows={3}
+                className="mt-3 w-full rounded-xl border-2 border-input bg-background p-3 text-base"
+              />
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button disabled={busy} onClick={() => void decide("approved")}>
+                  {busy ? (
+                    <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <CheckCircle2 className="size-4" aria-hidden="true" />
+                  )}
+                  {ar ? "اعتماد" : "Approve"}
+                </Button>
+                <Button
+                  disabled={busy}
+                  variant="outline"
+                  onClick={() => void decide("clarification")}
+                >
+                  {ar ? "طلب توضيح" : "Request clarification"}
+                </Button>
+                <Button disabled={busy} variant="danger" onClick={() => void decide("rejected")}>
+                  {ar ? "رفض" : "Reject"}
+                </Button>
+              </div>
+              <p aria-live="polite" className="mt-3 text-sm font-semibold">
+                {message}
+              </p>
+            </Card>
+          ) : (
+            <Card className="border-warning/30 bg-unknown-soft">
+              <p className="font-bold">
+                {ar ? "بانتظار رد المساهم" : "Awaiting contributor response"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {ar
+                  ? "تُتاح قرارات المراجعة مجددًا بعد إعادة الإرسال."
+                  : "Review decisions become available again after resubmission."}
+              </p>
+            </Card>
+          )}
         </section>
       ) : null}
     </div>

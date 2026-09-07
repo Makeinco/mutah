@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Languages,
+  ImagePlus,
   LockKeyhole,
   LogIn,
   LogOut,
@@ -8,8 +9,9 @@ import {
   UploadCloud,
   UserRound,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
+import { ClarificationResponseFlow } from "@/components/mutah/ClarificationResponseFlow";
 import { Button, Card } from "@/components/mutah/ui";
 import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { useAuth } from "@/lib/mutah/auth";
@@ -37,19 +39,25 @@ function AccountPage() {
   const [sending, setSending] = useState(false);
   const [contributions, setContributions] = useState<PersistedContribution[]>([]);
   const [loadingContributions, setLoadingContributions] = useState(false);
+  const [clarifyingId, setClarifyingId] = useState("");
+  const [openPicker, setOpenPicker] = useState(false);
   const ar = lang === "ar";
 
-  useEffect(() => {
+  const loadContributions = useCallback(async () => {
     if (!user) {
       setContributions([]);
       return;
     }
     setLoadingContributions(true);
-    void listMyContributions()
+    await listMyContributions()
       .then(setContributions)
       .catch(() => setContributions([]))
       .finally(() => setLoadingContributions(false));
   }, [user]);
+
+  useEffect(() => {
+    void loadContributions();
+  }, [loadContributions]);
 
   const submitLogin = async () => {
     if (!email.trim()) return;
@@ -222,37 +230,95 @@ function AccountPage() {
                 </p>
               ) : (
                 <ul className="mt-4 space-y-3">
-                  {contributions.map((item) => (
-                    <li key={item.id} className="rounded-xl border border-border p-3">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <p className="font-semibold">
-                            {ar
-                              ? item.facility?.name_ar
-                              : item.facility?.name_en || item.facility?.name_ar}
-                          </p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {ar ? item.zone?.label_ar : item.zone?.label_en || item.zone?.label_ar}
-                          </p>
-                          {item.focus_indicator && item.focus_indicator !== "general" ? (
-                            <p className="mt-1 text-xs font-semibold text-primary">
+                  {contributions.map((item) => {
+                    const clarificationRequest = [...(item.review_history ?? [])]
+                      .filter((event) => event.decision === "clarification")
+                      .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+                    return (
+                      <li key={item.id} className="rounded-xl border border-border p-3">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold">
                               {ar
-                                ? FOCUS_LABEL[item.focus_indicator].ar
-                                : FOCUS_LABEL[item.focus_indicator].en}
+                                ? item.facility?.name_ar
+                                : item.facility?.name_en || item.facility?.name_ar}
                             </p>
-                          ) : null}
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {ar
+                                ? item.zone?.label_ar
+                                : item.zone?.label_en || item.zone?.label_ar}
+                            </p>
+                            {item.focus_indicator && item.focus_indicator !== "general" ? (
+                              <p className="mt-1 text-xs font-semibold text-primary">
+                                {ar
+                                  ? FOCUS_LABEL[item.focus_indicator].ar
+                                  : FOCUS_LABEL[item.focus_indicator].en}
+                              </p>
+                            ) : null}
+                          </div>
+                          <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+                            {ar ? STATUS_LABEL[item.status].ar : STATUS_LABEL[item.status].en}
+                          </span>
                         </div>
-                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
-                          {ar ? STATUS_LABEL[item.status].ar : STATUS_LABEL[item.status].en}
-                        </span>
-                      </div>
-                      {item.clarification_note ? (
-                        <p className="mt-3 rounded-lg bg-unknown-soft p-3 text-sm">
-                          {item.clarification_note}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
+                        {item.status === "clarification_requested" ? (
+                          <div className="mt-3 rounded-xl border border-warning/30 bg-unknown-soft p-3">
+                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                              {ar ? "سبب طلب التوضيح" : "Reviewer clarification reason"}
+                            </p>
+                            <p className="mt-1 text-sm">
+                              {clarificationRequest?.reviewer_note || item.clarification_note}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setOpenPicker(false);
+                                  setClarifyingId(item.id);
+                                }}
+                              >
+                                {ar ? "إضافة توضيح" : "Add clarification"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setOpenPicker(true);
+                                  setClarifyingId(item.id);
+                                }}
+                              >
+                                <ImagePlus className="size-4" aria-hidden="true" />
+                                {ar ? "إضافة صورة أخرى" : "Add another image"}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : null}
+                        {(item.clarification_responses ?? []).some(
+                          (response) => response.contributor_note,
+                        ) ? (
+                          <div className="mt-3 text-sm text-muted-foreground">
+                            <p className="font-semibold text-foreground">
+                              {ar ? "توضيحاتك السابقة" : "Your previous clarifications"}
+                            </p>
+                            <ul className="mt-1 list-inside list-disc space-y-1">
+                              {(item.clarification_responses ?? [])
+                                .filter((response) => response.contributor_note)
+                                .map((response) => (
+                                  <li key={response.id}>{response.contributor_note}</li>
+                                ))}
+                            </ul>
+                          </div>
+                        ) : null}
+                        {clarifyingId === item.id && item.status === "clarification_requested" ? (
+                          <ClarificationResponseFlow
+                            key={`${item.id}-${openPicker ? "picker" : "note"}`}
+                            contribution={item}
+                            openFileOnMount={openPicker}
+                            onComplete={loadContributions}
+                          />
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
