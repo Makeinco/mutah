@@ -201,8 +201,8 @@ export function ReviewCenterLive() {
       setMessage(
         decision === "approved"
           ? ar
-            ? "تم اعتماد المساهمة وتسجيل قرار المراجع."
-            : "Contribution approved and the reviewer decision was recorded."
+            ? "تم اعتماد المساهمة ونشر الأدلة المراجعة وتحديث ملف المرفق."
+            : "Contribution approved; reviewed evidence was published and the facility profile was refreshed."
           : decision === "clarification"
             ? ar
               ? "تم إرسال طلب التوضيح إلى المساهم."

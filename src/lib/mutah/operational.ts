@@ -303,6 +303,9 @@ export async function reviewContribution({
     p_reviewer_note: note?.trim() || null,
   });
   if (error) throw error;
+  if (decision === "approved" && typeof window !== "undefined") {
+    window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+  }
 }
 
 export async function getOpsOverview(): Promise<OpsOverview> {

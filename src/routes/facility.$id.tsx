@@ -24,7 +24,8 @@ export const Route = createFileRoute("/facility/$id")({
       { title: "أدلة الوصول | مُتاح ماب" },
       {
         name: "description",
-        content: "أدلة مرئية متعددة عن مسار الوصول والمدخل والمواقف والمصعد ودورة المياه المخصصة، مع توضيح ما نعرفه وما لا نعرفه.",
+        content:
+          "أدلة مرئية متعددة عن مسار الوصول والمدخل والمواقف والمصعد ودورة المياه المخصصة، مع توضيح ما نعرفه وما لا نعرفه.",
       },
       { property: "og:title", content: "أدلة الوصول | مُتاح ماب" },
       {
@@ -129,11 +130,7 @@ function FacilityProfile() {
             ) : null}
           </div>
 
-          <ZoneEvidence
-            facility={facility}
-            activeZone={activeZone}
-            onZoneChange={setActiveZone}
-          />
+          <ZoneEvidence facility={facility} activeZone={activeZone} onZoneChange={setActiveZone} />
         </section>
 
         <section aria-labelledby="analysis-title" className="mt-10">
@@ -143,7 +140,8 @@ function FacilityProfile() {
           <Card className="bg-surface">
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                {t("source")}: {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
+                {t("source")}:{" "}
+                {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
               </li>
               <li>{t("notCertification")}</li>
               <li>
@@ -171,7 +169,8 @@ function FacilityProfile() {
               </li>
               <li>
                 <Tag>
-                  {t("source")}: {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
+                  {t("source")}:{" "}
+                  {facility.source === "team_survey" ? t("sourceTeam") : t("sourceContributor")}
                 </Tag>
               </li>
             </ul>
@@ -182,7 +181,9 @@ function FacilityProfile() {
           <Button
             size="lg"
             className="sm:flex-1"
-            onClick={() => navigate({ to: "/contribute/$facilityId", params: { facilityId: facility.id } })}
+            onClick={() =>
+              navigate({ to: "/contribute/$facilityId", params: { facilityId: facility.id } })
+            }
           >
             <Camera className="size-5" aria-hidden="true" />
             {t("contributeNewer")}
@@ -211,7 +212,10 @@ function EvidenceGallery({ facility, gallery }: { facility: Facility; gallery: E
   }
 
   return (
-    <section aria-label={lang === "ar" ? "معرض أدلة الوصول" : "Access evidence gallery"} className="mt-5">
+    <section
+      aria-label={lang === "ar" ? "معرض أدلة الوصول" : "Access evidence gallery"}
+      className="mt-5"
+    >
       <div className={`grid gap-2 ${visible.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
         {visible.map((image, index) => (
           <img
@@ -270,7 +274,9 @@ function ZoneEvidence({
             >
               {pick(ZONE_LABEL[z])}
               {!documented ? (
-                <span className="ms-1 text-xs">· {lang === "ar" ? "غير موثق" : "not documented"}</span>
+                <span className="ms-1 text-xs">
+                  · {lang === "ar" ? "غير موثق" : "not documented"}
+                </span>
               ) : null}
             </button>
           );
@@ -280,7 +286,7 @@ function ZoneEvidence({
       <div className="door-reveal mt-5" key={activeZone}>
         <p className="text-sm text-muted-foreground">{pick(ZONE_HINT[activeZone])}</p>
 
-        {zone.documented && zone.images.length > 0 ? (
+        {zone.images.length > 0 ? (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {zone.images.map((image, i) => (
               <li key={`${image.url}-${i}`}>
@@ -295,6 +301,19 @@ function ZoneEvidence({
               </li>
             ))}
           </ul>
+        ) : zone.documented ? (
+          <div className="mt-4 rounded-2xl border border-border bg-surface p-6 text-sm">
+            <p className="font-semibold">
+              {lang === "ar"
+                ? "توجد أدلة مراجعة لهذا المسار"
+                : "Reviewed evidence is available for this zone"}
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              {lang === "ar"
+                ? "تظهر الخلاصة المراجعة أدناه. لا تُعرض الصور الخاصة ما لم تمر بعملية النشر الآمنة."
+                : "The reviewed summary appears below. Private images are not shown unless they complete the safe publication process."}
+            </p>
+          </div>
         ) : (
           <div className="mt-4 rounded-2xl border-2 border-dashed border-input bg-unknown-soft/50 p-6 text-center text-sm">
             <p className="font-semibold">{t("noEvidenceForZone")}</p>

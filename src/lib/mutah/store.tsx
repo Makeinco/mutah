@@ -1,8 +1,17 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { FACILITIES, INITIAL_CONTRIBUTIONS } from "./data";
 import { bi } from "./i18n";
 import { persistLiveContribution } from "./operational";
 import { supabase } from "./supabase-client";
+import { loadReviewedFacilityModels } from "./supabase";
 import type {
   AccessNeed,
   Contribution,
@@ -82,6 +91,25 @@ export function MutahProvider({ children }: { children: ReactNode }) {
   const [contributions, setContributions] = useState<Contribution[]>(INITIAL_CONTRIBUTIONS);
   const [needs, setNeedsState] = useState<AccessNeed[]>([]);
   const [needsChosen, setNeedsChosen] = useState(false);
+
+  const refreshReviewedFacilities = useCallback(async () => {
+    try {
+      const reviewed = await loadReviewedFacilityModels();
+      setFacilities((current) => {
+        const reviewedIds = new Set(reviewed.map((facility) => facility.id));
+        return [...current.filter((facility) => !reviewedIds.has(facility.id)), ...reviewed];
+      });
+    } catch (error) {
+      console.error("Could not refresh reviewed public facilities", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshReviewedFacilities();
+    const refresh = () => void refreshReviewedFacilities();
+    window.addEventListener("mutah:reviewed-evidence-changed", refresh);
+    return () => window.removeEventListener("mutah:reviewed-evidence-changed", refresh);
+  }, [refreshReviewedFacilities]);
 
   const setNeeds = useCallback((next: AccessNeed[]) => {
     setNeedsState(next);
@@ -176,11 +204,12 @@ export function MutahProvider({ children }: { children: ReactNode }) {
 
             const today = new Date().toISOString().slice(0, 10);
             const zone = f.zones[contribution.zone];
-            const contributionImages = (contribution.imageUrls?.length
-              ? contribution.imageUrls
-              : contribution.imageUrl
-                ? [contribution.imageUrl]
-                : []
+            const contributionImages = (
+              contribution.imageUrls?.length
+                ? contribution.imageUrls
+                : contribution.imageUrl
+                  ? [contribution.imageUrl]
+                  : []
             ).map((url, index) => ({
               url,
               alt: bi(
@@ -265,9 +294,7 @@ export function useMutah(): MutahState {
   return ctx;
 }
 
-export function emptyConfirmations(
-  observations: IndicatorEvidence[],
-): Contribution["confirmed"] {
+export function emptyConfirmations(observations: IndicatorEvidence[]): Contribution["confirmed"] {
   return Object.fromEntries(
     observations.map((o) => [o.key, { state: o.state, action: "confirmed" as const }]),
   ) as Contribution["confirmed"];
