@@ -39,14 +39,14 @@ function extractJson(text: string): unknown {
  * must not infer measurements, legal compliance, certification, or whole-building accessibility.
  */
 export async function analyseEvidenceWithGemini({ zone, images }: GeminiInput): Promise<IndicatorEvidence[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) throw new Error("GEMINI_NOT_CONFIGURED");
 
   if (images.length === 0 || images.length > 6) {
     throw new Error("INVALID_IMAGE_COUNT");
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+  const model = process.env["GEMINI_MODEL"] || "gemini-3.6-flash";
   const allowed = ZONE_INDICATORS[zone];
   const prompt = [
     "You are the MUTAH MAP visual evidence observer.",

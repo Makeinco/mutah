@@ -59,7 +59,7 @@ export function ContributeFlowOperational({
 }) {
   const navigate = useNavigate();
   const { getFacility, submitContribution } = useMutah();
-  const { user } = useAuth();
+  const { session, user } = useAuth();
   const { t, pick, lang } = useLang();
   const facility = getFacility(facilityId);
   const ar = lang === "ar";
@@ -151,8 +151,10 @@ export function ContributeFlowOperational({
     setAnalysisError(false);
     try {
       if (selectedFiles.length > 0) {
+        if (!session?.access_token) throw new Error("AUTH_REQUIRED");
         const formData = new FormData();
         formData.set("zone", zone);
+        formData.set("accessToken", session.access_token);
         selectedFiles.forEach((file) => formData.append("images", file));
         const result = await analyseEvidenceServer({ data: formData });
         setObservations(result);

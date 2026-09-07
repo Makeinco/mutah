@@ -83,7 +83,10 @@ function Discover() {
             <SlidersHorizontal className="size-4" aria-hidden="true" />
             {t("accessNeeds")}
           </h2>
-          <Link to="/preferences" className="text-sm font-semibold text-primary hover:underline">
+          <Link
+            to="/preferences"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:underline"
+          >
             {t("editNeeds")}
           </Link>
         </div>
@@ -135,7 +138,7 @@ function Discover() {
       ) : null}
 
       <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className={view === "map" ? "block" : "hidden lg:block"}>
+        <div className={view === "map" ? "min-w-0 block" : "hidden min-w-0 lg:block"}>
           <SchematicMap
             facilities={results}
             needs={needs}
@@ -144,7 +147,7 @@ function Discover() {
           />
         </div>
 
-        <div className={view === "list" ? "block" : "hidden lg:block"}>
+        <div className={view === "list" ? "min-w-0 block" : "hidden min-w-0 lg:block"}>
           {results.length === 0 ? (
             <EmptyState
               title={t("noResults")}

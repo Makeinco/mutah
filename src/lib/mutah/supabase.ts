@@ -14,10 +14,10 @@ const DEFAULT_SUPABASE_URL = "https://lxwwdobvlysgqdgixniv.supabase.co";
 const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_L-E_exDU3r8nhA5xz3gb4w_EzqgXiIv";
 
 function config() {
-  const url = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const url = import.meta.env["VITE_SUPABASE_URL"] || DEFAULT_SUPABASE_URL;
   // Supabase publishable keys are intentionally browser-safe. Environment values
   // still override this project-scoped fallback to support rotation/deploy targets.
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+  const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
   return { url: url.replace(/\/$/, ""), key };
 }
 

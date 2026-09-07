@@ -79,6 +79,7 @@ async function persistSignedInLiveContribution(input: {
   await persistLiveContribution({
     facilityExternalKey: input.facilityId,
     zone: input.zone,
+    focusIndicator: "general",
     userId: user.id,
     files,
     observations: input.aiObservations,

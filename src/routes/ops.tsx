@@ -14,6 +14,7 @@ import { AppShell } from "@/components/mutah/AppShell";
 import { RoleGate } from "@/components/mutah/RoleGate";
 import { OperationsWorkspace } from "@/components/mutah/OperationsWorkspace";
 import { Button, Card } from "@/components/mutah/ui";
+import { useAuth } from "@/lib/mutah/auth";
 import { useLang } from "@/lib/mutah/i18n";
 import { getOpsOverview, type OpsOverview } from "@/lib/mutah/operational";
 
@@ -79,10 +80,11 @@ const ITEMS = [
 ];
 
 function OperationsPage() {
+  const { canReview } = useAuth();
   const { lang } = useLang();
   const ar = lang === "ar";
   const [overview, setOverview] = useState<OpsOverview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   const load = async () => {
@@ -99,8 +101,8 @@ function OperationsPage() {
   };
 
   useEffect(() => {
-    void load();
-  }, []);
+    if (canReview) void load();
+  }, [canReview]);
 
   const metrics = overview
     ? [

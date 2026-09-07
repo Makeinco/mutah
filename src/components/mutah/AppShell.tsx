@@ -1,13 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { Camera, Compass, Home, Shapes, UserRound } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 import { MutahLogo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLang } from "@/lib/mutah/i18n";
 import { UI } from "@/lib/mutah/i18n";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+type NavItem = {
+  to: "/" | "/discover" | "/contribute" | "/ecosystem" | "/account";
+  key: keyof typeof UI;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  primary?: boolean;
+};
+
+const NAV: readonly NavItem[] = [
   { to: "/", key: "navHome", icon: Home },
   { to: "/discover", key: "navDiscover", icon: Compass },
   { to: "/contribute", key: "navContribute", icon: Camera, primary: true },
@@ -43,21 +50,24 @@ export function AppShell({
           ) : null}
           <div className="flex items-center gap-2">
             <nav aria-label={t("mainNav")} className="hidden items-center gap-1 md:flex">
-              {NAV.map(({ to, key, primary }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={cn(
-                    "min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors",
-                    primary
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "text-foreground hover:bg-muted",
-                  )}
-                  activeProps={!primary ? { className: "bg-primary-soft text-primary" } : undefined}
-                >
-                  {t(key as keyof typeof UI)}
-                </Link>
-              ))}
+              {NAV.map(({ to, key, primary }) => {
+                const activeProps = primary ? {} : { activeProps: { className: "bg-primary-soft text-primary" } };
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={cn(
+                      "min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors",
+                      primary
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "text-foreground hover:bg-muted",
+                    )}
+                    {...activeProps}
+                  >
+                    {t(key)}
+                  </Link>
+                );
+              })}
             </nav>
             <LanguageSwitcher />
           </div>
@@ -79,30 +89,33 @@ export function AppShell({
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/98 backdrop-blur md:hidden"
       >
         <ul className="mx-auto grid max-w-md grid-cols-5 items-end px-1 pb-[max(.25rem,env(safe-area-inset-bottom))]">
-          {NAV.map(({ to, key, icon: Icon, primary }) => (
-            <li key={to} className="min-w-0">
-              <Link
-                to={to}
-                className={cn(
-                  "relative flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[11px] font-semibold text-muted-foreground transition-all duration-200",
-                  primary && "-translate-y-3 text-foreground",
-                )}
-                activeProps={!primary ? { className: "text-primary" } : undefined}
-              >
-                <span
+          {NAV.map(({ to, key, icon: Icon, primary }) => {
+            const activeProps = primary ? {} : { activeProps: { className: "text-primary" } };
+            return (
+              <li key={to} className="min-w-0">
+                <Link
+                  to={to}
                   className={cn(
-                    "flex items-center justify-center",
-                    primary
-                      ? "size-14 rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-sm"
-                      : "size-7",
+                    "relative flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[11px] font-semibold text-muted-foreground transition-all duration-200",
+                    primary && "-translate-y-3 text-foreground",
                   )}
+                  {...activeProps}
                 >
-                  <Icon className={primary ? "size-7" : "size-6"} aria-hidden="true" />
-                </span>
-                <span className={cn(primary && "-mt-0.5")}>{t(key as keyof typeof UI)}</span>
-              </Link>
-            </li>
-          ))}
+                  <span
+                    className={cn(
+                      "flex items-center justify-center",
+                      primary
+                        ? "size-14 rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-sm"
+                        : "size-7",
+                    )}
+                  >
+                    <Icon className={primary ? "size-7" : "size-6"} aria-hidden="true" />
+                  </span>
+                  <span className={cn(primary && "-mt-0.5")}>{t(key)}</span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>

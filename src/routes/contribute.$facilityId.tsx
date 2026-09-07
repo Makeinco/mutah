@@ -31,7 +31,7 @@ function ContributionRoute() {
 
   return (
     <AppShell title={t("contributeTitle")}>
-      <ContributeFlowOperational facilityId={facilityId} initialZone={zone} />
+      <ContributeFlowOperational facilityId={facilityId} {...(zone ? { initialZone: zone } : {})} />
     </AppShell>
   );
 }

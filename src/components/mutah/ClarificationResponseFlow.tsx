@@ -34,7 +34,7 @@ export function ClarificationResponseFlow({
   onComplete: () => Promise<void> | void;
 }) {
   const { lang, pick } = useLang();
-  const { user } = useAuth();
+  const { session, user } = useAuth();
   const ar = lang === "ar";
   const fileRef = useRef<HTMLInputElement>(null);
   const previewsRef = useRef<string[]>([]);
@@ -94,12 +94,13 @@ export function ClarificationResponseFlow({
 
   const analyse = async () => {
     const zone = contribution.zone?.zone_type ? DB_TO_ZONE[contribution.zone.zone_type] : undefined;
-    if (!zone || files.length === 0 || !user) return;
+    if (!zone || files.length === 0 || !user || !session?.access_token) return;
     setStep("analysing");
     setError("");
     try {
       const formData = new FormData();
       formData.set("zone", zone);
+      formData.set("accessToken", session.access_token);
       files.forEach((file) => formData.append("images", file));
       const result = await analyseEvidenceServer({ data: formData });
       setObservations(result);
