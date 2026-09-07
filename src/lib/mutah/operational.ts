@@ -108,7 +108,91 @@ export type OpsOverview = {
   open_reports: number;
   stale_facilities: number;
   contributors: number;
+  proposals_pending: number;
+  proposals_clarification: number;
+  proposals_recommended: number;
+  archived_facilities: number;
+  official_facilities: number;
 };
+
+export type FacilityProposalStatus =
+  "draft" | "pending_review" | "clarification_requested" | "recommended" | "approved" | "rejected";
+
+export type FacilityProposal = {
+  id: string;
+  proposal_type: "new_facility" | "facility_change";
+  status: FacilityProposalStatus;
+  submitted_by: string;
+  existing_facility_id: string | null;
+  approved_facility_id: string | null;
+  proposed_name_ar: string;
+  proposed_name_en: string | null;
+  proposed_category_ar: string;
+  proposed_category_en: string | null;
+  proposed_area_ar: string | null;
+  proposed_area_en: string | null;
+  proposed_latitude: number | null;
+  proposed_longitude: number | null;
+  location_note: string | null;
+  duplicate_acknowledged: boolean;
+  duplicate_note: string | null;
+  submitted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  existing_facility: OperationalFacility | null;
+  evidence: ProposalEvidence[];
+  events: ProposalEvent[];
+};
+
+export type ProposalEvidence = {
+  id: string;
+  storage_path: string;
+  mime_type: string;
+  created_at: string;
+  signed_url?: string | null;
+};
+
+export type ProposalEvent = {
+  id: string;
+  event_type: string;
+  from_status: FacilityProposalStatus | null;
+  to_status: FacilityProposalStatus;
+  reason: string | null;
+  created_at: string;
+};
+
+export type OperationalFacility = {
+  id: string;
+  external_key: string | null;
+  name_ar: string;
+  name_en: string | null;
+  category_ar: string | null;
+  category_en: string | null;
+  area_ar: string | null;
+  area_en: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  verification: string;
+  last_verified_at: string | null;
+  is_archived: boolean;
+  updated_at: string;
+};
+
+export type FacilityReport = {
+  id: string;
+  facility_id: string;
+  report_type: string;
+  details: string | null;
+  status: "open" | "resolved" | "dismissed";
+  resolution_note: string | null;
+  created_at: string;
+  facility: Pick<OperationalFacility, "id" | "name_ar" | "name_en"> | null;
+};
+
+export type DuplicateFacility = Pick<
+  OperationalFacility,
+  "id" | "name_ar" | "name_en" | "area_ar" | "area_en"
+> & { distance_meters: number };
 
 export async function createContributionDraft(
   facilityExternalKey: string,
@@ -319,5 +403,237 @@ export async function getOpsOverview(): Promise<OpsOverview> {
     open_reports: Number(row.open_reports ?? 0),
     stale_facilities: Number(row.stale_facilities ?? 0),
     contributors: Number(row.contributors ?? 0),
+    proposals_pending: Number(row.proposals_pending ?? 0),
+    proposals_clarification: Number(row.proposals_clarification ?? 0),
+    proposals_recommended: Number(row.proposals_recommended ?? 0),
+    archived_facilities: Number(row.archived_facilities ?? 0),
+    official_facilities: Number(row.official_facilities ?? 0),
   };
+}
+
+const PROPOSAL_SELECT =
+  "id,proposal_type,status,submitted_by,existing_facility_id,approved_facility_id,proposed_name_ar,proposed_name_en,proposed_category_ar,proposed_category_en,proposed_area_ar,proposed_area_en,proposed_latitude,proposed_longitude,location_note,duplicate_acknowledged,duplicate_note,submitted_at,created_at,updated_at,existing_facility:facilities!existing_facility_id(id,name_ar,name_en),evidence:facility_proposal_evidence(id,storage_path,mime_type,created_at),events:facility_proposal_events(id,event_type,from_status,to_status,reason,created_at)";
+
+async function addProposalSignedUrls(rows: FacilityProposal[]) {
+  return Promise.all(
+    rows.map(async (proposal) => ({
+      ...proposal,
+      evidence: await Promise.all(
+        (proposal.evidence ?? []).map(async (item) => {
+          const { data } = await supabase.storage
+            .from("mutah-raw-evidence")
+            .createSignedUrl(item.storage_path, 15 * 60);
+          return { ...item, signed_url: data?.signedUrl ?? null };
+        }),
+      ),
+    })),
+  );
+}
+
+export async function listMyFacilityProposals() {
+  const { data, error } = await supabase
+    .from("facility_proposals")
+    .select(PROPOSAL_SELECT)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return addProposalSignedUrls((data ?? []) as unknown as FacilityProposal[]);
+}
+
+export async function listFacilityProposalQueue() {
+  const { data, error } = await supabase
+    .from("facility_proposals")
+    .select(PROPOSAL_SELECT)
+    .in("status", ["pending_review", "clarification_requested", "recommended"])
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return addProposalSignedUrls((data ?? []) as unknown as FacilityProposal[]);
+}
+
+export async function findFacilityDuplicates(input: {
+  name: string;
+  latitude: number;
+  longitude: number;
+}) {
+  const { data, error } = await supabase.rpc("find_facility_proposal_duplicates", {
+    p_name: input.name,
+    p_latitude: input.latitude,
+    p_longitude: input.longitude,
+    p_radius_meters: 250,
+  });
+  if (error) throw error;
+  return (data ?? []) as DuplicateFacility[];
+}
+
+export async function createFacilityProposal(input: {
+  proposalType: "new_facility" | "facility_change";
+  existingFacilityId?: string;
+  nameAr: string;
+  nameEn?: string;
+  categoryAr: string;
+  categoryEn?: string;
+  areaAr?: string;
+  areaEn?: string;
+  latitude: number;
+  longitude: number;
+  locationNote?: string;
+  duplicateAcknowledged?: boolean;
+  duplicateNote?: string;
+}) {
+  const { data, error } = await supabase.rpc("create_facility_proposal", {
+    p_proposal_type: input.proposalType,
+    p_existing_facility_id: input.existingFacilityId ?? null,
+    p_name_ar: input.nameAr,
+    p_name_en: input.nameEn?.trim() || null,
+    p_category_ar: input.categoryAr,
+    p_category_en: input.categoryEn?.trim() || null,
+    p_area_ar: input.areaAr?.trim() || null,
+    p_area_en: input.areaEn?.trim() || null,
+    p_latitude: input.latitude,
+    p_longitude: input.longitude,
+    p_location_note: input.locationNote?.trim() || null,
+    p_duplicate_acknowledged: input.duplicateAcknowledged ?? false,
+    p_duplicate_note: input.duplicateNote?.trim() || null,
+    p_submit: true,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function uploadProposalEvidence(input: {
+  proposalId: string;
+  userId: string;
+  file: File;
+}) {
+  const extension =
+    input.file.type === "image/png" ? "png" : input.file.type === "image/webp" ? "webp" : "jpg";
+  const storagePath = `${input.userId}/proposals/${input.proposalId}/${crypto.randomUUID()}.${extension}`;
+  const { error: uploadError } = await supabase.storage
+    .from("mutah-raw-evidence")
+    .upload(storagePath, input.file, { contentType: input.file.type, upsert: false });
+  if (uploadError) throw uploadError;
+  const { error } = await supabase.rpc("attach_facility_proposal_evidence", {
+    p_proposal_id: input.proposalId,
+    p_storage_path: storagePath,
+    p_mime_type: input.file.type,
+  });
+  if (error) {
+    await supabase.storage.from("mutah-raw-evidence").remove([storagePath]);
+    throw error;
+  }
+}
+
+export async function respondToProposalClarification(proposalId: string, note?: string) {
+  const { error } = await supabase.rpc("respond_to_facility_proposal_clarification", {
+    p_proposal_id: proposalId,
+    p_note: note?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function reviewFacilityProposal(input: {
+  proposalId: string;
+  action: "clarification" | "recommend" | "reject";
+  reason?: string;
+}) {
+  const { error } = await supabase.rpc("review_facility_proposal", {
+    p_proposal_id: input.proposalId,
+    p_action: input.action,
+    p_reason: input.reason?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function approveFacilityProposal(proposalId: string) {
+  const { data, error } = await supabase.rpc("approve_facility_proposal", {
+    p_proposal_id: proposalId,
+  });
+  if (error) throw error;
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+  return data as string;
+}
+
+export async function listOperationalFacilities() {
+  const { data, error } = await supabase
+    .from("facilities")
+    .select(
+      "id,external_key,name_ar,name_en,category_ar,category_en,area_ar,area_en,latitude,longitude,verification,last_verified_at,is_archived,updated_at",
+    )
+    .eq("is_demo", false)
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as OperationalFacility[];
+}
+
+export async function adminSaveFacility(
+  input: Omit<
+    OperationalFacility,
+    "id" | "external_key" | "verification" | "last_verified_at" | "is_archived" | "updated_at"
+  > & { id?: string; reason?: string },
+) {
+  const { data, error } = await supabase.rpc("admin_save_facility", {
+    p_facility_id: input.id ?? null,
+    p_name_ar: input.name_ar,
+    p_name_en: input.name_en,
+    p_category_ar: input.category_ar,
+    p_category_en: input.category_en,
+    p_area_ar: input.area_ar,
+    p_area_en: input.area_en,
+    p_latitude: input.latitude,
+    p_longitude: input.longitude,
+    p_reason: input.reason?.trim() || null,
+  });
+  if (error) throw error;
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+  return data as string;
+}
+
+export async function adminSetFacilityArchived(id: string, archived: boolean, reason: string) {
+  const { error } = await supabase.rpc("admin_set_facility_archived", {
+    p_facility_id: id,
+    p_archived: archived,
+    p_reason: reason,
+  });
+  if (error) throw error;
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+}
+
+export async function createFacilityReport(
+  facilityId: string,
+  reportType: string,
+  details: string,
+) {
+  const { data, error } = await supabase.rpc("create_facility_report", {
+    p_facility_id: facilityId,
+    p_report_type: reportType,
+    p_details: details,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function listFacilityReports() {
+  const { data, error } = await supabase
+    .from("reports")
+    .select(
+      "id,facility_id,report_type,details,status,resolution_note,created_at,facility:facilities(id,name_ar,name_en)",
+    )
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as FacilityReport[];
+}
+
+export async function resolveFacilityReport(
+  id: string,
+  status: "resolved" | "dismissed",
+  note: string,
+) {
+  const { error } = await supabase.rpc("resolve_facility_report", {
+    p_report_id: id,
+    p_status: status,
+    p_resolution_note: note,
+  });
+  if (error) throw error;
 }

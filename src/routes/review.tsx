@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/mutah/AppShell";
 import { ReviewCenterLive } from "@/components/mutah/ReviewCenterLive";
+import { FacilityProposalQueue } from "@/components/mutah/FacilityProposalQueue";
 import { RoleGate } from "@/components/mutah/RoleGate";
 import { useLang } from "@/lib/mutah/i18n";
 
@@ -33,6 +34,7 @@ function ReviewCenter() {
             : "There is no automatic publishing. Review the image bundle, Gemini observations, and contributor confirmations before deciding."}
         </p>
         <ReviewCenterLive />
+        <FacilityProposalQueue />
       </RoleGate>
     </AppShell>
   );

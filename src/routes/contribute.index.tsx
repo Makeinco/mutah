@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Camera, FileText, Flag } from "lucide-react";
+import { Camera } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
+import { FacilityProposalFlow } from "@/components/mutah/FacilityProposalFlow";
 import { Button, Card, SectionTitle } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
 import { ZONE_LABEL, ZONE_ORDER } from "@/lib/mutah/labels";
@@ -32,7 +33,6 @@ function Contribute() {
   const { t, pick, lang } = useLang();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
   const [zone, setZone] = useState<ZoneKey>("entrance");
-  const [reported, setReported] = useState(false);
 
   return (
     <AppShell title={t("contributeTitle")}>
@@ -106,40 +106,15 @@ function Contribute() {
         </Card>
 
         <div className="mt-8">
-          <SectionTitle>{lang === "ar" ? "خيارات أخرى" : "Other options"}</SectionTitle>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <FileText className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">{lang === "ar" ? "أضف مكانًا" : "Suggest a place"}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {lang === "ar"
-                  ? "مكان غير موجود في مُتاح؟ أرسل اسمه وموقعه ليُضاف لاحقًا."
-                  : "A place missing from MUTAH? Send its name and location to be added."}
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                {lang === "ar" ? "إرسال اقتراح" : "Send suggestion"}
-              </Button>
-            </Card>
-            <Card>
-              <Flag className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">{t("reportChange")}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {lang === "ar"
-                  ? "تغيّر المكان عمّا هو منشور؟ أخبرنا لنعيد التحقق منه."
-                  : "Has the place changed since it was published? Tell us so we re-verify."}
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                {lang === "ar" ? "إرسال بلاغ" : "Send report"}
-              </Button>
-            </Card>
-          </div>
-          <p aria-live="polite" className="mt-4 text-sm font-semibold text-access-strong">
-            {reported
-              ? lang === "ar"
-                ? "شكرًا لك. سجّلنا ملاحظتك وستتم مراجعتها قبل النشر."
-                : "Thank you. We've logged your note; it will be reviewed before publishing."
-              : ""}
+          <SectionTitle>
+            {lang === "ar" ? "المرافق والتغييرات" : "Facilities and changes"}
+          </SectionTitle>
+          <p className="text-sm text-muted-foreground">
+            {lang === "ar"
+              ? "المساهم يقترح، فريق مُتاح يراجع، والمدير وحده يعتمد التغيير الرسمي."
+              : "Contributors propose, MUTAH reviews, and only an admin approves official changes."}
           </p>
+          <FacilityProposalFlow />
         </div>
 
         <p className="mt-10 text-sm text-muted-foreground">{t("reviewedBeforePublish")}</p>

@@ -1,8 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building2, ClipboardCheck, FileWarning, History, LoaderCircle, RefreshCw, ShieldCheck, UsersRound } from "lucide-react";
+import {
+  Building2,
+  ClipboardCheck,
+  FileWarning,
+  History,
+  LoaderCircle,
+  RefreshCw,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { RoleGate } from "@/components/mutah/RoleGate";
+import { OperationsWorkspace } from "@/components/mutah/OperationsWorkspace";
 import { Button, Card } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
 import { getOpsOverview, type OpsOverview } from "@/lib/mutah/operational";
@@ -11,19 +21,61 @@ export const Route = createFileRoute("/ops")({
   head: () => ({
     meta: [
       { title: "مركز عمليات مُتاح | MUTAH Operations" },
-      { name: "description", content: "مساحة تشغيلية محمية لفريق مُتاح: المراجعة وإدارة المرافق وجودة البيانات." },
+      {
+        name: "description",
+        content: "مساحة تشغيلية محمية لفريق مُتاح: المراجعة وإدارة المرافق وجودة البيانات.",
+      },
     ],
   }),
   component: OperationsPage,
 });
 
 const ITEMS = [
-  { icon: ClipboardCheck, ar: "قائمة المراجعة", en: "Review queue", bodyAr: "مراجعة حزم الأدلة قبل النشر.", bodyEn: "Review evidence bundles before publishing.", to: "/review" as const },
-  { icon: Building2, ar: "المرافق", en: "Facilities", bodyAr: "إدارة هوية المرافق ومناطق التوثيق.", bodyEn: "Manage facility identity and evidence zones." },
-  { icon: UsersRound, ar: "المساهمون", en: "Contributors", bodyAr: "متابعة المساهمات دون إنشاء ملفات شخصية تدخّلية.", bodyEn: "Track contributions without invasive profiling." },
-  { icon: FileWarning, ar: "البلاغات", en: "Reports", bodyAr: "التغييرات المقترحة والمرافق الجديدة.", bodyEn: "Reported changes and suggested facilities." },
-  { icon: ShieldCheck, ar: "جودة البيانات", en: "Data quality", bodyAr: "الأدلة القديمة والمناطق غير الموثقة والتعارضات.", bodyEn: "Stale evidence, missing zones, and conflicts." },
-  { icon: History, ar: "سجل التدقيق", en: "Audit log", bodyAr: "من اتخذ القرار ومتى ولماذا.", bodyEn: "Who made a decision, when, and why." },
+  {
+    icon: ClipboardCheck,
+    ar: "قائمة المراجعة",
+    en: "Review queue",
+    bodyAr: "مراجعة حزم الأدلة قبل النشر.",
+    bodyEn: "Review evidence bundles before publishing.",
+    to: "/review" as const,
+  },
+  {
+    icon: Building2,
+    ar: "المرافق",
+    en: "Facilities",
+    bodyAr: "إدارة هوية المرافق ومناطق التوثيق.",
+    bodyEn: "Manage facility identity and evidence zones.",
+    href: "#facility-management",
+  },
+  {
+    icon: UsersRound,
+    ar: "المساهمون",
+    en: "Contributors",
+    bodyAr: "متابعة المساهمات دون إنشاء ملفات شخصية تدخّلية.",
+    bodyEn: "Track contributions without invasive profiling.",
+  },
+  {
+    icon: FileWarning,
+    ar: "البلاغات",
+    en: "Reports",
+    bodyAr: "بلاغات التغيير المفتوحة وقراراتها.",
+    bodyEn: "Open change reports and their decisions.",
+    href: "#reports",
+  },
+  {
+    icon: ShieldCheck,
+    ar: "جودة البيانات",
+    en: "Data quality",
+    bodyAr: "الأدلة القديمة والمناطق غير الموثقة والتعارضات.",
+    bodyEn: "Stale evidence, missing zones, and conflicts.",
+  },
+  {
+    icon: History,
+    ar: "سجل التدقيق",
+    en: "Audit log",
+    bodyAr: "من اتخذ القرار ومتى ولماذا.",
+    bodyEn: "Who made a decision, when, and why.",
+  },
 ];
 
 function OperationsPage() {
@@ -58,6 +110,19 @@ function OperationsPage() {
         { ar: "أدلة قديمة", en: "Stale facilities", value: overview.stale_facilities },
         { ar: "مساهمون", en: "Contributors", value: overview.contributors },
         { ar: "مساهمات معتمدة", en: "Approved contributions", value: overview.approved },
+        { ar: "مقترحات للمراجعة", en: "Proposals pending", value: overview.proposals_pending },
+        {
+          ar: "توضيح المقترحات",
+          en: "Proposal clarifications",
+          value: overview.proposals_clarification,
+        },
+        {
+          ar: "موصى بها للمدير",
+          en: "Recommended proposals",
+          value: overview.proposals_recommended,
+        },
+        { ar: "مرافق رسمية", en: "Official facilities", value: overview.official_facilities },
+        { ar: "مرافق مؤرشفة", en: "Archived facilities", value: overview.archived_facilities },
       ]
     : [];
 
@@ -68,7 +133,9 @@ function OperationsPage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-primary">MUTAH Operations</p>
-              <h1 className="mt-2 text-3xl font-bold">{ar ? "مركز عمليات مُتاح" : "MUTAH Operations"}</h1>
+              <h1 className="mt-2 text-3xl font-bold">
+                {ar ? "مركز عمليات مُتاح" : "MUTAH Operations"}
+              </h1>
               <p className="mt-2 max-w-3xl text-muted-foreground">
                 {ar
                   ? "مساحة العمل الداخلية للمراجعة والإدارة والنشر. لا تظهر هذه الأدوات ضمن تنقل المستخدم العام."
@@ -76,7 +143,11 @@ function OperationsPage() {
               </p>
             </div>
             <Button size="sm" variant="outline" disabled={loading} onClick={() => void load()}>
-              {loading ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="size-4" aria-hidden="true" />}
+              {loading ? (
+                <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw className="size-4" aria-hidden="true" />
+              )}
               {ar ? "تحديث" : "Refresh"}
             </Button>
           </div>
@@ -84,19 +155,31 @@ function OperationsPage() {
           {loading ? (
             <Card className="mt-8 flex items-center gap-3">
               <LoaderCircle className="size-5 animate-spin text-primary" aria-hidden="true" />
-              <p className="font-semibold">{ar ? "جاري تحميل حالة التشغيل…" : "Loading operational status…"}</p>
+              <p className="font-semibold">
+                {ar ? "جاري تحميل حالة التشغيل…" : "Loading operational status…"}
+              </p>
             </Card>
           ) : error ? (
             <Card className="mt-8">
-              <p className="font-semibold">{ar ? "تعذر تحميل المؤشرات التشغيلية الآن." : "Operational metrics could not be loaded."}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{ar ? "لم يؤثر ذلك على البيانات؛ حاول التحديث مرة أخرى." : "No data was changed; try refreshing again."}</p>
+              <p className="font-semibold">
+                {ar
+                  ? "تعذر تحميل المؤشرات التشغيلية الآن."
+                  : "Operational metrics could not be loaded."}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {ar
+                  ? "لم يؤثر ذلك على البيانات؛ حاول التحديث مرة أخرى."
+                  : "No data was changed; try refreshing again."}
+              </p>
             </Card>
           ) : (
             <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {metrics.map((metric) => (
                 <Card key={metric.en} className="p-4">
                   <p className="text-2xl font-bold">{metric.value}</p>
-                  <p className="mt-1 text-xs font-semibold text-muted-foreground">{ar ? metric.ar : metric.en}</p>
+                  <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                    {ar ? metric.ar : metric.en}
+                  </p>
                 </Card>
               ))}
             </div>
@@ -109,22 +192,37 @@ function OperationsPage() {
                   <Icon className="size-6 text-primary" aria-hidden="true" />
                   <h2 className="mt-4 text-lg font-bold">{ar ? arTitle : en}</h2>
                   <p className="mt-2 text-sm text-muted-foreground">{ar ? bodyAr : bodyEn}</p>
-                  {"to" in item ? (
+                  {"to" in item || "href" in item ? (
                     <p className="mt-4 text-sm font-semibold text-primary">{ar ? "فتح" : "Open"}</p>
                   ) : (
-                    <p className="mt-4 text-xs font-semibold text-muted-foreground">{ar ? "قيد الاستكمال التشغيلي" : "Operational build in progress"}</p>
+                    <p className="mt-4 text-xs font-semibold text-muted-foreground">
+                      {ar ? "قيد الاستكمال التشغيلي" : "Operational build in progress"}
+                    </p>
                   )}
                 </Card>
               );
               return "to" in item ? (
-                <Link key={arTitle} to={item.to} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Link
+                  key={arTitle}
+                  to={item.to}
+                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   {content}
                 </Link>
+              ) : "href" in item ? (
+                <a
+                  key={arTitle}
+                  href={item.href}
+                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {content}
+                </a>
               ) : (
                 <div key={arTitle}>{content}</div>
               );
             })}
           </div>
+          <OperationsWorkspace />
         </div>
       </RoleGate>
     </AppShell>
