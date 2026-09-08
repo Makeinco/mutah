@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/mutah/auth";
 import { useLang } from "@/lib/mutah/i18n";
 import {
   adminSaveFacility,
+  adminUploadFacilityDisplayImage,
   adminSetFacilityArchived,
   listFacilityReports,
   listOperationalFacilities,
@@ -12,6 +13,7 @@ import {
   type OperationalFacility,
 } from "@/lib/mutah/operational";
 import { Button, Card, EmptyState, SectionTitle } from "./ui";
+import { LocationPicker } from "./LocationPicker";
 
 const inputClass = "min-h-11 w-full rounded-xl border-2 border-input bg-background px-3 text-sm";
 const emptyForm = {
@@ -42,6 +44,7 @@ export function OperationsWorkspace() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [resolution, setResolution] = useState("");
+  const [officialImage, setOfficialImage] = useState<File | null>(null);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -122,6 +125,7 @@ export function OperationsWorkspace() {
       });
       setMessage(ar ? "حُفظ المرفق وسُجل التغيير." : "Facility saved and change audited.");
       setForm(emptyForm);
+      setOfficialImage(null);
       await load();
     } catch {
       setMessage(ar ? "لم يُحفظ المرفق." : "Facility was not saved.");
@@ -310,8 +314,6 @@ export function OperationsWorkspace() {
                   ["category_en", ar ? "التصنيف بالإنجليزية" : "English category"],
                   ["area_ar", ar ? "المنطقة بالعربية" : "Arabic area"],
                   ["area_en", ar ? "المنطقة بالإنجليزية" : "English area"],
-                  ["latitude", ar ? "خط العرض" : "Latitude"],
-                  ["longitude", ar ? "خط الطول" : "Longitude"],
                 ] as const
               ).map(([key, label]) => (
                 <label key={key} className="text-sm font-semibold">
@@ -326,6 +328,19 @@ export function OperationsWorkspace() {
                 </label>
               ))}
             </div>
+            <div className="mt-3">
+              <LocationPicker
+                latitude={form.latitude ? Number(form.latitude) : null}
+                longitude={form.longitude ? Number(form.longitude) : null}
+                onChange={(latitude, longitude) =>
+                  setForm((current) => ({
+                    ...current,
+                    latitude: latitude.toFixed(7),
+                    longitude: longitude.toFixed(7),
+                  }))
+                }
+              />
+            </div>
             <label className="mt-3 block text-sm font-semibold">
               {ar ? "سبب التغيير" : "Change reason"}
               <input
@@ -336,6 +351,52 @@ export function OperationsWorkspace() {
                 }
               />
             </label>
+            {form.id ? (
+              <div className="mt-3 rounded-xl border border-border p-3">
+                <label className="block text-sm font-semibold">
+                  {facilities.find((item) => item.id === form.id)?.official_image_path
+                    ? ar
+                      ? "تغيير الصورة"
+                      : "Change photo"
+                    : ar
+                      ? "إضافة صورة"
+                      : "Add photo"}
+                  <input
+                    className="mt-2 block w-full font-normal"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) => setOfficialImage(event.target.files?.[0] ?? null)}
+                  />
+                </label>
+                <Button
+                  className="mt-3"
+                  variant="outline"
+                  disabled={!officialImage || form.reason.trim().length < 4 || busy}
+                  onClick={() => {
+                    if (!officialImage) return;
+                    setBusy(true);
+                    void adminUploadFacilityDisplayImage(form.id, officialImage, form.reason)
+                      .then(async () => {
+                        setOfficialImage(null);
+                        setMessage(
+                          ar
+                            ? "نُشرت الصورة الرسمية وسُجل التغيير."
+                            : "Official photo published and audited.",
+                        );
+                        await load();
+                      })
+                      .catch(() => {
+                        setMessage(
+                          ar ? "لم تتغير الصورة الرسمية." : "Official photo was unchanged.",
+                        );
+                        setBusy(false);
+                      });
+                  }}
+                >
+                  {ar ? "نشر الصورة الرسمية" : "Publish official photo"}
+                </Button>
+              </div>
+            ) : null}
             <div className="mt-4 flex gap-2">
               <Button
                 disabled={busy || !form.name_ar.trim() || !form.category_ar.trim()}

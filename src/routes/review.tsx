@@ -3,6 +3,7 @@ import { AppShell } from "@/components/mutah/AppShell";
 import { ReviewCenterLive } from "@/components/mutah/ReviewCenterLive";
 import { FacilityProposalQueue } from "@/components/mutah/FacilityProposalQueue";
 import { RoleGate } from "@/components/mutah/RoleGate";
+import { DisplayImageProposalQueue } from "@/components/mutah/DisplayImageProposalQueue";
 import { useLang } from "@/lib/mutah/i18n";
 
 export const Route = createFileRoute("/review")({
@@ -35,6 +36,7 @@ function ReviewCenter() {
         </p>
         <ReviewCenterLive />
         <FacilityProposalQueue />
+        <DisplayImageProposalQueue />
       </RoleGate>
     </AppShell>
   );

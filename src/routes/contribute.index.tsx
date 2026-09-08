@@ -3,6 +3,7 @@ import { Camera } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { FacilityProposalFlow } from "@/components/mutah/FacilityProposalFlow";
+import { FacilityFinder } from "@/components/mutah/FacilityFinder";
 import { Button, Card, SectionTitle } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
 import { ZONE_LABEL, ZONE_ORDER } from "@/lib/mutah/labels";
@@ -33,6 +34,7 @@ function Contribute() {
   const { t, pick, lang } = useLang();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
   const [zone, setZone] = useState<ZoneKey>("entrance");
+  const [showProposal, setShowProposal] = useState(false);
 
   return (
     <AppShell title={t("contributeTitle")}>
@@ -58,21 +60,13 @@ function Contribute() {
           </div>
 
           <div className="mt-5">
-            <label htmlFor="facility-select" className="mb-2 block text-sm font-semibold">
-              {t("chooseFacility")}
-            </label>
-            <select
-              id="facility-select"
+            <p className="mb-2 text-sm font-semibold">{t("chooseFacility")}</p>
+            <FacilityFinder
+              facilities={facilities}
               value={facilityId}
-              onChange={(e) => setFacilityId(e.target.value)}
-              className="min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base"
-            >
-              {facilities.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {pick(f.name)} — {pick(f.area)}
-                </option>
-              ))}
-            </select>
+              onChange={setFacilityId}
+              onMissing={() => setShowProposal(true)}
+            />
           </div>
 
           <div className="mt-4">
@@ -105,7 +99,7 @@ function Contribute() {
           </Button>
         </Card>
 
-        <div className="mt-8">
+        <div className="mt-8" id="facility-proposal">
           <SectionTitle>
             {lang === "ar" ? "المرافق والتغييرات" : "Facilities and changes"}
           </SectionTitle>
@@ -114,7 +108,13 @@ function Contribute() {
               ? "المساهم يقترح، فريق مُتاح يراجع، والمدير وحده يعتمد التغيير الرسمي."
               : "Contributors propose, MUTAH reviews, and only an admin approves official changes."}
           </p>
-          <FacilityProposalFlow />
+          {showProposal ? (
+            <FacilityProposalFlow />
+          ) : (
+            <Button variant="outline" className="mt-4" onClick={() => setShowProposal(true)}>
+              {lang === "ar" ? "فتح نموذج المقترح" : "Open proposal form"}
+            </Button>
+          )}
         </div>
 
         <p className="mt-10 text-sm text-muted-foreground">{t("reviewedBeforePublish")}</p>

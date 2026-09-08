@@ -64,21 +64,21 @@ export interface ZoneEvidence {
 }
 
 export type VerificationStatus =
-  | "team_reviewed"
-  | "contributor_only"
-  | "pending_review"
-  | "disputed"
-  | "stale";
+  "team_reviewed" | "contributor_only" | "pending_review" | "disputed" | "stale";
 
 export type SourceKind = "contributor_image" | "team_survey";
 
 export interface Facility {
   id: string;
+  /** Internal database identifier used only for authenticated mutations. */
+  databaseId?: string;
   name: L;
   category: L;
   area: L;
   distanceKm?: number;
   point: { x: number; y: number };
+  /** Canonical WGS84 coordinates used by real map and distance features. */
+  coordinates?: { latitude: number; longitude: number };
   /** Cover image only; detailed evidence lives inside zones. */
   imageUrl: string;
   imageAlt: L;

@@ -13,9 +13,9 @@ export interface NeedResult {
 export type Verdict = "available" | "partial" | "not_available" | "insufficient";
 
 export const VERDICT_LABEL: Record<Verdict, L> = {
-  available: bi("متاح", "Available"),
-  partial: bi("متاح جزئيًا", "Partially available"),
-  not_available: bi("غير متاح وفق احتياجاتك الحالية", "Not available for your current needs"),
+  available: bi("متاح", "Accessible"),
+  partial: bi("متاح جزئيًا", "Partially accessible"),
+  not_available: bi("غير متاح وفق احتياجاتك الحالية", "Not accessible for your current needs"),
   insufficient: bi("معلومات غير كافية", "Insufficient information"),
 };
 

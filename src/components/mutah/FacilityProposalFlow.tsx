@@ -13,6 +13,7 @@ import {
   type OperationalFacility,
 } from "@/lib/mutah/operational";
 import { Button, Card } from "./ui";
+import { LocationPicker } from "./LocationPicker";
 
 type Mode = "new_facility" | "facility_change" | "report";
 
@@ -340,23 +341,16 @@ export function FacilityProposalFlow() {
               value={areaEn}
               onChange={setAreaEn}
             />
-            <Field
-              id="proposal-latitude"
-              label={ar ? "خط العرض" : "Latitude"}
-              value={latitude}
-              onChange={setLatitude}
-              inputMode="decimal"
-              required
-            />
-            <Field
-              id="proposal-longitude"
-              label={ar ? "خط الطول" : "Longitude"}
-              value={longitude}
-              onChange={setLongitude}
-              inputMode="decimal"
-              required
-            />
           </div>
+          <LocationPicker
+            latitude={latitude ? Number(latitude) : null}
+            longitude={longitude ? Number(longitude) : null}
+            onChange={(lat, lng, label) => {
+              setLatitude(lat.toFixed(7));
+              setLongitude(lng.toFixed(7));
+              if (label && !locationNote) setLocationNote(label);
+            }}
+          />
           <label className="block text-sm font-semibold" htmlFor="proposal-location-note">
             {ar ? "ملاحظة عن الموقع (اختياري)" : "Location note (optional)"}
           </label>

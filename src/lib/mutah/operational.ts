@@ -176,6 +176,27 @@ export type OperationalFacility = {
   last_verified_at: string | null;
   is_archived: boolean;
   updated_at: string;
+  official_image_path: string | null;
+};
+
+export type DisplayImageProposal = {
+  id: string;
+  facility_id: string;
+  submitted_by: string;
+  private_storage_path: string;
+  mime_type: string;
+  context_note: string | null;
+  status: "pending_review" | "clarification_requested" | "recommended" | "approved" | "rejected";
+  review_reason: string | null;
+  published_storage_path: string | null;
+  created_at: string;
+  facility: {
+    id: string;
+    name_ar: string;
+    name_en: string | null;
+    official_image_path: string | null;
+  } | null;
+  signed_url?: string | null;
 };
 
 export type FacilityReport = {
@@ -557,7 +578,7 @@ export async function listOperationalFacilities() {
   const { data, error } = await supabase
     .from("facilities")
     .select(
-      "id,external_key,name_ar,name_en,category_ar,category_en,area_ar,area_en,latitude,longitude,verification,last_verified_at,is_archived,updated_at",
+      "id,external_key,name_ar,name_en,category_ar,category_en,area_ar,area_en,latitude,longitude,verification,last_verified_at,is_archived,updated_at,official_image_path",
     )
     .eq("is_demo", false)
     .order("updated_at", { ascending: false });
@@ -565,10 +586,125 @@ export async function listOperationalFacilities() {
   return (data ?? []) as OperationalFacility[];
 }
 
+export async function proposeFacilityDisplayImage(input: {
+  facilityId: string;
+  userId: string;
+  file: File;
+  context?: string;
+}) {
+  const extension =
+    input.file.type === "image/png" ? "png" : input.file.type === "image/webp" ? "webp" : "jpg";
+  const path = `${input.userId}/display-images/${input.facilityId}/${crypto.randomUUID()}.${extension}`;
+  const { error: uploadError } = await supabase.storage
+    .from("mutah-raw-evidence")
+    .upload(path, input.file, { contentType: input.file.type, upsert: false });
+  if (uploadError) throw uploadError;
+  const { data, error } = await supabase.rpc("create_facility_display_image_proposal", {
+    p_facility_id: input.facilityId,
+    p_storage_path: path,
+    p_mime_type: input.file.type,
+    p_context_note: input.context?.trim() || null,
+  });
+  if (error) {
+    await supabase.storage.from("mutah-raw-evidence").remove([path]);
+    throw error;
+  }
+  return data as string;
+}
+
+export async function listDisplayImageProposals() {
+  const { data, error } = await supabase
+    .from("facility_display_image_proposals")
+    .select(
+      "id,facility_id,submitted_by,private_storage_path,mime_type,context_note,status,review_reason,published_storage_path,created_at,facility:facilities(id,name_ar,name_en,official_image_path)",
+    )
+    .in("status", ["pending_review", "clarification_requested", "recommended"])
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return Promise.all(
+    ((data ?? []) as unknown as DisplayImageProposal[]).map(async (proposal) => {
+      const { data: signed } = await supabase.storage
+        .from("mutah-raw-evidence")
+        .createSignedUrl(proposal.private_storage_path, 900);
+      return { ...proposal, signed_url: signed?.signedUrl ?? null };
+    }),
+  );
+}
+
+export async function reviewDisplayImageProposal(
+  id: string,
+  action: "clarification" | "recommend" | "reject",
+  reason?: string,
+) {
+  const { error } = await supabase.rpc("review_facility_display_image_proposal", {
+    p_proposal_id: id,
+    p_action: action,
+    p_reason: reason?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function respondToDisplayImageClarification(id: string, context: string) {
+  const { error } = await supabase.rpc("respond_to_display_image_clarification", {
+    p_proposal_id: id,
+    p_context_note: context,
+  });
+  if (error) throw error;
+}
+
+async function uploadPublicFacilityImage(facilityId: string, file: Blob, mimeType: string) {
+  const extension = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  const path = `${facilityId}/${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage
+    .from("mutah-public-facility-media")
+    .upload(path, file, { contentType: mimeType, upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export async function publishDisplayImageProposal(proposal: DisplayImageProposal, reason?: string) {
+  if (!proposal.signed_url) throw new Error("PRIVATE_IMAGE_UNAVAILABLE");
+  const response = await fetch(proposal.signed_url);
+  if (!response.ok) throw new Error("PRIVATE_IMAGE_UNAVAILABLE");
+  const path = await uploadPublicFacilityImage(
+    proposal.facility_id,
+    await response.blob(),
+    proposal.mime_type,
+  );
+  const { error } = await supabase.rpc("publish_facility_display_image", {
+    p_proposal_id: proposal.id,
+    p_public_path: path,
+    p_reason: reason?.trim() || null,
+  });
+  if (error) throw error;
+  window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+}
+
+export async function adminUploadFacilityDisplayImage(
+  facilityId: string,
+  file: File,
+  reason: string,
+) {
+  const path = await uploadPublicFacilityImage(facilityId, file, file.type);
+  const { error } = await supabase.rpc("admin_set_facility_display_image", {
+    p_facility_id: facilityId,
+    p_public_path: path,
+    p_reason: reason,
+  });
+  if (error) throw error;
+  window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
+}
+
 export async function adminSaveFacility(
   input: Omit<
     OperationalFacility,
-    "id" | "external_key" | "verification" | "last_verified_at" | "is_archived" | "updated_at"
+    | "id"
+    | "external_key"
+    | "verification"
+    | "last_verified_at"
+    | "is_archived"
+    | "updated_at"
+    | "official_image_path"
   > & { id?: string; reason?: string },
 ) {
   const { data, error } = await supabase.rpc("admin_save_facility", {

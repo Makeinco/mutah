@@ -73,8 +73,15 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
   const name = pick(facility.name);
   const missing = Math.max(0, decision.total - decision.completeness);
   const evidenceLabel =
-    missing === 0 ? t("infoComplete") : decision.completeness === 0 ? t("infoLimited") : t("infoMissing");
-  const EvidenceIcon = missing === 0 ? CircleCheck : decision.completeness === 0 ? CircleAlert : Clock3;
+    missing === 0
+      ? lang === "ar"
+        ? "البيانات مكتملة"
+        : "Complete data"
+      : lang === "ar"
+        ? "البيانات غير مكتملة"
+        : "Incomplete data";
+  const EvidenceIcon =
+    missing === 0 ? CircleCheck : decision.completeness === 0 ? CircleAlert : Clock3;
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-border bg-card transition-colors hover:border-primary/30">
@@ -135,21 +142,13 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
 
       <div className="border-t border-border px-4 py-4 sm:px-5">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-sm font-bold">
-            {lang === "ar" ? "احتياجات الوصول" : "Access needs"}
-          </p>
+          <p className="text-sm font-bold">{lang === "ar" ? "احتياجات الوصول" : "Access needs"}</p>
           <span className="text-xs text-muted-foreground">
-            {needs.length > 0
-              ? lang === "ar"
-                ? "وفق تفضيلاتك"
-                : "Based on your preferences"
-              : lang === "ar"
-                ? "ملخص الأدلة"
-                : "Evidence summary"}
+            {lang === "ar" ? "وفق احتياجاتك" : "For your needs"}
           </span>
         </div>
 
-        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        <ul className="flex flex-wrap gap-2">
           {shownResults.map((result) => {
             const NeedIcon = NEED_ICON[result.need];
             const outcome = OUTCOME_STYLE[result.outcome];
@@ -158,16 +157,31 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
               <li
                 key={result.need}
                 title={pick(result.reason)}
-                className={`relative flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2.5 text-center ${outcome.card}`}
+                className={`flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 ${outcome.card}`}
               >
-                <span className={`flex size-7 items-center justify-center rounded-lg ${outcome.iconWrap}`}>
+                <span
+                  className={`flex size-7 items-center justify-center rounded-lg ${outcome.iconWrap}`}
+                >
                   <NeedIcon className="size-4" aria-hidden="true" />
                 </span>
-                <span className="line-clamp-2 text-[10px] font-semibold leading-tight sm:text-[11px]">
+                <span className="text-xs font-semibold">
                   {pick(ACCESS_NEED_LABEL[result.need])}
                 </span>
-                <OutcomeIcon className={`absolute end-1.5 top-1.5 size-3.5 ${outcome.className}`} aria-hidden="true" />
-                <span className="sr-only">{pick(result.reason)}</span>
+                <OutcomeIcon className={`size-4 ${outcome.className}`} aria-hidden="true" />
+                <span className="text-xs font-semibold">
+                  {result.outcome === "met"
+                    ? lang === "ar"
+                      ? "متوفر"
+                      : "Met"
+                    : result.outcome === "not_met"
+                      ? lang === "ar"
+                        ? "عائق موثق"
+                        : "Barrier"
+                      : lang === "ar"
+                        ? "غير معروف"
+                        : "Unknown"}
+                </span>
+                <span className="sr-only">. {pick(result.reason)}</span>
               </li>
             );
           })}
@@ -188,7 +202,10 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
           className="min-h-11 shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {t("viewDetails")}
-          <span className="sr-only"> {t("about")} {name}</span>
+          <span className="sr-only">
+            {" "}
+            {t("about")} {name}
+          </span>
         </Link>
       </div>
     </article>

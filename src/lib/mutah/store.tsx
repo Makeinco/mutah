@@ -233,7 +233,9 @@ export function MutahProvider({ children }: { children: ReactNode }) {
               ...f,
               indicators: next,
               zones,
-              imageUrl: contribution.imageUrl || f.imageUrl,
+              // Approved access evidence remains inside its zone; it never becomes
+              // the facility's official public display image implicitly.
+              imageUrl: f.imageUrl,
               lastVerifiedISO: today,
               verification: "team_reviewed",
               source: "contributor_image",

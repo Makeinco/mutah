@@ -475,6 +475,15 @@ export function ContributeFlowOperational({
           analysisError={analysisError}
           submitState={submitState}
           submitError={submitError}
+          onTryAgain={() => {
+            clearImages();
+            setObservations([]);
+            setConfirmed(null);
+            setAnalysisError(false);
+            setSubmitError("");
+            setStep("capture");
+            window.setTimeout(() => fileRef.current?.click(), 0);
+          }}
           onSubmit={() => void submit()}
         />
       ) : null}
@@ -669,6 +678,7 @@ function ConfirmStep({
   confirmed,
   setConfirmed,
   onSubmit,
+  onTryAgain,
   evidenceCount,
   analysisMode,
   analysisError,
@@ -679,6 +689,7 @@ function ConfirmStep({
   confirmed: Contribution["confirmed"];
   setConfirmed: (value: Contribution["confirmed"]) => void;
   onSubmit: () => void;
+  onTryAgain: () => void;
   evidenceCount: number;
   analysisMode: AnalysisMode;
   analysisError: boolean;
@@ -807,16 +818,32 @@ function ConfirmStep({
         </p>
       ) : null}
       <div className="mt-8">
-        <Button size="lg" block disabled={submitState === "saving"} onClick={onSubmit}>
-          {submitState === "saving" ? (
-            <>
-              <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
-              {ar ? "جاري حفظ مساهمتك…" : "Saving your contribution…"}
-            </>
-          ) : (
-            t("submitForReview")
-          )}
-        </Button>
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
+          <Button
+            size="lg"
+            variant="outline"
+            className="sm:flex-1"
+            disabled={submitState === "saving"}
+            onClick={onTryAgain}
+          >
+            {ar ? "إعادة المحاولة" : "Try Again"}
+          </Button>
+          <Button
+            size="lg"
+            className="sm:flex-1"
+            disabled={submitState === "saving"}
+            onClick={onSubmit}
+          >
+            {submitState === "saving" ? (
+              <>
+                <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
+                {ar ? "جاري حفظ مساهمتك…" : "Saving your contribution…"}
+              </>
+            ) : (
+              t("submitForReview")
+            )}
+          </Button>
+        </div>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           {submitState === "saving"
             ? ar

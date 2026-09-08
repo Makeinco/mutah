@@ -5,6 +5,7 @@ import { AppShell } from "@/components/mutah/AppShell";
 import { DecisionSummary } from "@/components/mutah/DecisionSummary";
 import { EvidenceList } from "@/components/mutah/Evidence";
 import { Button, Card, EmptyState, SectionTitle, Tag } from "@/components/mutah/ui";
+import { OfficialImageAction } from "@/components/mutah/OfficialImageAction";
 import { decideFor } from "@/lib/mutah/decision";
 import { useLang } from "@/lib/mutah/i18n";
 import {
@@ -92,7 +93,23 @@ function FacilityProfile() {
           </p>
         </header>
 
+        {facility.imageUrl ? (
+          <figure className="mt-5">
+            <img
+              src={facility.imageUrl}
+              alt={pick(facility.imageAlt)}
+              className="aspect-video w-full rounded-2xl object-cover"
+            />
+            <figcaption className="mt-2 text-xs text-muted-foreground">
+              {lang === "ar"
+                ? "الصورة الرسمية للمرفق — منفصلة عن أدلة الوصول."
+                : "Official facility photo — separate from access evidence."}
+            </figcaption>
+          </figure>
+        ) : null}
+
         <EvidenceGallery facility={facility} gallery={gallery} />
+        <OfficialImageAction facility={facility} />
 
         <div className="mt-5">
           <DecisionSummary decision={decision} hasNeeds={needs.length > 0} />

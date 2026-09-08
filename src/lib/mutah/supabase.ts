@@ -35,6 +35,7 @@ export type ReviewedFacilityRow = {
   source: "mutah_admin" | "volunteer" | "facility_owner";
   verification: "team_reviewed" | "stale";
   last_verified_at: string | null;
+  official_image_path: string | null;
 };
 
 const INDICATOR_KEYS: IndicatorKey[] = [
@@ -70,6 +71,15 @@ function positionFor(id: string) {
   let hash = 0;
   for (const character of id) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   return { x: 0.15 + (hash % 70) / 100, y: 0.15 + ((hash >>> 8) % 70) / 100 };
+}
+
+function publicArea(value: string | null) {
+  if (!value) return "";
+  const withoutPlusCode = value
+    .replace(/\b[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}\b/giu, "")
+    .replace(/^\s*[,·–—-]\s*|\s*[,·–—-]\s*$/g, "")
+    .trim();
+  return withoutPlusCode;
 }
 
 function toFacility(row: ReviewedFacilityRow, summary?: ReviewedSummaryRow): Facility {
@@ -109,12 +119,21 @@ function toFacility(row: ReviewedFacilityRow, summary?: ReviewedSummaryRow): Fac
 
   return {
     id: row.external_key || row.id,
+    databaseId: row.id,
     name: bi(row.name_ar, row.name_en || row.name_ar),
     category: bi(row.category_ar || "مرفق", row.category_en || "Facility"),
-    area: bi(row.area_ar || "", row.area_en || row.area_ar || ""),
+    area: bi(publicArea(row.area_ar), publicArea(row.area_en || row.area_ar)),
     point: positionFor(row.id),
-    imageUrl: "",
-    imageAlt: bi("", ""),
+    ...(row.latitude != null && row.longitude != null
+      ? { coordinates: { latitude: row.latitude, longitude: row.longitude } }
+      : {}),
+    imageUrl: row.official_image_path
+      ? `${config().url}/storage/v1/object/public/mutah-public-facility-media/${encodeURI(row.official_image_path)}`
+      : "",
+    imageAlt: bi(
+      `الصورة الرسمية لـ ${row.name_ar}`,
+      `Official photo of ${row.name_en || row.name_ar}`,
+    ),
     lastVerifiedISO: row.last_verified_at || summary?.last_recomputed_at || "",
     verification: row.verification,
     source: row.source === "mutah_admin" ? "team_survey" : "contributor_image",
@@ -161,7 +180,7 @@ async function rest<T>(path: string): Promise<T> {
  */
 export async function loadReviewedFacilities(): Promise<ReviewedFacilityRow[]> {
   return rest<ReviewedFacilityRow[]>(
-    "facilities?select=id,external_key,name_ar,name_en,category_ar,category_en,area_ar,area_en,latitude,longitude,source,verification,last_verified_at&order=updated_at.desc",
+    "facilities?select=id,external_key,name_ar,name_en,category_ar,category_en,area_ar,area_en,latitude,longitude,source,verification,last_verified_at,official_image_path&order=updated_at.desc",
   );
 }
 

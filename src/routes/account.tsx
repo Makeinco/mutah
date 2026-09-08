@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { ClarificationResponseFlow } from "@/components/mutah/ClarificationResponseFlow";
 import { MyFacilityProposals } from "@/components/mutah/MyFacilityProposals";
+import { MyDisplayImageProposals } from "@/components/mutah/MyDisplayImageProposals";
 import { Button, Card } from "@/components/mutah/ui";
 import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { useAuth } from "@/lib/mutah/auth";
@@ -194,6 +195,7 @@ function AccountPage() {
         </Card>
 
         {user ? <MyFacilityProposals /> : null}
+        {user ? <MyDisplayImageProposals /> : null}
 
         <Card>
           <div className="flex items-center justify-between gap-4">

@@ -1,12 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { decideFor } from "@/lib/mutah/decision";
+import type { Map as MapLibreMap, Marker } from "maplibre-gl";
+import { useEffect, useRef } from "react";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { decideFor, VERDICT_LABEL } from "@/lib/mutah/decision";
 import { useLang } from "@/lib/mutah/i18n";
+import { loadMapLibre } from "@/lib/mutah/maplibre-client";
 import type { AccessNeed, Facility } from "@/lib/mutah/types";
 
-/**
- * Schematic map placeholder. Later replaced by MapLibre/MapTiler.
- * The map is never the only way to discover: the list view is always available.
- */
+const TILE_URL =
+  import.meta.env["VITE_MAP_TILE_URL"] || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const VERDICT_MARK = {
+  available: "✓",
+  partial: "≈",
+  not_available: "!",
+  insufficient: "?",
+} as const;
+const VERDICT_CLASS = {
+  available: "bg-access text-white",
+  partial: "bg-primary text-white",
+  not_available: "bg-caution text-black",
+  insufficient: "bg-unknown text-foreground",
+} as const;
+
 export function SchematicMap({
   facilities,
   needs,
@@ -19,72 +34,92 @@ export function SchematicMap({
   onSelect?: (id: string) => void;
 }) {
   const { pick, lang } = useLang();
+  const host = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const selectRef = useRef(onSelect);
+  selectRef.current = onSelect;
 
+  useEffect(() => {
+    if (!host.current) return;
+    let cancelled = false;
+    const markers: Marker[] = [];
+    void loadMapLibre().then(({ Map, Marker, NavigationControl }) => {
+      if (cancelled || !host.current) return;
+      const located = facilities.filter((f) => f.coordinates);
+      const first = located[0]?.coordinates;
+      const map = new Map({
+        container: host.current,
+        center: first ? [first.longitude, first.latitude] : [46.6753, 24.7136],
+        zoom: located.length ? 11 : 9,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: "raster",
+              tiles: [TILE_URL],
+              tileSize: 256,
+              attribution: "© OpenStreetMap contributors",
+            },
+          },
+          layers: [{ id: "osm", type: "raster", source: "osm" }],
+        },
+        attributionControl: { compact: true },
+      });
+      mapRef.current = map;
+      map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+      for (const facility of located) {
+        const verdict = decideFor(facility, needs).verdict;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `flex size-10 items-center justify-center rounded-full border-2 border-white font-black shadow-md ${VERDICT_CLASS[verdict]}`;
+        button.textContent = VERDICT_MARK[verdict];
+        button.setAttribute(
+          "aria-label",
+          `${pick(facility.name)} — ${pick(VERDICT_LABEL[verdict])}`,
+        );
+        button.onclick = () => selectRef.current?.(facility.id);
+        markers.push(
+          new Marker({ element: button })
+            .setLngLat([facility.coordinates!.longitude, facility.coordinates!.latitude])
+            .addTo(map),
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+      markers.forEach((marker) => marker.remove());
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, [facilities, needs, pick]);
+
+  const selected = facilities.find((facility) => facility.id === selectedId);
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-surface">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
       <div
-        aria-hidden="true"
-        className="absolute inset-0 opacity-70"
-        style={{
-          backgroundImage:
-            "linear-gradient(to left, var(--color-border) 1px, transparent 1px), linear-gradient(to bottom, var(--color-border) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-        }}
+        ref={host}
+        className="h-[22rem] w-full"
+        aria-label={lang === "ar" ? "خريطة المرافق" : "Facilities map"}
       />
-      <div className="relative aspect-4/3 w-full sm:aspect-video">
-        {facilities.map((f) => {
-          const verdict = decideFor(f, needs).verdict;
-          const selected = f.id === selectedId;
-          return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => onSelect?.(f.id)}
-              aria-pressed={selected}
-              style={{ insetInlineStart: `${f.point.x * 100}%`, top: `${f.point.y * 100}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-xl transition-transform focus-visible:z-10 hover:scale-105"
-            >
-              <span
-                className={[
-                  "flex min-h-11 items-center gap-2 rounded-xl border-2 bg-background px-3 py-2 text-xs font-bold shadow-sm",
-                  selected ? "border-primary ring-2 ring-primary" : "border-border",
-                ].join(" ")}
-              >
-                <span
-                  aria-hidden="true"
-                  className={[
-                    "inline-block h-5 w-1.5 rounded-full",
-                    verdict === "available"
-                      ? "bg-access"
-                      : verdict === "not_available"
-                        ? "bg-caution"
-                        : verdict === "partial"
-                          ? "bg-primary"
-                          : "bg-unknown",
-                  ].join(" ")}
-                />
-                {pick(f.name)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="border-t border-border bg-background px-4 py-3 text-sm text-muted-foreground">
+      <p className="border-t border-border bg-background px-4 py-2 text-xs text-muted-foreground">
         {lang === "ar"
-          ? "عرض تخطيطي للمواقع. القائمة تحتوي على المعلومات نفسها بصيغة يمكن قراءتها بالكامل."
-          : "A schematic view. The list holds the same information in a fully readable form."}
+          ? "الخريطة والقائمة تعرضان قرار الوصول نفسه. بيانات الخريطة © مساهمو OpenStreetMap."
+          : "Map and list use the same access verdict. Map data © OpenStreetMap contributors."}
       </p>
-
-      {selectedId ? (
-        <div className="border-t border-border bg-background px-4 py-3">
-          <Link
-            to="/facility/$id"
-            params={{ id: selectedId }}
-            className="text-sm font-semibold text-primary hover:underline"
-          >
-            {lang === "ar" ? "عرض تفاصيل الموقع المحدد" : "View the selected place"}
-          </Link>
+      {selected ? (
+        <div className="border-t border-border bg-background p-4">
+          <p className="font-bold">{pick(selected.name)}</p>
+          <p className="text-sm text-muted-foreground">
+            {pick(VERDICT_LABEL[decideFor(selected, needs).verdict])}
+          </p>
+          <div className="mt-2 flex gap-4 text-sm font-semibold text-primary">
+            <Link to="/facility/$id" params={{ id: selected.id }}>
+              {lang === "ar" ? "التفاصيل" : "Details"}
+            </Link>
+            <Link to="/contribute/$facilityId" params={{ facilityId: selected.id }}>
+              {lang === "ar" ? "ساهم" : "Contribute"}
+            </Link>
+          </div>
         </div>
       ) : null}
     </div>
