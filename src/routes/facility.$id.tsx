@@ -1,5 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CalendarClock, Camera, Flag, Image as ImageIcon, MapPin, ShieldCheck } from "lucide-react";
+import {
+  Bot,
+  CalendarClock,
+  Camera,
+  Flag,
+  Image as ImageIcon,
+  MapPin,
+  Send,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
 import { DecisionSummary } from "@/components/mutah/DecisionSummary";
@@ -154,7 +164,28 @@ function FacilityProfile() {
           <div id="analysis-title">
             <SectionTitle hint={t("analysisTrailHint")}>{t("analysisTrail")}</SectionTitle>
           </div>
-          <Card className="bg-surface">
+          <Card className="mutah-open-edge bg-surface">
+            <ol className="mb-4 grid gap-3 sm:grid-cols-4">
+              {[
+                { icon: Bot, ar: "رصد الذكاء الاصطناعي", en: "AI observed" },
+                { icon: UserCheck, ar: "أكد المساهم أو صحّح", en: "Contributor confirmed or corrected" },
+                { icon: ShieldCheck, ar: "راجع فريق مُتاح", en: "MUTAH reviewed" },
+                { icon: Send, ar: "نُشرت المعلومة", en: "Information published" },
+              ].map((step, index) => {
+                const StepIcon = step.icon;
+                return (
+                  <li key={step.en} className="rounded-xl border border-border bg-background p-3 text-sm">
+                    <span className="mb-2 flex size-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                      <StepIcon className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="font-semibold">{lang === "ar" ? step.ar : step.en}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {lang === "ar" ? `الخطوة ${index + 1}` : `Step ${index + 1}`}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 {t("source")}:{" "}

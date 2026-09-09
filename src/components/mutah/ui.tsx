@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 /* Buttons ------------------------------------------------------------------ */
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold shadow-sm transition-[color,background-color,border-color,transform,box-shadow] duration-200 active:translate-y-px disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -49,7 +49,7 @@ export function Card({
   as?: "div" | "article" | "li" | "section";
 }) {
   return (
-    <As className={cn("rounded-2xl border border-border bg-card p-5", className)}>{children}</As>
+    <As className={cn("mutah-surface rounded-2xl border border-border bg-card p-5", className)}>{children}</As>
   );
 }
 
@@ -157,7 +157,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border-2 border-dashed border-border px-6 py-12 text-center">
+    <div className="rounded-2xl border-2 border-dashed border-border bg-surface/60 px-6 py-12 text-center">
       <p className="text-base font-bold">{title}</p>
       <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}

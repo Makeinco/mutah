@@ -84,7 +84,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
     missing === 0 ? CircleCheck : decision.completeness === 0 ? CircleAlert : Clock3;
 
   return (
-    <article className="group overflow-hidden rounded-3xl border border-border bg-card transition-colors hover:border-primary/30">
+    <article className="mutah-surface mutah-open-edge group overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/30">
       <div className="flex gap-4 p-4 sm:p-5">
         {facility.imageUrl ? (
           <img
@@ -140,7 +140,7 @@ export function FacilityCard({ facility, needs }: { facility: Facility; needs: A
         </div>
       </div>
 
-      <div className="border-t border-border px-4 py-4 sm:px-5">
+      <div className="border-t border-border bg-surface/45 px-4 py-4 sm:px-5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <p className="text-sm font-bold">{lang === "ar" ? "احتياجات الوصول" : "Access needs"}</p>
           <span className="text-xs text-muted-foreground">

@@ -34,7 +34,7 @@ export const GENERAL_FOCUS_LABEL: Record<Extract<ZoneKey, "approach" | "entrance
 export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   approach: {
     assetKey: "approach-path",
-    image: "/guides/approach-path.webp",
+    image: "/guides/approach-path-transparent.png",
     title: { ar: "مثال لمسار الوصول المناسب", en: "Example of a useful approach-path photo" },
     helper: {
       ar: "صوّر المسار من نقطة الوصول حتى المدخل، مع إبقاء العناصر المحيطة ظاهرة.",
@@ -55,7 +55,7 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   },
   entrance: {
     assetKey: "entrance",
-    image: "/guides/entrance.webp",
+    image: "/guides/entrance-transparent.png",
     title: { ar: "مثال لصورة المدخل المناسبة", en: "Example of a useful entrance photo" },
     helper: {
       ar: "صوّر المدخل والمساحة المؤدية إليه بحيث يظهر اتصال المسار بالباب.",
@@ -76,7 +76,7 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   },
   parking: {
     assetKey: "parking",
-    image: "/guides/parking.webp",
+    image: "/guides/parking-transparent.png",
     title: { ar: "مثال لصورة المواقف المناسبة", en: "Example of a useful parking photo" },
     helper: {
       ar: "صوّر الموقف والعلامات المرئية وصلته بمسار الوصول إلى المبنى.",
@@ -97,7 +97,7 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   },
   elevator: {
     assetKey: "elevator",
-    image: "/guides/elevator.webp",
+    image: "/guides/elevator-transparent.png",
     title: { ar: "مثال لصورة المصعد المناسبة", en: "Example of a useful elevator photo" },
     helper: {
       ar: "صوّر باب المصعد والمنطقة أمامه، وأضف زاوية أخرى للأزرار عند الحاجة.",
@@ -121,7 +121,7 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
   },
   restroom: {
     assetKey: "accessible-restroom",
-    image: "/guides/accessible-restroom.webp",
+    image: "/guides/accessible-restroom-transparent.png",
     title: {
       ar: "مثال لصورة دورة المياه المخصصة",
       en: "Example of a useful accessible-restroom photo",
@@ -154,7 +154,7 @@ export const ZONE_GUIDE_ASSETS: Record<ZoneKey, GuideAsset> = {
 export const INDICATOR_GUIDE_ASSETS: Record<Exclude<FocusIndicator, "general">, GuideAsset> = {
   ramp: {
     assetKey: "ramp",
-    image: "/guides/ramp.webp",
+    image: "/guides/ramp-transparent.png",
     title: { ar: "مثال لصورة منحدر واضحة", en: "Example of a clear ramp photo" },
     helper: {
       ar: "أظهر المنحدر كاملًا وبداية ونهاية المسار إن أمكن.",
@@ -175,7 +175,7 @@ export const INDICATOR_GUIDE_ASSETS: Record<Exclude<FocusIndicator, "general">, 
   },
   handrail: {
     assetKey: "handrail",
-    image: "/guides/handrail.webp",
+    image: "/guides/handrail-transparent.png",
     title: { ar: "مثال لصورة درابزين واضحة", en: "Example of a clear handrail photo" },
     helper: {
       ar: "أظهر الدرابزين وعلاقته بالمسار أو المدخل.",
@@ -196,7 +196,7 @@ export const INDICATOR_GUIDE_ASSETS: Record<Exclude<FocusIndicator, "general">, 
   },
   path_obstruction: {
     assetKey: "path-obstruction",
-    image: "/guides/path-obstruction.webp",
+    image: "/guides/path-obstruction-transparent.png",
     title: { ar: "مثال لصورة عائق في المسار", en: "Example of a path-obstruction photo" },
     helper: {
       ar: "أظهر العائق والمسار المحيط به بوضوح.",

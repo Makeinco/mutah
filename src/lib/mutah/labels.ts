@@ -156,6 +156,7 @@ const EN_MONTHS = [
 
 export function formatDate(iso: string, lang: Lang): string {
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return lang === "ar" ? "التاريخ غير متاح" : "Date unavailable";
   const months = lang === "ar" ? AR_MONTHS : EN_MONTHS;
   return lang === "ar"
     ? `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
@@ -163,7 +164,11 @@ export function formatDate(iso: string, lang: Lang): string {
 }
 
 export function relativeDate(iso: string, lang: Lang, now = new Date()): string {
-  const days = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 86400000));
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime()) || Number.isNaN(now.getTime())) {
+    return lang === "ar" ? "وقت التحديث غير متاح" : "Update time unavailable";
+  }
+  const days = Math.max(0, Math.round((now.getTime() - date.getTime()) / 86400000));
   if (lang === "ar") {
     if (days === 0) return "اليوم";
     if (days === 1) return "أمس";

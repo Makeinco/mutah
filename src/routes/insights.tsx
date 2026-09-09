@@ -76,21 +76,21 @@ function Insights() {
     <AppShell title={t("navInsights")} wide>
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">{t("navInsights")}</h1>
-        <Tag tone="warn">{ar ? "بيانات تجريبية للعرض" : "Demo data"}</Tag>
+        <Tag tone="brand">{ar ? "بيانات المرحلة التجريبية" : "Pilot data"}</Tag>
       </div>
       <p className="mt-1 max-w-3xl text-muted-foreground">
         {ar
-          ? "هذه الأرقام مولدة من بيانات النموذج التجريبي داخل التطبيق وليست نتائج ميدانية أو مؤشرات وطنية. في الـPilot ستُستبدل ببيانات مراجعة فعلية."
-          : "These figures come from the in-app demo dataset. They are not field results or national indicators and will be replaced by reviewed pilot data."}
+          ? "تلخّص هذه الأرقام البيانات المتاحة حاليًا في تجربة مُتاح. هي ليست مؤشرات وطنية ولا ترتيبًا للمدن، وقد تتغير مع مراجعة أدلة جديدة."
+          : "These figures summarise the data currently available in the MUTAH pilot. They are not national indicators or city rankings and may change as new evidence is reviewed."}
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Metric label={ar ? "المرافق التجريبية" : "Demo facilities"} value={facilities.length} />
+        <Metric label={ar ? "المرافق في المرحلة التجريبية" : "Pilot facilities"} value={facilities.length} />
         <Metric label={ar ? "صور الأدلة" : "Evidence images"} value={totalImages} />
         <Metric label={ar ? "مناطق الأدلة الموثقة" : "Documented evidence zones"} value={documentedZones} />
         <Metric label={ar ? "مساهمات معتمدة" : "Approved contributions"} value={reviewed} />
         <Metric
-          label={ar ? "اكتمال بيانات العينة التجريبية" : "Demo dataset completeness"}
+          label={ar ? "اكتمال البيانات المتاحة" : "Available data completeness"}
           value={`${completeness}%`}
         />
         <Metric label={ar ? "مرافق تحتاج تحديثًا" : "Facilities needing updates"} value={needsUpdate} />
@@ -101,11 +101,11 @@ function Insights() {
           <SectionTitle
             hint={
               ar
-                ? "عدّ وصفي داخل بيانات العرض الحالية، وليس ترتيبًا أو مؤشرًا رسميًا."
-                : "A descriptive count within the current demo data, not a ranking or official indicator."
+                ? "عدّ وصفي داخل بيانات المرحلة التجريبية الحالية، وليس ترتيبًا أو مؤشرًا رسميًا."
+                : "A descriptive count within the current pilot data, not a ranking or official indicator."
             }
           >
-            {ar ? "الحواجز المرصودة في بيانات العرض" : "Barriers observed in demo data"}
+            {ar ? "الحواجز المرصودة في البيانات المتاحة" : "Barriers observed in available data"}
           </SectionTitle>
         </div>
 

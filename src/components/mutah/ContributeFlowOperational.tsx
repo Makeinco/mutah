@@ -533,11 +533,11 @@ function GuideImage({ asset }: { asset: GuideAsset }) {
   const { pick } = useLang();
 
   return (
-    <div className="flex min-h-36 items-center justify-center bg-muted/40 p-3 sm:min-h-48 sm:p-5">
+    <div className="flex min-h-36 items-center justify-center bg-primary-soft/55 p-3 sm:min-h-48 sm:p-5">
       <img
         src={asset.image}
         alt={pick(asset.alt)}
-        className="max-h-56 w-full object-contain sm:max-h-64"
+        className="guide-art max-h-56 w-full object-contain sm:max-h-64"
       />
     </div>
   );
@@ -554,7 +554,7 @@ function ZoneGuideCard({
   const guide = getGuideAsset(zone, focusIndicator);
   return (
     <section
-      className="door-reveal mt-6 overflow-hidden rounded-3xl border border-border bg-surface"
+      className="door-reveal mutah-surface mutah-open-edge mt-6 overflow-hidden rounded-2xl border border-border bg-surface"
       aria-labelledby="zone-guide-title"
     >
       <div className="grid sm:grid-cols-[minmax(220px,0.9fr)_minmax(0,1.1fr)]">

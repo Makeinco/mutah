@@ -51,7 +51,13 @@ export function AppShell({
           <div className="flex items-center gap-2">
             <nav aria-label={t("mainNav")} className="hidden items-center gap-1 md:flex">
               {NAV.map(({ to, key, primary }) => {
-                const activeProps = primary ? {} : { activeProps: { className: "bg-primary-soft text-primary" } };
+                const activeProps = {
+                  activeProps: {
+                    className: primary
+                      ? "ring-2 ring-primary ring-offset-2"
+                      : "bg-primary-soft text-primary",
+                  },
+                };
                 return (
                   <Link
                     key={to}
@@ -90,7 +96,7 @@ export function AppShell({
       >
         <ul className="mx-auto grid max-w-md grid-cols-5 items-end px-1 pb-[max(.25rem,env(safe-area-inset-bottom))]">
           {NAV.map(({ to, key, icon: Icon, primary }) => {
-            const activeProps = primary ? {} : { activeProps: { className: "text-primary" } };
+            const activeProps = { activeProps: { className: "text-primary" } };
             return (
               <li key={to} className="min-w-0">
                 <Link
@@ -105,7 +111,7 @@ export function AppShell({
                     className={cn(
                       "flex items-center justify-center",
                       primary
-                        ? "size-14 rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-sm"
+                        ? "size-14 rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-[var(--shadow-raised)]"
                         : "size-7",
                     )}
                   >

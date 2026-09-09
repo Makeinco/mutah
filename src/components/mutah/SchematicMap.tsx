@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Map as MapLibreMap, Marker } from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { decideFor, VERDICT_LABEL } from "@/lib/mutah/decision";
 import { useLang } from "@/lib/mutah/i18n";
@@ -36,11 +36,13 @@ export function SchematicMap({
   const { pick, lang } = useLang();
   const host = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
   const selectRef = useRef(onSelect);
   selectRef.current = onSelect;
 
   useEffect(() => {
     if (!host.current) return;
+    setMapState("loading");
     let cancelled = false;
     const markers: Marker[] = [];
     void loadMapLibre().then(({ Map, Marker, NavigationControl }) => {
@@ -66,13 +68,18 @@ export function SchematicMap({
         attributionControl: { compact: true },
       });
       mapRef.current = map;
+      map.once("load", () => setMapState("ready"));
       map.addControl(new NavigationControl({ showCompass: false }), "top-right");
       for (const facility of located) {
         const verdict = decideFor(facility, needs).verdict;
         const button = document.createElement("button");
         button.type = "button";
-        button.className = `flex size-10 items-center justify-center rounded-full border-2 border-white font-black shadow-md ${VERDICT_CLASS[verdict]}`;
-        button.textContent = VERDICT_MARK[verdict];
+        button.className = `mutah-map-marker flex items-center justify-center border-2 border-white font-black ${VERDICT_CLASS[verdict]}`;
+        button.dataset["facilityId"] = facility.id;
+        button.dataset["selected"] = "false";
+        const mark = document.createElement("span");
+        mark.textContent = VERDICT_MARK[verdict];
+        button.append(mark);
         button.setAttribute(
           "aria-label",
           `${pick(facility.name)} — ${pick(VERDICT_LABEL[verdict])}`,
@@ -84,6 +91,8 @@ export function SchematicMap({
             .addTo(map),
         );
       }
+    }).catch(() => {
+      if (!cancelled) setMapState("error");
     });
     return () => {
       cancelled = true;
@@ -93,9 +102,30 @@ export function SchematicMap({
     };
   }, [facilities, needs, pick]);
 
+  useEffect(() => {
+    const markerButtons = host.current?.querySelectorAll<HTMLButtonElement>(".mutah-map-marker");
+    markerButtons?.forEach((button) => {
+      button.dataset["selected"] = String(button.dataset["facilityId"] === selectedId);
+    });
+  }, [selectedId, facilities]);
+
   const selected = facilities.find((facility) => facility.id === selectedId);
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+    <div className="mutah-surface overflow-hidden rounded-2xl border border-border bg-surface">
+      {mapState !== "ready" ? (
+        <div
+          className="flex min-h-14 items-center justify-center border-b border-border bg-background px-4 text-sm text-muted-foreground"
+          role="status"
+        >
+          {mapState === "loading"
+            ? lang === "ar"
+              ? "جاري تحميل الخريطة…"
+              : "Loading map…"
+            : lang === "ar"
+              ? "تعذر تحميل الخريطة. استخدم القائمة لعرض المرافق."
+              : "The map could not load. Use the list to browse facilities."}
+        </div>
+      ) : null}
       <div
         ref={host}
         className="h-[22rem] w-full"

@@ -35,7 +35,7 @@ export function DecisionSummary({
   return (
     <section
       aria-labelledby="decision-title"
-      className={cn("door-reveal rounded-2xl border-2 p-5", style.frame)}
+      className={cn("door-reveal mutah-surface mutah-open-edge rounded-2xl border-2 p-5", style.frame)}
     >
       <p className="mb-2 text-sm font-semibold text-muted-foreground">{t("personalStatus")}</p>
       <div className="flex items-start gap-3">
@@ -56,7 +56,7 @@ export function DecisionSummary({
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
-            className="mt-4 min-h-11 rounded-xl bg-background/70 px-4 text-sm font-bold hover:bg-background"
+            className="mt-4 min-h-11 rounded-xl border border-border bg-background/80 px-4 text-sm font-bold transition-colors hover:bg-background"
           >
             {t("whyThisResult")}
           </button>
@@ -64,7 +64,7 @@ export function DecisionSummary({
           {open ? (
             <ul className="door-reveal mt-3 space-y-2">
               {decision.results.map((r) => (
-                <li key={r.need} className="flex gap-2 rounded-xl bg-background/70 p-3 text-sm">
+                <li key={r.need} className="flex gap-2 rounded-xl border border-border/70 bg-background/80 p-3 text-sm">
                   <span aria-hidden="true" className="font-bold">
                     {r.outcome === "met" ? "✓" : r.outcome === "not_met" ? "✕" : "?"}
                   </span>
