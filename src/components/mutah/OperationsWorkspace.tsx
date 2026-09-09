@@ -54,7 +54,11 @@ export function OperationsWorkspace() {
         setReports(reportRows);
       })
       .catch(() =>
-        setMessage(ar ? "تعذر تحميل بيانات العمليات." : "Operations data could not be loaded."),
+        setMessage(
+          ar
+            ? "تعذر تحميل بيانات العمليات. لم تتغير البيانات؛ أعد المحاولة."
+            : "Operations data could not be loaded. Nothing changed; try again.",
+        ),
       )
       .finally(() => setBusy(false));
   }, [ar]);
@@ -128,7 +132,11 @@ export function OperationsWorkspace() {
       setOfficialImage(null);
       await load();
     } catch {
-      setMessage(ar ? "لم يُحفظ المرفق." : "Facility was not saved.");
+      setMessage(
+        ar
+          ? "لم يُحفظ المرفق. راجع الحقول وسبب التغيير ثم أعد المحاولة."
+          : "The facility was not saved. Review the fields and change reason, then try again.",
+      );
       setBusy(false);
     }
   };
@@ -141,9 +149,22 @@ export function OperationsWorkspace() {
     setBusy(true);
     try {
       await adminSetFacilityArchived(item.id, !item.is_archived, reason);
+      setMessage(
+        item.is_archived
+          ? ar
+            ? "تمت استعادة المرفق وسُجل السبب."
+            : "Facility restored and the reason was recorded."
+          : ar
+            ? "تمت أرشفة المرفق وسُجل السبب."
+            : "Facility archived and the reason was recorded.",
+      );
       await load();
     } catch {
-      setMessage(ar ? "لم تتغير حالة الأرشفة." : "Archive state was unchanged.");
+      setMessage(
+        ar
+          ? "لم تتغير حالة الأرشفة. تحقق من صلاحيتك ثم أعد المحاولة."
+          : "Archive state was unchanged. Check your access and try again.",
+      );
       setBusy(false);
     }
   };
@@ -153,9 +174,22 @@ export function OperationsWorkspace() {
     try {
       await resolveFacilityReport(report.id, next, resolution);
       setResolution("");
+      setMessage(
+        next === "resolved"
+          ? ar
+            ? "تم حل البلاغ وتسجيل القرار."
+            : "Report resolved and the decision was recorded."
+          : ar
+            ? "أُغلق البلاغ دون تغيير وسُجل السبب."
+            : "Report dismissed without a change and the reason was recorded.",
+      );
       await load();
     } catch {
-      setMessage(ar ? "لم يُحفظ قرار البلاغ." : "Report decision was not saved.");
+      setMessage(
+        ar
+          ? "لم يُحفظ قرار البلاغ. لم تتغير البيانات؛ أعد المحاولة."
+          : "The report decision was not saved. Nothing changed; try again.",
+      );
       setBusy(false);
     }
   };
@@ -289,8 +323,27 @@ export function OperationsWorkspace() {
         ) : (
           <div className="mt-3">
             <EmptyState
-              title={ar ? "لا نتائج" : "No results"}
-              description={ar ? "عدّل عوامل التصفية." : "Adjust the filters."}
+              title={ar ? "لا توجد مرافق تطابق التصفية" : "No facilities match these filters"}
+              description={
+                ar
+                  ? "غيّر البحث أو امسح عوامل التصفية لعرض المرافق المتاحة."
+                  : "Change the search or clear the filters to see available facilities."
+              }
+              action={
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setSearch("");
+                    setStatus("all");
+                    setCategory("all");
+                    setFreshness("all");
+                    setArchive("active");
+                  }}
+                >
+                  {ar ? "مسح التصفية" : "Clear filters"}
+                </Button>
+              }
             />
           </div>
         )}
@@ -399,7 +452,12 @@ export function OperationsWorkspace() {
             ) : null}
             <div className="mt-4 flex gap-2">
               <Button
-                disabled={busy || !form.name_ar.trim() || !form.category_ar.trim()}
+                disabled={
+                  busy ||
+                  !form.name_ar.trim() ||
+                  !form.category_ar.trim() ||
+                  form.reason.trim().length < 4
+                }
                 onClick={() => void save()}
               >
                 <Save className="size-4" />
@@ -441,7 +499,7 @@ export function OperationsWorkspace() {
                         onChange={(event) => setResolution(event.target.value)}
                       />
                     </label>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         disabled={resolution.trim().length < 4}

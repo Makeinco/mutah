@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Building2,
   ClipboardCheck,
+  CircleAlert,
   FileWarning,
   History,
   LoaderCircle,
@@ -39,6 +40,7 @@ const ITEMS = [
     bodyAr: "مراجعة حزم الأدلة قبل النشر.",
     bodyEn: "Review evidence bundles before publishing.",
     to: "/review" as const,
+    kind: "action" as const,
   },
   {
     icon: Building2,
@@ -47,6 +49,7 @@ const ITEMS = [
     bodyAr: "إدارة هوية المرافق ومناطق التوثيق.",
     bodyEn: "Manage facility identity and evidence zones.",
     href: "#facility-management",
+    kind: "action" as const,
   },
   {
     icon: UsersRound,
@@ -54,6 +57,7 @@ const ITEMS = [
     en: "Contributors",
     bodyAr: "متابعة المساهمات دون إنشاء ملفات شخصية تدخّلية.",
     bodyEn: "Track contributions without invasive profiling.",
+    kind: "context" as const,
   },
   {
     icon: FileWarning,
@@ -62,6 +66,7 @@ const ITEMS = [
     bodyAr: "بلاغات التغيير المفتوحة وقراراتها.",
     bodyEn: "Open change reports and their decisions.",
     href: "#reports",
+    kind: "action" as const,
   },
   {
     icon: ShieldCheck,
@@ -69,6 +74,7 @@ const ITEMS = [
     en: "Data quality",
     bodyAr: "الأدلة القديمة والمناطق غير الموثقة والتعارضات.",
     bodyEn: "Stale evidence, missing zones, and conflicts.",
+    kind: "context" as const,
   },
   {
     icon: History,
@@ -76,6 +82,7 @@ const ITEMS = [
     en: "Audit log",
     bodyAr: "من اتخذ القرار ومتى ولماذا.",
     bodyEn: "Who made a decision, when, and why.",
+    kind: "context" as const,
   },
 ];
 
@@ -163,16 +170,28 @@ function OperationsPage() {
             </Card>
           ) : error ? (
             <Card className="mt-8">
-              <p className="font-semibold">
-                {ar
-                  ? "تعذر تحميل المؤشرات التشغيلية الآن."
-                  : "Operational metrics could not be loaded."}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {ar
-                  ? "لم يؤثر ذلك على البيانات؛ حاول التحديث مرة أخرى."
-                  : "No data was changed; try refreshing again."}
-              </p>
+              <div className="flex items-start gap-3">
+                <CircleAlert
+                  className="mt-0.5 size-5 shrink-0 text-destructive"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="font-semibold">
+                    {ar
+                      ? "تعذر تحميل المؤشرات التشغيلية الآن."
+                      : "Operational metrics could not be loaded."}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {ar
+                      ? "لم يؤثر ذلك على البيانات؛ حاول التحديث مرة أخرى."
+                      : "No data was changed; try refreshing again."}
+                  </p>
+                  <Button size="sm" variant="outline" className="mt-3" onClick={() => void load()}>
+                    <RefreshCw className="size-4" aria-hidden="true" />
+                    {ar ? "إعادة المحاولة" : "Try again"}
+                  </Button>
+                </div>
+              </div>
             </Card>
           ) : (
             <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -187,8 +206,44 @@ function OperationsPage() {
             </div>
           )}
 
+          {overview ? (
+            <Card className="mt-6 border-primary/25 bg-primary-soft/30">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-primary">
+                    {ar ? "يتطلب قرارًا الآن" : "Requires a decision now"}
+                  </p>
+                  <p className="mt-1 text-2xl font-bold">
+                    {overview.pending_review +
+                      overview.proposals_recommended +
+                      overview.open_reports}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {ar
+                      ? "مساهمات بانتظار المراجعة، ومقترحات موصى بها، وبلاغات مفتوحة."
+                      : "Pending contributions, recommended proposals, and open reports."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to="/review"
+                    className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+                  >
+                    {ar ? "فتح قرارات المراجعة" : "Open review decisions"}
+                  </Link>
+                  <a
+                    href="#reports"
+                    className="inline-flex min-h-11 items-center rounded-xl border-2 border-input bg-background px-4 py-2 text-sm font-semibold"
+                  >
+                    {ar ? "فتح البلاغات" : "Open reports"}
+                  </a>
+                </div>
+              </div>
+            </Card>
+          ) : null}
+
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {ITEMS.map(({ icon: Icon, ar: arTitle, en, bodyAr, bodyEn, ...item }) => {
+            {ITEMS.map(({ icon: Icon, ar: arTitle, en, bodyAr, bodyEn, kind, ...item }) => {
               const content = (
                 <Card className="h-full transition-colors hover:border-primary/40">
                   <Icon className="size-6 text-primary" aria-hidden="true" />
@@ -198,7 +253,13 @@ function OperationsPage() {
                     <p className="mt-4 text-sm font-semibold text-primary">{ar ? "فتح" : "Open"}</p>
                   ) : (
                     <p className="mt-4 text-xs font-semibold text-muted-foreground">
-                      {ar ? "قيد الاستكمال التشغيلي" : "Operational build in progress"}
+                      {kind === "context"
+                        ? ar
+                          ? "ملخص معلوماتي من بيانات التشغيل الحالية"
+                          : "Informational summary from current operations data"
+                        : ar
+                          ? "إجراء تشغيلي"
+                          : "Operational action"}
                     </p>
                   )}
                 </Card>

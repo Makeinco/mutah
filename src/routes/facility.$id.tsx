@@ -3,6 +3,8 @@ import {
   Bot,
   CalendarClock,
   Camera,
+  CircleCheck,
+  CircleDashed,
   Flag,
   Image as ImageIcon,
   MapPin,
@@ -118,9 +120,6 @@ function FacilityProfile() {
           </figure>
         ) : null}
 
-        <EvidenceGallery facility={facility} gallery={gallery} />
-        <OfficialImageAction facility={facility} />
-
         <div className="mt-5">
           <DecisionSummary decision={decision} hasNeeds={needs.length > 0} />
         </div>
@@ -130,6 +129,8 @@ function FacilityProfile() {
             {pending.length} {t("pendingHere")}
           </p>
         ) : null}
+
+        <EvidenceGallery facility={facility} gallery={gallery} />
 
         <section aria-labelledby="evidence-title" className="mt-10">
           <div id="evidence-title">
@@ -167,20 +168,61 @@ function FacilityProfile() {
           <Card className="mutah-open-edge bg-surface">
             <ol className="mb-4 grid gap-3 sm:grid-cols-4">
               {[
-                { icon: Bot, ar: "رصد الذكاء الاصطناعي", en: "AI observed" },
-                { icon: UserCheck, ar: "أكد المساهم أو صحّح", en: "Contributor confirmed or corrected" },
-                { icon: ShieldCheck, ar: "راجع فريق مُتاح", en: "MUTAH reviewed" },
-                { icon: Send, ar: "نُشرت المعلومة", en: "Information published" },
-              ].map((step, index) => {
+                {
+                  icon: Bot,
+                  ar: "رصد الذكاء الاصطناعي",
+                  en: "AI observed",
+                  complete: facility.source === "contributor_image" && documentedZones > 0,
+                  applicable: facility.source === "contributor_image",
+                },
+                {
+                  icon: UserCheck,
+                  ar: "أكد المساهم أو صحّح",
+                  en: "Contributor confirmed or corrected",
+                  complete:
+                    facility.source === "contributor_image" &&
+                    !["contributor_only", "pending_review"].includes(facility.verification),
+                  applicable: facility.source === "contributor_image",
+                },
+                {
+                  icon: ShieldCheck,
+                  ar: "راجع فريق مُتاح",
+                  en: "MUTAH reviewed",
+                  complete: ["team_reviewed", "stale"].includes(facility.verification),
+                  applicable: true,
+                },
+                {
+                  icon: Send,
+                  ar: "نُشرت المعلومة",
+                  en: "Information published",
+                  complete: ["team_reviewed", "stale"].includes(facility.verification),
+                  applicable: true,
+                },
+              ].map((step) => {
                 const StepIcon = step.icon;
+                const StateIcon = step.complete ? CircleCheck : CircleDashed;
                 return (
-                  <li key={step.en} className="rounded-xl border border-border bg-background p-3 text-sm">
+                  <li
+                    key={step.en}
+                    className={`rounded-xl border p-3 text-sm ${step.complete ? "border-access/30 bg-access-soft/40" : "border-dashed border-input bg-background"}`}
+                  >
                     <span className="mb-2 flex size-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
                       <StepIcon className="size-4" aria-hidden="true" />
                     </span>
                     <span className="font-semibold">{lang === "ar" ? step.ar : step.en}</span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {lang === "ar" ? `الخطوة ${index + 1}` : `Step ${index + 1}`}
+                    <span className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <StateIcon className="size-3.5" aria-hidden="true" />
+                      {!step.applicable
+                        ? lang === "ar"
+                          ? "غير منطبق على مصدر هذا السجل"
+                          : "Not part of this record's source"
+                        : step.complete
+                          ? lang === "ar"
+                            ? "مكتملة لهذا السجل"
+                            : "Complete for this record"
+                          : lang === "ar"
+                            ? "لم تكتمل لهذا السجل"
+                            : "Not complete for this record"}
                     </span>
                   </li>
                 );
@@ -224,6 +266,10 @@ function FacilityProfile() {
             </ul>
           </Card>
         </section>
+
+        <div className="mt-8">
+          <OfficialImageAction facility={facility} />
+        </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button

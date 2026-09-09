@@ -9,9 +9,17 @@ const VERDICT_STYLE: Record<
   Verdict,
   { icon: ComponentType<{ className?: string }>; frame: string; accent: string }
 > = {
-  available: { icon: CircleCheck, frame: "border-access bg-access-soft", accent: "text-access-strong" },
+  available: {
+    icon: CircleCheck,
+    frame: "border-access bg-access-soft",
+    accent: "text-access-strong",
+  },
   partial: { icon: CircleAlert, frame: "border-caution bg-caution-soft", accent: "text-caution" },
-  not_available: { icon: CircleSlash, frame: "border-destructive/50 bg-destructive/5", accent: "text-destructive" },
+  not_available: {
+    icon: CircleSlash,
+    frame: "border-destructive/50 bg-destructive/5",
+    accent: "text-destructive",
+  },
   insufficient: {
     icon: CircleHelp,
     frame: "border-input border-dashed bg-unknown-soft",
@@ -19,13 +27,7 @@ const VERDICT_STYLE: Record<
   },
 };
 
-export function DecisionSummary({
-  decision,
-  hasNeeds,
-}: {
-  decision: Decision;
-  hasNeeds: boolean;
-}) {
+export function DecisionSummary({ decision, hasNeeds }: { decision: Decision; hasNeeds: boolean }) {
   const { pick, t, lang } = useLang();
   const [open, setOpen] = useState(false);
   const style = VERDICT_STYLE[decision.verdict];
@@ -35,7 +37,10 @@ export function DecisionSummary({
   return (
     <section
       aria-labelledby="decision-title"
-      className={cn("door-reveal mutah-surface mutah-open-edge rounded-2xl border-2 p-5", style.frame)}
+      className={cn(
+        "door-reveal mutah-surface mutah-open-edge rounded-2xl border-2 p-5",
+        style.frame,
+      )}
     >
       <p className="mb-2 text-sm font-semibold text-muted-foreground">{t("personalStatus")}</p>
       <div className="flex items-start gap-3">
@@ -64,10 +69,26 @@ export function DecisionSummary({
           {open ? (
             <ul className="door-reveal mt-3 space-y-2">
               {decision.results.map((r) => (
-                <li key={r.need} className="flex gap-2 rounded-xl border border-border/70 bg-background/80 p-3 text-sm">
-                  <span aria-hidden="true" className="font-bold">
-                    {r.outcome === "met" ? "✓" : r.outcome === "not_met" ? "✕" : "?"}
-                  </span>
+                <li
+                  key={r.need}
+                  className="flex gap-2 rounded-xl border border-border/70 bg-background/80 p-3 text-sm"
+                >
+                  {r.outcome === "met" ? (
+                    <CircleCheck
+                      className="mt-0.5 size-4 shrink-0 text-access-strong"
+                      aria-hidden="true"
+                    />
+                  ) : r.outcome === "not_met" ? (
+                    <CircleAlert
+                      className="mt-0.5 size-4 shrink-0 text-caution"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <CircleHelp
+                      className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  )}
                   <span>
                     <span className="font-semibold">{pick(ACCESS_NEED_LABEL[r.need])}</span>
                     <span className="text-muted-foreground"> — {pick(r.reason)}</span>
