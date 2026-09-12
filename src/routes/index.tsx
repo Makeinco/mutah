@@ -28,8 +28,7 @@ export const Route = createFileRoute("/")({
       { title: "مُتاح ماب | اعرف قبل أن تصل" },
       {
         name: "description",
-        content:
-          "معلومات وصول واضحة وموثقة تساعدك على اتخاذ قرارك قبل الزيارة، مع أدلة مرئية ومراجعة بشرية.",
+        content: "معلومات وصول واضحة وموثقة تساعدك على اتخاذ قرارك قبل الزيارة، مع أدلة مرئية ومراجعة بشرية.",
       },
       { property: "og:title", content: "مُتاح ماب | اعرف قبل أن تصل" },
       {
@@ -73,23 +72,23 @@ function Home() {
     <>
       <HomeSplash />
       <div className="min-h-dvh bg-white pb-20 text-foreground md:pb-0">
-        <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/94 backdrop-blur-xl">
-          <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 md:px-8 lg:px-12">
+        <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/95 backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between px-5 md:px-8 lg:px-10">
             <Link to="/" aria-label={`${t("brand")} — ${t("home")}`} className="shrink-0">
               <MutahLogo className="h-8 md:h-9" />
             </Link>
 
             <nav aria-label={t("mainNav")} className="hidden items-center gap-1 lg:flex">
-              <Link to="/" className="rounded-full bg-primary-soft px-5 py-2.5 text-sm font-bold text-primary">
+              <Link to="/" className="rounded-full bg-primary-soft px-4 py-2 text-sm font-bold text-primary">
                 {lang === "ar" ? "الرئيسية" : "Home"}
               </Link>
-              <Link to="/discover" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <Link to="/discover" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "استكشف" : "Explore"}
               </Link>
-              <Link to="/contribute" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <Link to="/contribute" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "ساهم" : "Contribute"}
               </Link>
-              <Link to="/ecosystem" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <Link to="/ecosystem" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "مُتاح" : "MUTAH"}
               </Link>
             </nav>
@@ -99,23 +98,23 @@ function Home() {
         </header>
 
         <main id="main-content">
-          <section className="relative overflow-hidden bg-white">
-            <div className="mx-auto grid max-w-[1440px] items-center gap-7 px-5 pb-10 pt-7 md:grid-cols-[0.96fr_1.04fr] md:gap-8 md:px-8 md:pb-14 md:pt-10 lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12">
-              <div className="order-2 max-w-[620px] md:order-1 md:justify-self-start rtl:md:justify-self-end">
-                <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
+          <section className="bg-white">
+            <div className="mx-auto grid max-w-[1480px] items-center gap-6 px-5 py-7 md:grid-cols-[0.9fr_1.1fr] md:gap-10 md:px-8 md:py-9 lg:px-10 lg:py-10">
+              <div className="order-2 max-w-[560px] md:order-1 md:justify-self-start rtl:md:justify-self-end">
+                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-[13px]">
                   {lang === "ar" ? "مُتاح ماب | MUTAH MAP" : "MUTAH MAP | مُتاح ماب"}
                 </p>
 
-                <h1 className="mt-3 text-[clamp(2.65rem,4.35vw,4.7rem)] font-bold leading-[1.03] tracking-[-0.038em] text-slate-950">
+                <h1 className="mt-3 text-[clamp(2.65rem,4vw,4.15rem)] font-bold leading-[1.04] tracking-[-0.035em] text-slate-950">
                   {t("tagline")}
                 </h1>
 
-                <p className="mt-4 max-w-[560px] text-base leading-8 text-slate-600 md:text-lg lg:text-[1.2rem]">
+                <p className="mt-4 max-w-[520px] text-base leading-8 text-slate-600 md:text-[1.05rem]">
                   {copy.heroBody}
                 </p>
 
                 <form
-                  className="mt-7 max-w-[600px]"
+                  className="mt-6 max-w-[560px]"
                   onSubmit={(event) => {
                     event.preventDefault();
                     navigate({ to: "/discover", search: { q: query || undefined } });
@@ -124,7 +123,7 @@ function Home() {
                   <label htmlFor="home-search" className="sr-only">
                     {t("searchLabel")}
                   </label>
-                  <div className="flex h-[58px] items-center gap-3 rounded-[20px] border border-slate-200 bg-white px-5 shadow-[0_12px_32px_-24px_rgba(15,23,42,0.32)] transition focus-within:border-primary/45 focus-within:shadow-[0_18px_40px_-26px_rgba(0,102,255,0.28)]">
+                  <div className="flex h-[54px] items-center gap-3 rounded-[18px] border border-slate-200 bg-white px-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.30)] transition focus-within:border-primary/45">
                     <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
                     <input
                       id="home-search"
@@ -136,11 +135,11 @@ function Home() {
                   </div>
                 </form>
 
-                <div className="mt-4 flex max-w-[600px] flex-col gap-3 sm:flex-row">
+                <div className="mt-3 flex max-w-[560px] flex-col gap-3 sm:flex-row">
                   <Button
                     size="lg"
                     onClick={() => navigate({ to: "/discover" })}
-                    className="h-[54px] rounded-[18px] px-7 sm:flex-1"
+                    className="h-[50px] rounded-[16px] px-6 sm:flex-1"
                   >
                     {t("explore")}
                     <Arrow className="size-5" aria-hidden="true" />
@@ -149,7 +148,7 @@ function Home() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate({ to: "/preferences" })}
-                    className="h-[54px] rounded-[18px] border-slate-200 bg-white px-7 sm:flex-1"
+                    className="h-[50px] rounded-[16px] border-slate-200 bg-white px-6 sm:flex-1"
                   >
                     {t("setNeeds")}
                   </Button>
@@ -163,7 +162,7 @@ function Home() {
           </section>
 
           <section aria-labelledby="recent-title" className="border-t border-slate-100 bg-white">
-            <div className="mx-auto max-w-[1320px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
+            <div className="mx-auto max-w-[1280px] px-5 py-12 md:px-8 md:py-16">
               <SectionHeading
                 id="recent-title"
                 eyebrow={copy.recentEyebrow}
@@ -172,7 +171,7 @@ function Home() {
                 action={{ label: copy.viewAll, to: "/discover" }}
               />
 
-              <div className="mt-8 flex snap-x gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+              <div className="mt-7 flex snap-x gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
                 {recent.map((facility) => {
                   const decision = decideFor(facility, needs);
                   return (
@@ -180,15 +179,15 @@ function Home() {
                       key={facility.id}
                       to="/facility/$id"
                       params={{ id: facility.id }}
-                      className="group min-w-[82%] snap-start overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_20px_55px_-40px_rgba(15,23,42,0.34)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_-38px_rgba(15,23,42,0.4)] sm:min-w-[48%] md:min-w-0"
+                      className="group min-w-[82%] snap-start overflow-hidden rounded-[22px] border border-slate-200/80 bg-white shadow-[0_18px_45px_-38px_rgba(15,23,42,0.32)] transition hover:-translate-y-0.5 sm:min-w-[48%] md:min-w-0"
                     >
-                      <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                      <div className="aspect-[16/9] overflow-hidden bg-slate-100">
                         {facility.imageUrl ? (
                           <img
                             src={facility.imageUrl}
                             alt={pick(facility.imageAlt)}
                             loading="lazy"
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-sm text-slate-400">
@@ -196,11 +195,11 @@ function Home() {
                           </div>
                         )}
                       </div>
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-4">
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="line-clamp-1 text-lg font-bold text-slate-950">{pick(facility.name)}</h3>
-                            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
+                            <h3 className="line-clamp-1 font-bold text-slate-950">{pick(facility.name)}</h3>
+                            <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
                               <MapPin className="size-4" aria-hidden="true" />
                               {pick(facility.area)}
                             </p>
@@ -209,7 +208,7 @@ function Home() {
                             {pick(VERDICT_LABEL[decision.verdict])}
                           </span>
                         </div>
-                        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500">
+                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
                           <span>{copy.lastUpdated}</span>
                           <span>{relativeDate(facility.lastVerifiedISO, lang)}</span>
                         </div>
@@ -222,14 +221,14 @@ function Home() {
           </section>
 
           <section className="bg-[#f8fbff]">
-            <div className="mx-auto max-w-[1180px] px-5 py-16 md:px-8 md:py-24">
+            <div className="mx-auto max-w-[1120px] px-5 py-14 md:px-8 md:py-18">
               <SectionHeading eyebrow={copy.howEyebrow} title={copy.howTitle} body={copy.howBody} centered />
-              <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {copy.steps.map((step, index) => (
-                  <article key={step.title} className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_55px_-44px_rgba(15,23,42,0.32)] md:p-7">
-                    <div className="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{index + 1}</div>
-                    <h3 className="mt-6 text-xl font-bold text-slate-950">{step.title}</h3>
-                    <p className="mt-3 leading-7 text-slate-600">{step.body}</p>
+                  <article key={step.title} className="rounded-[24px] border border-white bg-white p-6 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.30)]">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{index + 1}</div>
+                    <h3 className="mt-5 text-xl font-bold text-slate-950">{step.title}</h3>
+                    <p className="mt-2.5 leading-7 text-slate-600">{step.body}</p>
                   </article>
                 ))}
               </div>
@@ -237,13 +236,13 @@ function Home() {
           </section>
 
           <section className="bg-white">
-            <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-5 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-8 md:py-24 lg:gap-16">
+            <div className="mx-auto grid max-w-[1220px] items-center gap-10 px-5 py-14 md:grid-cols-[1fr_1fr] md:px-8 md:py-20 lg:gap-14">
               <EvidenceVisual imageUrl={recent[0]?.imageUrl} imageAlt={recent[0] ? pick(recent[0].imageAlt) : ""} />
-              <div className="max-w-[560px]">
-                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{copy.aiKicker}</p>
-                <h2 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.025em] text-slate-950 md:text-5xl">{copy.aiTitle}</h2>
-                <p className="mt-5 text-base leading-8 text-slate-600 md:text-lg">{copy.aiBody}</p>
-                <div className="mt-7 flex flex-wrap gap-2.5">
+              <div className="max-w-[520px]">
+                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-[13px]">{copy.aiKicker}</p>
+                <h2 className="mt-3 text-3xl font-bold leading-tight text-slate-950 md:text-4xl">{copy.aiTitle}</h2>
+                <p className="mt-4 leading-8 text-slate-600 md:text-lg">{copy.aiBody}</p>
+                <div className="mt-6 flex flex-wrap gap-2">
                   <TrustChip icon={Sparkles} text="AI Observes." />
                   <TrustChip icon={ShieldCheck} text="Humans Verify." />
                   <TrustChip icon={CircleCheck} text={copy.publishAfterReview} />
@@ -252,14 +251,14 @@ function Home() {
             </div>
           </section>
 
-          <section className="px-5 pb-16 md:px-8 md:pb-24">
-            <div className="mx-auto max-w-[1280px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 text-white md:px-10 md:py-12 lg:flex lg:items-center lg:justify-between lg:gap-10">
-              <div className="max-w-[760px]">
+          <section className="px-5 pb-14 md:px-8 md:pb-20">
+            <div className="mx-auto max-w-[1220px] overflow-hidden rounded-[28px] bg-slate-950 px-6 py-9 text-white md:flex md:items-center md:justify-between md:gap-8 md:px-9">
+              <div className="max-w-[720px]">
                 <p className="text-sm font-bold text-[#65ff74]">{copy.contributeEyebrow}</p>
-                <h2 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{copy.contributeTitle}</h2>
-                <p className="mt-4 max-w-[680px] leading-7 text-white/68">{copy.contributeBody}</p>
+                <h2 className="mt-2 text-3xl font-bold leading-tight md:text-4xl">{copy.contributeTitle}</h2>
+                <p className="mt-3 max-w-[650px] leading-7 text-white/70">{copy.contributeBody}</p>
               </div>
-              <Button size="lg" onClick={() => navigate({ to: "/contribute" })} className="mt-7 min-h-[54px] rounded-2xl px-7 lg:mt-0 lg:shrink-0">
+              <Button size="lg" onClick={() => navigate({ to: "/contribute" })} className="mt-6 h-[50px] rounded-[16px] px-6 md:mt-0 md:shrink-0">
                 {copy.contributeCta}
                 <Camera className="size-5" aria-hidden="true" />
               </Button>
@@ -268,7 +267,7 @@ function Home() {
         </main>
 
         <footer className="border-t border-slate-100 bg-white">
-          <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between md:px-8">
+          <div className="mx-auto flex max-w-[1220px] flex-col gap-3 px-5 py-7 text-sm text-slate-500 md:flex-row md:items-center md:justify-between md:px-8">
             <MutahLogo className="h-7" />
             <p>{lang === "ar" ? "اعرف قبل أن تصل." : "Know before you go."}</p>
           </div>
@@ -313,13 +312,13 @@ function SectionHeading({
   centered?: boolean;
 }) {
   return (
-    <div className={`flex flex-col gap-3 ${centered ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"}`}>
+    <div className={`flex flex-col gap-2.5 ${centered ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"}`}>
       <div className={centered ? "max-w-2xl" : ""}>
-        {eyebrow ? <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{eyebrow}</p> : null}
-        <h2 id={id} className={`${eyebrow ? "mt-3" : ""} text-2xl font-bold tracking-[-0.02em] text-slate-950 md:text-4xl`}>
+        {eyebrow ? <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-[13px]">{eyebrow}</p> : null}
+        <h2 id={id} className={`${eyebrow ? "mt-2.5" : ""} text-2xl font-bold tracking-[-0.02em] text-slate-950 md:text-3xl`}>
           {title}
         </h2>
-        {body ? <p className="mt-3 max-w-2xl leading-7 text-slate-600 md:text-lg">{body}</p> : null}
+        {body ? <p className="mt-2.5 max-w-2xl leading-7 text-slate-600 md:text-base">{body}</p> : null}
       </div>
       {action ? (
         <Link to={action.to} className="mt-1 text-sm font-bold text-primary hover:underline md:mt-0">
@@ -332,7 +331,7 @@ function SectionHeading({
 
 function HomeHero({ label }: { label: string }) {
   return (
-    <picture className="block w-full max-w-[760px] overflow-hidden rounded-[28px] bg-white">
+    <picture className="block w-full max-w-[820px]">
       <source media="(min-width: 768px)" srcSet="/assets/home/mutah-home-web.webp" />
       <img
         src="/assets/home/mutah-home-mobile.webp"
@@ -342,7 +341,7 @@ function HomeHero({ label }: { label: string }) {
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        className="h-auto w-full object-contain"
+        className="mx-auto block max-h-[330px] w-auto max-w-full object-contain md:h-[510px] md:max-h-none md:w-full md:object-cover md:object-center"
       />
     </picture>
   );
@@ -358,14 +357,12 @@ function HomeSplash() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const seen = window.sessionStorage.getItem(SPLASH_SESSION_KEY) === "1";
     if (reduceMotion || seen) return;
-
     window.sessionStorage.setItem(SPLASH_SESSION_KEY, "1");
     setShow(true);
   }, []);
 
   useEffect(() => {
     if (!show) return;
-
     const finish = () => {
       setLeaving(true);
       window.setTimeout(() => setShow(false), 380);
@@ -382,10 +379,7 @@ function HomeSplash() {
   };
 
   return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 motion-reduce:hidden ${leaving ? "opacity-0" : "opacity-100"}`}
-    >
+    <div aria-hidden="true" className={`pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 motion-reduce:hidden ${leaving ? "opacity-0" : "opacity-100"}`}>
       <video autoPlay muted playsInline preload="auto" onEnded={finish} onError={finish} className="size-full object-contain">
         <source src="/assets/home/mutah-splash-intro.mp4" type="video/mp4" />
       </video>
@@ -395,17 +389,17 @@ function HomeSplash() {
 
 function EvidenceVisual({ imageUrl, imageAlt }: { imageUrl?: string; imageAlt: string }) {
   return (
-    <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-[32px] bg-[#f7fbff] p-5 md:p-7">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-white shadow-[0_25px_60px_-40px_rgba(15,23,42,0.4)]">
+    <div className="relative mx-auto w-full max-w-[560px] overflow-hidden rounded-[26px] bg-[#f7fbff] p-4 md:p-5">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-white shadow-[0_22px_52px_-40px_rgba(15,23,42,0.4)]">
         {imageUrl ? (
           <img src={imageUrl} alt={imageAlt} loading="lazy" className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full bg-[linear-gradient(145deg,#f8fafc,#eaf3ff)]" aria-hidden="true" />
         )}
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-slate-950/18 via-transparent to-transparent" />
-        <div aria-hidden="true" className="absolute inset-y-[12%] end-[12%] w-[58%] rounded-[24px] border border-primary/20 bg-primary/5 backdrop-blur-[1px]" />
-        <div aria-hidden="true" className="absolute inset-y-[18%] end-[7%] w-[58%] rounded-[24px] border border-[#00d948]/30 bg-[#00ff00]/5" />
-        <div className="absolute bottom-5 start-5 flex items-center gap-2 rounded-full bg-white/92 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-slate-950/14 via-transparent to-transparent" />
+        <div aria-hidden="true" className="absolute inset-y-[14%] end-[12%] w-[58%] rounded-[20px] border border-primary/20 bg-primary/5 backdrop-blur-[1px]" />
+        <div aria-hidden="true" className="absolute inset-y-[20%] end-[7%] w-[58%] rounded-[20px] border border-[#00d948]/30 bg-[#00ff00]/5" />
+        <div className="absolute bottom-4 start-4 flex items-center gap-2 rounded-full bg-white/92 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
           <CircleCheck className="size-4 text-[#00b83e]" aria-hidden="true" />
           AI Observes. Humans Verify.
         </div>
@@ -416,7 +410,7 @@ function EvidenceVisual({ imageUrl, imageAlt }: { imageUrl?: string; imageAlt: s
 
 function TrustChip({ icon: Icon, text }: { icon: typeof Sparkles; text: string }) {
   return (
-    <span className="inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700">
+    <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 text-sm font-bold text-slate-700">
       <Icon className="size-4 text-primary" aria-hidden="true" />
       {text}
     </span>
@@ -453,8 +447,7 @@ const AR = {
   ],
   aiKicker: "من الصورة إلى قرار أوضح",
   aiTitle: "الذكاء الاصطناعي يرصد. والإنسان يتحقق.",
-  aiBody:
-    "يحوّل مُتاح الصور إلى أدلة وصول قابلة للفهم، ويُظهر ما هو غير واضح بدل التخمين، ثم تمر المعلومة بمراجعة بشرية قبل النشر.",
+  aiBody: "يحوّل مُتاح الصور إلى أدلة وصول قابلة للفهم، ويُظهر ما هو غير واضح بدل التخمين، ثم تمر المعلومة بمراجعة بشرية قبل النشر.",
   publishAfterReview: "النشر بعد المراجعة",
   contributeEyebrow: "المجتمع جزء من الثقة",
   contributeTitle: "معلومة واحدة قد تفتح الطريق لشخص آخر",
@@ -479,8 +472,7 @@ const EN = {
   ],
   aiKicker: "From image to a clearer decision",
   aiTitle: "AI observes. Humans verify.",
-  aiBody:
-    "MUTAH turns images into understandable access evidence, keeps uncertainty visible instead of guessing, and requires human review before publication.",
+  aiBody: "MUTAH turns images into understandable access evidence, keeps uncertainty visible instead of guessing, and requires human review before publication.",
   publishAfterReview: "Published after review",
   contributeEyebrow: "Community builds trust",
   contributeTitle: "One update can open the way for someone else",
