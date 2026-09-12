@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { MutahProvider } from "../lib/mutah/store";
-import { LangProvider } from "../lib/mutah/i18n";
+import { LangProvider, useLang } from "../lib/mutah/i18n";
 import { AuthProvider } from "../lib/mutah/auth";
 
 function NotFoundComponent() {
@@ -116,12 +116,6 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:right-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground"
-        >
-          تخطَّ إلى المحتوى
-        </a>
         {children}
         <Scripts />
       </body>
@@ -135,6 +129,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
+        <SkipLink />
         <AuthProvider>
           <MutahProvider>
             <Outlet />
@@ -142,5 +137,18 @@ function RootComponent() {
         </AuthProvider>
       </LangProvider>
     </QueryClientProvider>
+  );
+}
+
+function SkipLink() {
+  const { t } = useLang();
+
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:absolute focus:right-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground"
+    >
+      {t("skipToContent")}
+    </a>
   );
 }
