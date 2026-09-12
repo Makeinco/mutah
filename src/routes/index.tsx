@@ -73,35 +73,23 @@ function Home() {
     <>
       <HomeSplash />
       <div className="min-h-dvh bg-white pb-20 text-foreground md:pb-0">
-        <header className="sticky top-0 z-40 border-b border-border/45 bg-white/90 backdrop-blur-xl">
-          <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 md:px-8 lg:px-12">
+        <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/94 backdrop-blur-xl">
+          <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 md:px-8 lg:px-12">
             <Link to="/" aria-label={`${t("brand")} — ${t("home")}`} className="shrink-0">
               <MutahLogo className="h-8 md:h-9" />
             </Link>
 
             <nav aria-label={t("mainNav")} className="hidden items-center gap-1 lg:flex">
-              <Link
-                to="/"
-                className="rounded-full bg-primary-soft px-4 py-2 text-sm font-bold text-primary"
-              >
+              <Link to="/" className="rounded-full bg-primary-soft px-5 py-2.5 text-sm font-bold text-primary">
                 {lang === "ar" ? "الرئيسية" : "Home"}
               </Link>
-              <Link
-                to="/discover"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
-              >
+              <Link to="/discover" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "استكشف" : "Explore"}
               </Link>
-              <Link
-                to="/contribute"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
-              >
+              <Link to="/contribute" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "ساهم" : "Contribute"}
               </Link>
-              <Link
-                to="/ecosystem"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
-              >
+              <Link to="/ecosystem" className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 {lang === "ar" ? "مُتاح" : "MUTAH"}
               </Link>
             </nav>
@@ -111,26 +99,23 @@ function Home() {
         </header>
 
         <main id="main-content">
-          <section className="relative isolate overflow-hidden bg-white">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 -z-10 h-[78%] bg-[radial-gradient(circle_at_22%_14%,rgba(0,102,255,0.055),transparent_34%),radial-gradient(circle_at_72%_36%,rgba(0,255,0,0.035),transparent_26%)]"
-            />
-
-            <div className="mx-auto grid min-h-[calc(100svh-72px)] max-w-[1440px] items-center gap-4 px-5 pb-12 pt-7 md:min-h-[720px] md:grid-cols-[0.88fr_1.12fr] md:gap-6 md:px-8 md:py-12 lg:gap-10 lg:px-12 xl:min-h-[780px]">
-              <div className="order-2 relative z-10 max-w-[620px] md:order-1 md:py-8">
-                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">
+          <section className="relative overflow-hidden bg-white">
+            <div className="mx-auto grid max-w-[1440px] items-center gap-7 px-5 pb-10 pt-7 md:grid-cols-[0.96fr_1.04fr] md:gap-8 md:px-8 md:pb-14 md:pt-10 lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12">
+              <div className="order-2 max-w-[620px] md:order-1 md:justify-self-start rtl:md:justify-self-end">
+                <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
                   {lang === "ar" ? "مُتاح ماب | MUTAH MAP" : "MUTAH MAP | مُتاح ماب"}
                 </p>
-                <h1 className="mt-4 text-[clamp(2.7rem,5.4vw,5.55rem)] font-bold leading-[1.02] tracking-[-0.035em] text-slate-950">
+
+                <h1 className="mt-3 text-[clamp(2.65rem,4.35vw,4.7rem)] font-bold leading-[1.03] tracking-[-0.038em] text-slate-950">
                   {t("tagline")}
                 </h1>
-                <p className="mt-5 max-w-[560px] text-base leading-8 text-slate-600 md:text-lg lg:text-xl">
+
+                <p className="mt-4 max-w-[560px] text-base leading-8 text-slate-600 md:text-lg lg:text-[1.2rem]">
                   {copy.heroBody}
                 </p>
 
                 <form
-                  className="mt-8 max-w-[590px]"
+                  className="mt-7 max-w-[600px]"
                   onSubmit={(event) => {
                     event.preventDefault();
                     navigate({ to: "/discover", search: { q: query || undefined } });
@@ -139,7 +124,7 @@ function Home() {
                   <label htmlFor="home-search" className="sr-only">
                     {t("searchLabel")}
                   </label>
-                  <div className="flex min-h-[58px] items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-5 shadow-[0_12px_34px_-24px_rgba(15,23,42,0.34)] transition focus-within:border-primary/45 focus-within:shadow-[0_18px_42px_-26px_rgba(0,102,255,0.32)]">
+                  <div className="flex h-[58px] items-center gap-3 rounded-[20px] border border-slate-200 bg-white px-5 shadow-[0_12px_32px_-24px_rgba(15,23,42,0.32)] transition focus-within:border-primary/45 focus-within:shadow-[0_18px_40px_-26px_rgba(0,102,255,0.28)]">
                     <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
                     <input
                       id="home-search"
@@ -151,11 +136,11 @@ function Home() {
                   </div>
                 </form>
 
-                <div className="mt-4 flex max-w-[590px] flex-col gap-3 sm:flex-row">
+                <div className="mt-4 flex max-w-[600px] flex-col gap-3 sm:flex-row">
                   <Button
                     size="lg"
                     onClick={() => navigate({ to: "/discover" })}
-                    className="min-h-[54px] rounded-2xl px-7 sm:flex-1"
+                    className="h-[54px] rounded-[18px] px-7 sm:flex-1"
                   >
                     {t("explore")}
                     <Arrow className="size-5" aria-hidden="true" />
@@ -164,14 +149,14 @@ function Home() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate({ to: "/preferences" })}
-                    className="min-h-[54px] rounded-2xl border-slate-200 bg-white px-7 sm:flex-1"
+                    className="h-[54px] rounded-[18px] border-slate-200 bg-white px-7 sm:flex-1"
                   >
                     {t("setNeeds")}
                   </Button>
                 </div>
               </div>
 
-              <div className="order-1 flex min-h-[42vh] items-center justify-center md:order-2 md:min-h-0">
+              <div className="order-1 flex items-center justify-center md:order-2">
                 <HomeHero label={copy.heroVisualLabel} />
               </div>
             </div>
@@ -214,17 +199,13 @@ function Home() {
                       <div className="p-5">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h3 className="line-clamp-1 text-lg font-bold text-slate-950">
-                              {pick(facility.name)}
-                            </h3>
+                            <h3 className="line-clamp-1 text-lg font-bold text-slate-950">{pick(facility.name)}</h3>
                             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
                               <MapPin className="size-4" aria-hidden="true" />
                               {pick(facility.area)}
                             </p>
                           </div>
-                          <span
-                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${verdictClass(decision.verdict)}`}
-                          >
+                          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${verdictClass(decision.verdict)}`}>
                             {pick(VERDICT_LABEL[decision.verdict])}
                           </span>
                         </div>
@@ -245,13 +226,8 @@ function Home() {
               <SectionHeading eyebrow={copy.howEyebrow} title={copy.howTitle} body={copy.howBody} centered />
               <div className="mt-10 grid gap-4 md:grid-cols-3">
                 {copy.steps.map((step, index) => (
-                  <article
-                    key={step.title}
-                    className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_55px_-44px_rgba(15,23,42,0.32)] md:p-7"
-                  >
-                    <div className="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-                      {index + 1}
-                    </div>
+                  <article key={step.title} className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_55px_-44px_rgba(15,23,42,0.32)] md:p-7">
+                    <div className="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{index + 1}</div>
                     <h3 className="mt-6 text-xl font-bold text-slate-950">{step.title}</h3>
                     <p className="mt-3 leading-7 text-slate-600">{step.body}</p>
                   </article>
@@ -265,9 +241,7 @@ function Home() {
               <EvidenceVisual imageUrl={recent[0]?.imageUrl} imageAlt={recent[0] ? pick(recent[0].imageAlt) : ""} />
               <div className="max-w-[560px]">
                 <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{copy.aiKicker}</p>
-                <h2 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.025em] text-slate-950 md:text-5xl">
-                  {copy.aiTitle}
-                </h2>
+                <h2 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.025em] text-slate-950 md:text-5xl">{copy.aiTitle}</h2>
                 <p className="mt-5 text-base leading-8 text-slate-600 md:text-lg">{copy.aiBody}</p>
                 <div className="mt-7 flex flex-wrap gap-2.5">
                   <TrustChip icon={Sparkles} text="AI Observes." />
@@ -285,11 +259,7 @@ function Home() {
                 <h2 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{copy.contributeTitle}</h2>
                 <p className="mt-4 max-w-[680px] leading-7 text-white/68">{copy.contributeBody}</p>
               </div>
-              <Button
-                size="lg"
-                onClick={() => navigate({ to: "/contribute" })}
-                className="mt-7 min-h-[54px] rounded-2xl px-7 lg:mt-0 lg:shrink-0"
-              >
+              <Button size="lg" onClick={() => navigate({ to: "/contribute" })} className="mt-7 min-h-[54px] rounded-2xl px-7 lg:mt-0 lg:shrink-0">
                 {copy.contributeCta}
                 <Camera className="size-5" aria-hidden="true" />
               </Button>
@@ -304,27 +274,16 @@ function Home() {
           </div>
         </footer>
 
-        <nav
-          aria-label={t("bottomNav")}
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 backdrop-blur-xl md:hidden"
-        >
+        <nav aria-label={t("bottomNav")} className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 backdrop-blur-xl md:hidden">
           <ul className="mx-auto grid max-w-md grid-cols-5 px-1">
             {bottomNav.map(({ to, ar, en, icon: Icon, prominent }) => (
               <li key={to}>
                 <Link
                   to={to}
-                  className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${
-                    prominent ? "text-primary" : "text-slate-500"
-                  }`}
+                  className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${prominent ? "text-primary" : "text-slate-500"}`}
                   activeProps={{ className: "text-primary" }}
                 >
-                  <span
-                    className={
-                      prominent
-                        ? "-mt-4 flex size-12 items-center justify-center rounded-full bg-primary text-white shadow-lg ring-4 ring-white"
-                        : "flex size-8 items-center justify-center"
-                    }
-                  >
+                  <span className={prominent ? "-mt-4 flex size-12 items-center justify-center rounded-full bg-primary text-white shadow-lg ring-4 ring-white" : "flex size-8 items-center justify-center"}>
                     <Icon className={prominent ? "size-6" : "size-5"} aria-hidden="true" />
                   </span>
                   {lang === "ar" ? ar : en}
@@ -354,11 +313,7 @@ function SectionHeading({
   centered?: boolean;
 }) {
   return (
-    <div
-      className={`flex flex-col gap-3 ${
-        centered ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"
-      }`}
-    >
+    <div className={`flex flex-col gap-3 ${centered ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"}`}>
       <div className={centered ? "max-w-2xl" : ""}>
         {eyebrow ? <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{eyebrow}</p> : null}
         <h2 id={id} className={`${eyebrow ? "mt-3" : ""} text-2xl font-bold tracking-[-0.02em] text-slate-950 md:text-4xl`}>
@@ -377,7 +332,7 @@ function SectionHeading({
 
 function HomeHero({ label }: { label: string }) {
   return (
-    <picture className="relative block w-full max-w-[780px]">
+    <picture className="block w-full max-w-[760px] overflow-hidden rounded-[28px] bg-white">
       <source media="(min-width: 768px)" srcSet="/assets/home/mutah-home-web.webp" />
       <img
         src="/assets/home/mutah-home-mobile.webp"
@@ -387,12 +342,7 @@ function HomeHero({ label }: { label: string }) {
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        className="mx-auto max-h-[46vh] w-auto max-w-full object-contain md:max-h-none md:w-full"
-        style={{
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, black 7%, black 92%, transparent 100%)",
-          maskImage: "linear-gradient(to bottom, transparent 0%, black 7%, black 92%, transparent 100%)",
-        }}
+        className="h-auto w-full object-contain"
       />
     </picture>
   );
@@ -434,19 +384,9 @@ function HomeSplash() {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 motion-reduce:hidden ${
-        leaving ? "opacity-0" : "opacity-100"
-      }`}
+      className={`pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 motion-reduce:hidden ${leaving ? "opacity-0" : "opacity-100"}`}
     >
-      <video
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        onEnded={finish}
-        onError={finish}
-        className="size-full object-contain"
-      >
+      <video autoPlay muted playsInline preload="auto" onEnded={finish} onError={finish} className="size-full object-contain">
         <source src="/assets/home/mutah-splash-intro.mp4" type="video/mp4" />
       </video>
     </div>
