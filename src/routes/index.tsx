@@ -1,18 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Accessibility,
   ArrowLeft,
   ArrowRight,
-  Building2,
   Camera,
   CircleCheck,
   Compass,
   Home as HomeIcon,
   MapPin,
   Network,
-  ParkingCircle,
-  PlusCircle,
-  Route as RouteIcon,
   Search,
   ShieldCheck,
   Sparkles,
@@ -46,22 +41,20 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const accessNeedTiles = [
-  { key: "step", ar: "مسار بلا درجات", en: "Step-free route", icon: Accessibility },
-  { key: "ramp", ar: "منحدر", en: "Ramp", icon: RouteIcon },
-  { key: "path", ar: "مسار خالٍ من العوائق", en: "Obstacle-free path", icon: Compass },
-  { key: "rail", ar: "درابزين", en: "Handrail", icon: ShieldCheck },
-  { key: "parking", ar: "موقف مخصص", en: "Accessible parking", icon: ParkingCircle },
-  { key: "elevator", ar: "مصعد", en: "Elevator", icon: Building2 },
-  { key: "restroom", ar: "دورة مياه مخصصة", en: "Accessible restroom", icon: Accessibility },
-] as const;
+type BottomNavItem = {
+  to: "/" | "/discover" | "/contribute" | "/ecosystem" | "/preferences";
+  ar: string;
+  en: string;
+  icon: typeof HomeIcon;
+  prominent: boolean;
+};
 
-const bottomNav = [
-  { to: "/", ar: "الرئيسية", en: "Home", icon: HomeIcon },
-  { to: "/discover", ar: "استكشف", en: "Explore", icon: Compass },
+const bottomNav: readonly BottomNavItem[] = [
+  { to: "/", ar: "الرئيسية", en: "Home", icon: HomeIcon, prominent: false },
+  { to: "/discover", ar: "استكشف", en: "Explore", icon: Compass, prominent: false },
   { to: "/contribute", ar: "ساهم", en: "Contribute", icon: Camera, prominent: true },
-  { to: "/ecosystem", ar: "مُتاح", en: "MUTAH", icon: Network },
-  { to: "/preferences", ar: "حسابي", en: "Account", icon: UserRound },
+  { to: "/ecosystem", ar: "مُتاح", en: "MUTAH", icon: Network, prominent: false },
+  { to: "/preferences", ar: "حسابي", en: "Account", icon: UserRound, prominent: false },
 ] as const;
 
 function Home() {
@@ -74,40 +67,40 @@ function Home() {
 
   const recent = [...facilities]
     .sort((a, b) => b.lastVerifiedISO.localeCompare(a.lastVerifiedISO))
-    .slice(0, 4);
+    .slice(0, 3);
 
   return (
     <>
       <HomeSplash />
-      <div className="min-h-dvh bg-background pb-20 md:pb-0">
-        <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-xl">
-          <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+      <div className="min-h-dvh bg-white pb-20 text-foreground md:pb-0">
+        <header className="sticky top-0 z-40 border-b border-border/45 bg-white/90 backdrop-blur-xl">
+          <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 md:px-8 lg:px-12">
             <Link to="/" aria-label={`${t("brand")} — ${t("home")}`} className="shrink-0">
-              <MutahLogo className="h-9 md:h-10" />
+              <MutahLogo className="h-8 md:h-9" />
             </Link>
 
-            <nav aria-label={t("mainNav")} className="hidden items-center gap-1 md:flex">
+            <nav aria-label={t("mainNav")} className="hidden items-center gap-1 lg:flex">
               <Link
                 to="/"
-                className="rounded-xl bg-primary-soft px-4 py-2 text-sm font-bold text-primary"
+                className="rounded-full bg-primary-soft px-4 py-2 text-sm font-bold text-primary"
               >
                 {lang === "ar" ? "الرئيسية" : "Home"}
               </Link>
               <Link
                 to="/discover"
-                className="rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
               >
                 {lang === "ar" ? "استكشف" : "Explore"}
               </Link>
               <Link
                 to="/contribute"
-                className="rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
               >
                 {lang === "ar" ? "ساهم" : "Contribute"}
               </Link>
               <Link
                 to="/ecosystem"
-                className="rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/75 transition hover:bg-muted hover:text-foreground"
               >
                 {lang === "ar" ? "مُتاح" : "MUTAH"}
               </Link>
@@ -118,50 +111,51 @@ function Home() {
         </header>
 
         <main id="main-content">
-          <section className="relative overflow-hidden border-b border-border/60">
+          <section className="relative isolate overflow-hidden bg-white">
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(0,102,255,0.08),transparent_34%),radial-gradient(circle_at_58%_72%,rgba(0,255,0,0.05),transparent_24%)]"
+              className="absolute inset-x-0 top-0 -z-10 h-[78%] bg-[radial-gradient(circle_at_22%_14%,rgba(0,102,255,0.055),transparent_34%),radial-gradient(circle_at_72%_36%,rgba(0,255,0,0.035),transparent_26%)]"
             />
-            <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-[1.02fr_0.98fr] md:px-6 md:py-16 lg:gap-14 lg:py-20">
-              <div className="order-2 md:order-1">
-                <p className="text-sm font-bold tracking-wide text-primary">
+
+            <div className="mx-auto grid min-h-[calc(100svh-72px)] max-w-[1440px] items-center gap-4 px-5 pb-12 pt-7 md:min-h-[720px] md:grid-cols-[0.88fr_1.12fr] md:gap-6 md:px-8 md:py-12 lg:gap-10 lg:px-12 xl:min-h-[780px]">
+              <div className="order-2 relative z-10 max-w-[620px] md:order-1 md:py-8">
+                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">
                   {lang === "ar" ? "مُتاح ماب | MUTAH MAP" : "MUTAH MAP | مُتاح ماب"}
                 </p>
-                <h1 className="door-reveal mt-4 max-w-2xl text-4xl font-bold text-foreground md:text-6xl lg:text-7xl">
+                <h1 className="mt-4 text-[clamp(2.7rem,5.4vw,5.55rem)] font-bold leading-[1.02] tracking-[-0.035em] text-slate-950">
                   {t("tagline")}
                 </h1>
-                <p className="mt-4 max-w-xl text-lg text-muted-foreground md:text-xl">
+                <p className="mt-5 max-w-[560px] text-base leading-8 text-slate-600 md:text-lg lg:text-xl">
                   {copy.heroBody}
                 </p>
 
                 <form
-                  className="mt-8 max-w-2xl"
-                  onSubmit={(e) => {
-                    e.preventDefault();
+                  className="mt-8 max-w-[590px]"
+                  onSubmit={(event) => {
+                    event.preventDefault();
                     navigate({ to: "/discover", search: { q: query || undefined } });
                   }}
                 >
                   <label htmlFor="home-search" className="sr-only">
                     {t("searchLabel")}
                   </label>
-                  <div className="flex min-h-16 items-center gap-3 rounded-2xl border border-input bg-background/95 px-4 shadow-sm transition focus-within:border-primary focus-within:shadow-md">
-                    <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  <div className="flex min-h-[58px] items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-5 shadow-[0_12px_34px_-24px_rgba(15,23,42,0.34)] transition focus-within:border-primary/45 focus-within:shadow-[0_18px_42px_-26px_rgba(0,102,255,0.32)]">
+                    <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
                     <input
                       id="home-search"
                       value={query}
-                      onChange={(e) => setQuery(e.target.value)}
+                      onChange={(event) => setQuery(event.target.value)}
                       placeholder={t("search")}
-                      className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
+                      className="w-full bg-transparent text-[15px] outline-none placeholder:text-slate-400"
                     />
                   </div>
                 </form>
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:max-w-2xl">
+                <div className="mt-4 flex max-w-[590px] flex-col gap-3 sm:flex-row">
                   <Button
                     size="lg"
                     onClick={() => navigate({ to: "/discover" })}
-                    className="min-h-14 sm:flex-1"
+                    className="min-h-[54px] rounded-2xl px-7 sm:flex-1"
                   >
                     {t("explore")}
                     <Arrow className="size-5" aria-hidden="true" />
@@ -170,204 +164,164 @@ function Home() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate({ to: "/preferences" })}
-                    className="min-h-14 sm:flex-1"
+                    className="min-h-[54px] rounded-2xl border-slate-200 bg-white px-7 sm:flex-1"
                   >
                     {t("setNeeds")}
                   </Button>
                 </div>
-
-                <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-primary" />
-                    {copy.trust1}
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <CircleCheck className="size-4 text-access" />
-                    {copy.trust2}
-                  </span>
-                </div>
               </div>
 
-              <div className="order-1 md:order-2">
+              <div className="order-1 flex min-h-[42vh] items-center justify-center md:order-2 md:min-h-0">
                 <HomeHero label={copy.heroVisualLabel} />
               </div>
             </div>
           </section>
 
-          <section
-            aria-labelledby="recent-title"
-            className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16"
-          >
-            <SectionHeading
-              id="recent-title"
-              title={t("recentlyUpdated")}
-              body={copy.recentBody}
-              action={{ label: copy.viewAll, to: "/discover" }}
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {recent.map((facility) => {
-                const decision = decideFor(facility, needs);
-                return (
-                  <Link
-                    key={facility.id}
-                    to="/facility/$id"
-                    params={{ id: facility.id }}
-                    className="group overflow-hidden rounded-3xl border border-border bg-card transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                  >
-                    <div className="aspect-[4/3] overflow-hidden bg-surface">
-                      {facility.imageUrl ? (
-                        <img
-                          src={facility.imageUrl}
-                          alt={pick(facility.imageAlt)}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                          {t("noPhoto")}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="line-clamp-1 font-bold">{pick(facility.name)}</p>
-                      <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="size-4" aria-hidden="true" />
-                        {pick(facility.area)}
-                      </p>
-                      <div className="mt-4 flex items-end justify-between gap-3">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${verdictClass(decision.verdict)}`}
-                        >
-                          {pick(VERDICT_LABEL[decision.verdict])}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {relativeDate(facility.lastVerifiedISO, lang)}
-                        </span>
+          <section aria-labelledby="recent-title" className="border-t border-slate-100 bg-white">
+            <div className="mx-auto max-w-[1320px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
+              <SectionHeading
+                id="recent-title"
+                eyebrow={copy.recentEyebrow}
+                title={t("recentlyUpdated")}
+                body={copy.recentBody}
+                action={{ label: copy.viewAll, to: "/discover" }}
+              />
+
+              <div className="mt-8 flex snap-x gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+                {recent.map((facility) => {
+                  const decision = decideFor(facility, needs);
+                  return (
+                    <Link
+                      key={facility.id}
+                      to="/facility/$id"
+                      params={{ id: facility.id }}
+                      className="group min-w-[82%] snap-start overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_20px_55px_-40px_rgba(15,23,42,0.34)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_-38px_rgba(15,23,42,0.4)] sm:min-w-[48%] md:min-w-0"
+                    >
+                      <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                        {facility.imageUrl ? (
+                          <img
+                            src={facility.imageUrl}
+                            alt={pick(facility.imageAlt)}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                            {t("noPhoto")}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="border-y border-border/60 bg-surface/70">
-            <div className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16">
-              <SectionHeading title={copy.needsTitle} body={copy.needsBody} />
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-                {accessNeedTiles.map(({ key, ar, en, icon: Icon }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => navigate({ to: "/preferences" })}
-                    className="min-h-28 rounded-2xl border border-border bg-background p-4 text-start transition hover:border-primary/40 hover:shadow-md"
-                  >
-                    <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                      <Icon className="size-5" aria-hidden="true" />
-                    </span>
-                    <span className="mt-3 block text-sm font-bold">{lang === "ar" ? ar : en}</span>
-                  </button>
-                ))}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="line-clamp-1 text-lg font-bold text-slate-950">
+                              {pick(facility.name)}
+                            </h3>
+                            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
+                              <MapPin className="size-4" aria-hidden="true" />
+                              {pick(facility.area)}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${verdictClass(decision.verdict)}`}
+                          >
+                            {pick(VERDICT_LABEL[decision.verdict])}
+                          </span>
+                        </div>
+                        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500">
+                          <span>{copy.lastUpdated}</span>
+                          <span>{relativeDate(facility.lastVerifiedISO, lang)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </section>
 
-          <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 md:grid-cols-2 md:items-center md:px-6 md:py-20 lg:gap-14">
-            <EvidenceVisual />
-            <div>
-              <p className="text-sm font-bold text-primary">{copy.aiKicker}</p>
-              <h2 className="mt-3 text-3xl font-bold md:text-5xl">{copy.aiTitle}</h2>
-              <p className="mt-4 max-w-xl text-lg text-muted-foreground">{copy.aiBody}</p>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-bold">
-                <Sparkles className="size-4 text-primary" aria-hidden="true" />
-                AI Observes. Humans Verify.
-              </div>
-            </div>
-          </section>
-
-          <section className="border-y border-border/60 bg-surface/70">
-            <div className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16">
-              <SectionHeading title={copy.howTitle} body={copy.howBody} />
-              <div className="mt-7 grid gap-4 md:grid-cols-3">
+          <section className="bg-[#f8fbff]">
+            <div className="mx-auto max-w-[1180px] px-5 py-16 md:px-8 md:py-24">
+              <SectionHeading eyebrow={copy.howEyebrow} title={copy.howTitle} body={copy.howBody} centered />
+              <div className="mt-10 grid gap-4 md:grid-cols-3">
                 {copy.steps.map((step, index) => (
                   <article
                     key={step.title}
-                    className="rounded-3xl border border-border bg-background p-6"
+                    className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_55px_-44px_rgba(15,23,42,0.32)] md:p-7"
                   >
-                    <div className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                    <div className="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
                       {index + 1}
                     </div>
-                    <h3 className="mt-5 text-xl font-bold">{step.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{step.body}</p>
+                    <h3 className="mt-6 text-xl font-bold text-slate-950">{step.title}</h3>
+                    <p className="mt-3 leading-7 text-slate-600">{step.body}</p>
                   </article>
                 ))}
               </div>
             </div>
           </section>
 
-          <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-            <div className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft p-7 md:p-10">
-              <div
-                aria-hidden="true"
-                className="absolute -end-12 -top-12 size-48 rounded-full bg-brand-green/20 blur-3xl"
-              />
-              <div className="relative max-w-3xl">
-                <Camera className="size-8 text-primary" aria-hidden="true" />
-                <h2 className="mt-5 text-3xl font-bold md:text-4xl">{copy.contributeTitle}</h2>
-                <p className="mt-3 text-lg text-muted-foreground">{copy.contributeBody}</p>
-                <Button
-                  size="lg"
-                  onClick={() => navigate({ to: "/contribute" })}
-                  className="mt-6 min-h-14"
-                >
-                  {copy.contributeCta}
-                  <PlusCircle className="size-5" aria-hidden="true" />
-                </Button>
+          <section className="bg-white">
+            <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-5 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-8 md:py-24 lg:gap-16">
+              <EvidenceVisual imageUrl={recent[0]?.imageUrl} imageAlt={recent[0] ? pick(recent[0].imageAlt) : ""} />
+              <div className="max-w-[560px]">
+                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{copy.aiKicker}</p>
+                <h2 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.025em] text-slate-950 md:text-5xl">
+                  {copy.aiTitle}
+                </h2>
+                <p className="mt-5 text-base leading-8 text-slate-600 md:text-lg">{copy.aiBody}</p>
+                <div className="mt-7 flex flex-wrap gap-2.5">
+                  <TrustChip icon={Sparkles} text="AI Observes." />
+                  <TrustChip icon={ShieldCheck} text="Humans Verify." />
+                  <TrustChip icon={CircleCheck} text={copy.publishAfterReview} />
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="border-t border-border/60">
-            <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-12 md:flex-row md:items-center md:justify-between md:px-6">
-              <div>
-                <p className="text-sm font-bold text-primary">MUTAH ECOSYSTEM</p>
-                <h2 className="mt-2 text-2xl font-bold">{copy.ecosystemTitle}</h2>
-                <p className="mt-2 max-w-2xl text-muted-foreground">{copy.ecosystemBody}</p>
+          <section className="px-5 pb-16 md:px-8 md:pb-24">
+            <div className="mx-auto max-w-[1280px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 text-white md:px-10 md:py-12 lg:flex lg:items-center lg:justify-between lg:gap-10">
+              <div className="max-w-[760px]">
+                <p className="text-sm font-bold text-[#65ff74]">{copy.contributeEyebrow}</p>
+                <h2 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{copy.contributeTitle}</h2>
+                <p className="mt-4 max-w-[680px] leading-7 text-white/68">{copy.contributeBody}</p>
               </div>
-              <Link
-                to="/ecosystem"
-                className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-input px-5 py-3 text-sm font-bold hover:bg-muted"
+              <Button
+                size="lg"
+                onClick={() => navigate({ to: "/contribute" })}
+                className="mt-7 min-h-[54px] rounded-2xl px-7 lg:mt-0 lg:shrink-0"
               >
-                {copy.ecosystemCta}
-                <Arrow className="size-4" aria-hidden="true" />
-              </Link>
+                {copy.contributeCta}
+                <Camera className="size-5" aria-hidden="true" />
+              </Button>
             </div>
           </section>
         </main>
 
-        <footer className="border-t border-border bg-background">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between md:px-6">
-            <MutahLogo className="h-8" />
+        <footer className="border-t border-slate-100 bg-white">
+          <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between md:px-8">
+            <MutahLogo className="h-7" />
             <p>{lang === "ar" ? "اعرف قبل أن تصل." : "Know before you go."}</p>
           </div>
         </footer>
 
         <nav
           aria-label={t("bottomNav")}
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl md:hidden"
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 backdrop-blur-xl md:hidden"
         >
           <ul className="mx-auto grid max-w-md grid-cols-5 px-1">
             {bottomNav.map(({ to, ar, en, icon: Icon, prominent }) => (
               <li key={to}>
                 <Link
                   to={to}
-                  className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${prominent ? "text-primary" : "text-muted-foreground"}`}
+                  className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${
+                    prominent ? "text-primary" : "text-slate-500"
+                  }`}
                   activeProps={{ className: "text-primary" }}
                 >
                   <span
                     className={
                       prominent
-                        ? "-mt-4 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
+                        ? "-mt-4 flex size-12 items-center justify-center rounded-full bg-primary text-white shadow-lg ring-4 ring-white"
                         : "flex size-8 items-center justify-center"
                     }
                   >
@@ -386,25 +340,34 @@ function Home() {
 
 function SectionHeading({
   id,
+  eyebrow,
   title,
   body,
   action,
+  centered = false,
 }: {
   id?: string;
+  eyebrow?: string;
   title: string;
   body?: string;
   action?: { label: string; to: "/discover" };
+  centered?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-      <div>
-        <h2 id={id} className="text-2xl font-bold md:text-3xl">
+    <div
+      className={`flex flex-col gap-3 ${
+        centered ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"
+      }`}
+    >
+      <div className={centered ? "max-w-2xl" : ""}>
+        {eyebrow ? <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">{eyebrow}</p> : null}
+        <h2 id={id} className={`${eyebrow ? "mt-3" : ""} text-2xl font-bold tracking-[-0.02em] text-slate-950 md:text-4xl`}>
           {title}
         </h2>
-        {body ? <p className="mt-2 max-w-2xl text-muted-foreground">{body}</p> : null}
+        {body ? <p className="mt-3 max-w-2xl leading-7 text-slate-600 md:text-lg">{body}</p> : null}
       </div>
       {action ? (
-        <Link to={action.to} className="text-sm font-bold text-primary hover:underline">
+        <Link to={action.to} className="mt-1 text-sm font-bold text-primary hover:underline md:mt-0">
           {action.label}
         </Link>
       ) : null}
@@ -414,7 +377,7 @@ function SectionHeading({
 
 function HomeHero({ label }: { label: string }) {
   return (
-    <picture className="relative mx-auto block aspect-[95/168] w-full max-w-xl overflow-hidden rounded-[2.25rem] border border-border/70 bg-white shadow-[0_30px_80px_-50px_rgba(0,51,153,0.4)] md:aspect-[168/95]">
+    <picture className="relative block w-full max-w-[780px]">
       <source media="(min-width: 768px)" srcSet="/assets/home/mutah-home-web.webp" />
       <img
         src="/assets/home/mutah-home-mobile.webp"
@@ -424,7 +387,12 @@ function HomeHero({ label }: { label: string }) {
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        className="absolute inset-0 size-full object-cover object-center"
+        className="mx-auto max-h-[46vh] w-auto max-w-full object-contain md:max-h-none md:w-full"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 7%, black 92%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 7%, black 92%, transparent 100%)",
+        }}
       />
     </picture>
   );
@@ -439,7 +407,6 @@ function HomeSplash() {
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const seen = window.sessionStorage.getItem(SPLASH_SESSION_KEY) === "1";
-
     if (reduceMotion || seen) return;
 
     window.sessionStorage.setItem(SPLASH_SESSION_KEY, "1");
@@ -451,10 +418,9 @@ function HomeSplash() {
 
     const finish = () => {
       setLeaving(true);
-      window.setTimeout(() => setShow(false), 400);
+      window.setTimeout(() => setShow(false), 380);
     };
-    const fallback = window.setTimeout(finish, 8000);
-
+    const fallback = window.setTimeout(finish, 6000);
     return () => window.clearTimeout(fallback);
   }, [show]);
 
@@ -462,7 +428,7 @@ function HomeSplash() {
 
   const finish = () => {
     setLeaving(true);
-    window.setTimeout(() => setShow(false), 400);
+    window.setTimeout(() => setShow(false), 380);
   };
 
   return (
@@ -487,27 +453,33 @@ function HomeSplash() {
   );
 }
 
-function EvidenceVisual() {
+function EvidenceVisual({ imageUrl, imageAlt }: { imageUrl?: string; imageAlt: string }) {
   return (
-    <div
-      aria-hidden="true"
-      className="relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border bg-surface p-6 md:min-h-[420px]"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(0,102,255,0.10),transparent_30%),radial-gradient(circle_at_75%_75%,rgba(0,255,0,0.10),transparent_25%)]" />
-      <div className="absolute inset-x-[12%] bottom-[13%] top-[14%] overflow-hidden rounded-3xl border border-border bg-background shadow-xl">
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,#f8fafc,#eef6ff)]" />
-        <div className="absolute bottom-0 start-0 h-[42%] w-full bg-slate-200" />
-        <div className="absolute bottom-[18%] start-[12%] h-[34%] w-[42%] rounded-t-2xl border-8 border-primary/70 bg-white" />
-        <div className="absolute bottom-[18%] end-[9%] h-[26%] w-[34%] [clip-path:polygon(0_100%,100%_100%,100%_10%)] bg-brand-green/70" />
-        <div className="absolute end-[11%] top-[18%] flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-          <Sparkles className="size-5" />
-        </div>
-        <div className="absolute bottom-[22%] start-[16%] h-[42%] w-[48%] rounded-2xl border-2 border-primary/50" />
-        <div className="absolute bottom-[12%] end-[12%] flex size-11 items-center justify-center rounded-full bg-access text-white shadow-lg">
-          <CircleCheck className="size-6" />
+    <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-[32px] bg-[#f7fbff] p-5 md:p-7">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-white shadow-[0_25px_60px_-40px_rgba(15,23,42,0.4)]">
+        {imageUrl ? (
+          <img src={imageUrl} alt={imageAlt} loading="lazy" className="h-full w-full object-cover" />
+        ) : (
+          <div className="h-full w-full bg-[linear-gradient(145deg,#f8fafc,#eaf3ff)]" aria-hidden="true" />
+        )}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-slate-950/18 via-transparent to-transparent" />
+        <div aria-hidden="true" className="absolute inset-y-[12%] end-[12%] w-[58%] rounded-[24px] border border-primary/20 bg-primary/5 backdrop-blur-[1px]" />
+        <div aria-hidden="true" className="absolute inset-y-[18%] end-[7%] w-[58%] rounded-[24px] border border-[#00d948]/30 bg-[#00ff00]/5" />
+        <div className="absolute bottom-5 start-5 flex items-center gap-2 rounded-full bg-white/92 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+          <CircleCheck className="size-4 text-[#00b83e]" aria-hidden="true" />
+          AI Observes. Humans Verify.
         </div>
       </div>
     </div>
+  );
+}
+
+function TrustChip({ icon: Icon, text }: { icon: typeof Sparkles; text: string }) {
+  return (
+    <span className="inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700">
+      <Icon className="size-4 text-primary" aria-hidden="true" />
+      {text}
+    </span>
   );
 }
 
@@ -527,69 +499,51 @@ function verdictClass(verdict: "available" | "partial" | "not_available" | "insu
 const AR = {
   heroBody: "معلومات وصول واضحة وموثقة تساعدك على اتخاذ قرارك قبل الزيارة.",
   heroVisualLabel: "من الغموض إلى الوضوح قبل الرحلة",
-  trust1: "أدلة مرئية واضحة",
-  trust2: "مراجعة بشرية قبل النشر",
-  recentBody: "أماكن أضيفت أو تمت مراجعة أدلة الوصول فيها مؤخرًا.",
+  recentEyebrow: "معلومات حديثة",
+  recentBody: "استكشف أماكن أضيفت أو تمت مراجعة أدلة الوصول فيها مؤخرًا.",
   viewAll: "عرض جميع الأماكن",
-  needsTitle: "استكشف حسب احتياج الوصول",
-  needsBody: "اختر ما يهمك، ثم دع مُتاح يوضح الأدلة المرتبطة باحتياجاتك — دون تشخيص أو تصنيف طبي.",
-  aiKicker: "من الصورة إلى دليل أوضح",
+  lastUpdated: "آخر تحديث",
+  howEyebrow: "ثلاث خطوات واضحة",
+  howTitle: "كيف يعمل مُتاح؟",
+  howBody: "من احتياجك إلى الدليل ثم القرار — بدون تعقيد أو تصنيف طبي.",
+  steps: [
+    { title: "حدد ما تحتاجه", body: "اختر احتياجات الوصول التي تهمك قبل بدء الرحلة." },
+    { title: "استكشف الأدلة", body: "شاهد الصور، حالة التحقق، وما هو معروف وما يزال غير موثق." },
+    { title: "قرر قبل الزيارة", body: "افهم مدى ملاءمة المكان لاحتياجاتك قبل أن تصل." },
+  ],
+  aiKicker: "من الصورة إلى قرار أوضح",
   aiTitle: "الذكاء الاصطناعي يرصد. والإنسان يتحقق.",
   aiBody:
     "يحوّل مُتاح الصور إلى أدلة وصول قابلة للفهم، ويُظهر ما هو غير واضح بدل التخمين، ثم تمر المعلومة بمراجعة بشرية قبل النشر.",
-  howTitle: "كيف يساعدك مُتاح؟",
-  howBody: "ثلاث خطوات بسيطة لتحويل معلومات الوصول إلى قرار عملي قبل الزيارة.",
-  steps: [
-    { title: "حدد ما تحتاجه", body: "اختر احتياجات الوصول التي تهمك دون مشاركة معلومات طبية." },
-    { title: "استكشف الأدلة", body: "شاهد الصور، حالة التحقق، وما هو معروف وما يزال غير موثق." },
-    { title: "قرر قبل الزيارة", body: "افهم مدى ملاءمة المكان لاحتياجاتك قبل أن تبدأ الرحلة." },
-  ],
+  publishAfterReview: "النشر بعد المراجعة",
+  contributeEyebrow: "المجتمع جزء من الثقة",
   contributeTitle: "معلومة واحدة قد تفتح الطريق لشخص آخر",
-  contributeBody:
-    "صورة حديثة أو تحديث بسيط يمكن أن يجعل قرار الوصول أوضح للآخرين. كل مساهمة تمر بالمراجعة قبل النشر.",
+  contributeBody: "صورة حديثة أو تحديث بسيط يمكن أن يساعد الآخرين على اتخاذ قرار أوضح قبل الزيارة.",
   contributeCta: "ساهم الآن",
-  ecosystemTitle: "مُتاح أكبر من خريطة",
-  ecosystemBody:
-    "مُتاح ماب هو أول منتج عامل نختبر من خلاله رؤية أوسع لذكاء الإتاحة، مع مُتاح إنسايتس كطبقة بيانات قيد التطوير.",
-  ecosystemCta: "استكشف منظومة مُتاح",
 };
 
 const EN = {
   heroBody: "Clear, verified access information that helps you decide before you visit.",
   heroVisualLabel: "From uncertainty to clarity before the journey",
-  trust1: "Clear visual evidence",
-  trust2: "Human review before publication",
-  recentBody: "Places with recently added or reviewed accessibility evidence.",
+  recentEyebrow: "Fresh information",
+  recentBody: "Explore places with recently added or reviewed accessibility evidence.",
   viewAll: "View all places",
-  needsTitle: "Explore by access need",
-  needsBody:
-    "Choose what matters to you, and MUTAH will surface the relevant evidence — without medical classification.",
-  aiKicker: "From image to clearer evidence",
+  lastUpdated: "Last updated",
+  howEyebrow: "Three clear steps",
+  howTitle: "How MUTAH works",
+  howBody: "From your needs to evidence to a decision — without complexity or medical classification.",
+  steps: [
+    { title: "Choose what matters", body: "Select the access needs that matter before the journey begins." },
+    { title: "Explore the evidence", body: "See photos, verification state, what is known and what is still undocumented." },
+    { title: "Decide before you go", body: "Understand whether the place fits your needs before you arrive." },
+  ],
+  aiKicker: "From image to a clearer decision",
   aiTitle: "AI observes. Humans verify.",
   aiBody:
     "MUTAH turns images into understandable access evidence, keeps uncertainty visible instead of guessing, and requires human review before publication.",
-  howTitle: "How does MUTAH help?",
-  howBody: "Three simple steps turn access information into a practical pre-visit decision.",
-  steps: [
-    {
-      title: "Choose what matters",
-      body: "Select your access needs without sharing medical information.",
-    },
-    {
-      title: "Explore the evidence",
-      body: "See photos, verification state, what is known and what is still undocumented.",
-    },
-    {
-      title: "Decide before you go",
-      body: "Understand whether the place fits your needs before the journey begins.",
-    },
-  ],
+  publishAfterReview: "Published after review",
+  contributeEyebrow: "Community builds trust",
   contributeTitle: "One update can open the way for someone else",
-  contributeBody:
-    "A recent photo or simple update can make access decisions clearer for others. Every contribution is reviewed before publication.",
+  contributeBody: "A recent photo or simple update can help someone else make a clearer decision before visiting.",
   contributeCta: "Contribute now",
-  ecosystemTitle: "MUTAH is bigger than a map",
-  ecosystemBody:
-    "MUTAH MAP is the first working product testing a broader accessibility-intelligence vision, with MUTAH Insights in development.",
-  ecosystemCta: "Explore the MUTAH ecosystem",
 };
