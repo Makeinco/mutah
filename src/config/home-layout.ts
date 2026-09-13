@@ -82,7 +82,7 @@ export const HOME_LAYOUT = {
       heightBase: "500px",
       heightWide: "520px",
       heightVeryWide: "560px",
-      contentWidth: "min(60%, 430px)",
+      contentWidth: "min(80%, 430px)",
       visualWidth: "58%",
       imageFit: "contain",
       imagePosition: "center",
