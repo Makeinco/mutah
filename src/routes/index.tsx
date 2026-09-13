@@ -86,7 +86,7 @@ function Home() {
   const shared = SHARED_COPY[locale];
   const Arrow = locale === "ar" ? ArrowLeft : ArrowRight;
   const heroColumns =
-    locale === "ar" ? "lg:grid-cols-[1.08fr_0.92fr]" : "lg:grid-cols-[0.92fr_1.08fr]";
+    locale === "ar" ? "lg:grid-cols-[1.06fr_0.94fr]" : "lg:grid-cols-[0.94fr_1.06fr]";
   const heroContentColumn = locale === "ar" ? "lg:col-start-2" : "lg:col-start-1";
   const heroVisualColumn = locale === "ar" ? "lg:col-start-1" : "lg:col-start-2";
 
@@ -99,7 +99,7 @@ function Home() {
       <HomeSplash />
       <div
         style={HOME_TOKEN_STYLE}
-        className="min-h-dvh bg-white pb-[var(--home-bottom-nav)] text-foreground lg:pb-0"
+        className="min-h-dvh bg-white pb-[calc(var(--home-bottom-nav)+env(safe-area-inset-bottom))] text-foreground lg:pb-0"
       >
         <header className="sticky top-0 z-40 border-b border-slate-100/90 bg-white/95 backdrop-blur-xl">
           <div className="mx-auto flex h-[var(--home-header-mobile)] max-w-[var(--home-wide-max)] items-center justify-between gap-4 px-4 sm:px-6 lg:h-[var(--home-header-desktop)] lg:px-10">
@@ -125,26 +125,26 @@ function Home() {
           <section className="overflow-hidden bg-white">
             <div
               dir="ltr"
-              className={`mx-auto grid max-w-[var(--home-wide-max)] items-center gap-5 pb-10 pt-3 sm:px-6 sm:pt-5 md:gap-7 md:pb-12 lg:min-h-[560px] lg:gap-10 lg:px-10 lg:py-5 xl:min-h-[600px] xl:gap-14 ${heroColumns}`}
+              className={`mx-auto grid max-w-[var(--home-wide-max)] items-center gap-5 pb-8 pt-3 sm:px-6 sm:pt-4 md:gap-7 md:pb-10 lg:gap-10 lg:px-10 lg:py-10 xl:gap-14 xl:py-12 ${heroColumns}`}
             >
               <div
                 dir={locale === "ar" ? "rtl" : "ltr"}
-                className={`order-2 px-4 sm:px-0 lg:row-start-1 lg:max-w-[580px] lg:px-0 ${heroContentColumn} ${
+                className={`order-2 px-4 sm:px-0 lg:row-start-1 lg:max-w-[560px] lg:px-0 ${heroContentColumn} ${
                   locale === "ar" ? "lg:justify-self-end" : "lg:justify-self-start"
                 }`}
               >
                 <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
                   {copy.eyebrow}
                 </p>
-                <h1 className="mt-3 text-[length:var(--home-hero-mobile)] font-bold leading-[1.04] tracking-[-0.035em] text-slate-950 min-[390px]:text-[2.55rem] md:text-[3.25rem] lg:text-[length:var(--home-hero-desktop)]">
+                <h1 className="mt-3 text-[length:var(--home-hero-mobile)] font-bold leading-[1.04] tracking-[-0.035em] text-slate-950 min-[390px]:text-[2.5rem] md:text-[3.1rem] lg:text-[clamp(3.25rem,4vw,3.875rem)] lg:leading-[1.08]">
                   {copy.heroTitle}
                 </h1>
-                <p className="mt-4 max-w-[540px] text-base leading-7 text-slate-600 md:text-lg md:leading-8">
+                <p className="mt-4 max-w-[520px] text-base leading-7 text-slate-600 md:text-lg md:leading-8">
                   {copy.heroBody}
                 </p>
 
                 <form
-                  className="mt-6 max-w-[560px]"
+                  className="mt-5 max-w-[540px]"
                   onSubmit={(event) => {
                     event.preventDefault();
                     navigate({ to: "/discover", search: { q: query || undefined } });
@@ -153,7 +153,7 @@ function Home() {
                   <label htmlFor="home-search" className="sr-only">
                     {copy.searchPlaceholder}
                   </label>
-                  <div className="flex min-h-14 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)] transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
+                  <div className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)] transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
                     <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
                     <input
                       id="home-search"
@@ -165,11 +165,11 @@ function Home() {
                   </div>
                 </form>
 
-                <div className="mt-3 flex max-w-[560px] flex-col gap-3 sm:flex-row">
+                <div className="mt-3 flex max-w-[540px] flex-col gap-2.5 sm:flex-row">
                   <Button
                     size="lg"
                     onClick={() => navigate({ to: "/discover" })}
-                    className="min-h-[52px] rounded-2xl px-7 sm:flex-1"
+                    className="min-h-[50px] rounded-2xl px-7 sm:flex-1"
                   >
                     {copy.primaryCta}
                     <Arrow className="size-5" aria-hidden="true" />
@@ -178,7 +178,7 @@ function Home() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate({ to: "/preferences" })}
-                    className="min-h-[52px] rounded-2xl border-slate-200 bg-white px-7 sm:flex-1"
+                    className="min-h-[50px] rounded-2xl border-slate-200 bg-white px-7 sm:flex-1"
                   >
                     {copy.secondaryCta}
                   </Button>
@@ -192,7 +192,7 @@ function Home() {
           </section>
 
           <section aria-labelledby="recent-title" className="border-t border-slate-100 bg-white">
-            <div className="mx-auto max-w-[var(--home-content-max)] px-4 py-11 sm:px-6 md:py-14 lg:px-8 lg:py-16">
+            <div className="mx-auto max-w-[var(--home-content-max)] px-4 py-10 sm:px-6 md:py-12 lg:px-8 lg:py-12">
               <SectionHeading
                 id="recent-title"
                 eyebrow={copy.recentEyebrow}
@@ -425,7 +425,7 @@ function SectionHeading({
 
 function HomeHero({ label }: { label: string }) {
   return (
-    <div className="mx-4 h-[clamp(230px,64vw,285px)] overflow-hidden bg-white sm:mx-0 sm:h-[310px] md:h-[350px] lg:h-[520px] xl:h-[570px]">
+    <div className="mx-4 h-[clamp(230px,64vw,280px)] overflow-hidden bg-white sm:mx-0 sm:h-[300px] md:h-[340px] lg:h-auto lg:aspect-[2688/1520]">
       <picture className="block size-full">
         <source media="(min-width: 768px)" srcSet={MUTAH_ASSETS.home.heroDesktop} />
         <img
@@ -437,7 +437,7 @@ function HomeHero({ label }: { label: string }) {
           fetchPriority="high"
           decoding="async"
           sizes="(min-width: 1024px) 55vw, (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
-          className="size-full object-cover object-[center_57%] md:object-cover md:object-center lg:object-contain"
+          className="size-full object-cover object-[center_57%] md:object-cover md:object-center lg:object-cover"
         />
       </picture>
     </div>
@@ -526,7 +526,7 @@ function BottomNav({ copy, shared }: { copy: HomeCopy; shared: SharedCopy }) {
   return (
     <nav
       aria-label={copy.navigation.bottomLabel}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--home-bottom-nav)] max-w-md grid-cols-5 px-1">
         {bottomNav.map(({ to, label, icon: Icon, prominent }) => (
