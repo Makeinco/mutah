@@ -122,7 +122,7 @@ export const HOME_LAYOUT = {
       imageHeightLarge: "520px",
       imageFit: "contain",
       imagePosition: "center",
-      imageScale: 1,
+      imageScale: 6,
       titleMin: "2.25rem",
       titleFluid: "9.5vw",
       titleMax: "2.625rem",
