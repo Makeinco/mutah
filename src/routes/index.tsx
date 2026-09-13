@@ -110,8 +110,11 @@ function Home() {
             arrow={Arrow}
           />
 
-          <section aria-labelledby="recent-title" className="border-t border-slate-100 bg-white">
-            <div className="mx-auto max-w-[var(--home-content-max)] px-4 pb-12 pt-10 sm:px-6 md:pb-14 lg:px-8 lg:pb-16 lg:pt-12">
+          <section
+            aria-labelledby="recent-title"
+            className="relative bg-[linear-gradient(180deg,#fff_0%,#fbfcff_100%)]"
+          >
+            <div className="mx-auto max-w-[var(--home-content-max)] px-4 pb-14 pt-12 sm:px-6 md:pb-16 lg:px-8 lg:pb-20 lg:pt-14">
               <SectionHeading
                 id="recent-title"
                 eyebrow={copy.recentEyebrow}
@@ -120,7 +123,7 @@ function Home() {
                 action={{ label: copy.viewAll, to: "/discover" }}
               />
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:mt-7 lg:grid-cols-3">
+              <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:mt-9 lg:grid-cols-3 lg:gap-6">
                 {recent.map((facility, index) => {
                   const decision = decideFor(facility, needs);
                   return (
@@ -128,28 +131,32 @@ function Home() {
                       key={facility.id}
                       to="/facility/$id"
                       params={{ id: facility.id }}
-                      className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_16px_36px_-34px_rgba(15,23,42,0.55)] ${
+                      className={`group flex h-full flex-col overflow-hidden rounded-[1.375rem] border border-slate-200/85 bg-white shadow-[0_18px_50px_-44px_rgba(15,23,42,0.45)] transition duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_24px_55px_-38px_rgba(15,23,42,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                         index === 2 ? "hidden lg:flex" : ""
                       }`}
                     >
-                      <div className="aspect-[16/9] overflow-hidden bg-slate-100">
+                      <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
                         {facility.imageUrl ? (
                           <img
                             src={facility.imageUrl}
                             alt={pick(facility.imageAlt)}
                             loading="lazy"
-                            className="size-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                            className="size-full object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
                           />
                         ) : (
                           <div className="flex size-full items-center justify-center text-sm text-slate-400">
                             {copy.noPhoto}
                           </div>
                         )}
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-slate-950/15 to-transparent"
+                        />
                       </div>
-                      <div className="flex flex-1 flex-col p-4 lg:p-5">
+                      <div className="flex flex-1 flex-col p-5 lg:p-6">
                         <div className="flex items-center justify-between gap-3">
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-bold ${verdictClass(decision.verdict)}`}
+                            className={`inline-flex min-h-7 items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ring-current/10 ${verdictClass(decision.verdict)}`}
                           >
                             {pick(VERDICT_LABEL[decision.verdict])}
                           </span>
@@ -157,7 +164,7 @@ function Home() {
                             {relativeDate(facility.lastVerifiedISO, lang)}
                           </span>
                         </div>
-                        <h3 className="mt-4 line-clamp-1 text-lg font-bold text-slate-950">
+                        <h3 className="mt-4 line-clamp-1 text-[1.0625rem] font-bold leading-7 text-slate-950 lg:text-lg">
                           {pick(facility.name)}
                         </h3>
                         <p className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
@@ -173,8 +180,8 @@ function Home() {
             </div>
           </section>
 
-          <section className="bg-[#f8faff]">
-            <div className="mx-auto max-w-[74rem] px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
+          <section className="bg-[linear-gradient(180deg,#f8faff_0%,#f4f7fd_100%)]">
+            <div className="mx-auto max-w-[74rem] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
               <SectionHeading
                 eyebrow={copy.howEyebrow}
                 title={copy.howTitle}
@@ -183,31 +190,31 @@ function Home() {
               />
 
               <ol
-                className="relative mt-7 grid md:grid-cols-3"
+                className="relative mt-8 grid overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/72 px-5 shadow-[0_24px_70px_-58px_rgba(15,23,42,0.5)] backdrop-blur-sm md:grid-cols-3 md:px-0 lg:mt-10"
                 dir={locale === "ar" ? "rtl" : "ltr"}
               >
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-[16.66%] top-[22px] hidden h-px bg-primary/15 md:block"
+                  className="absolute inset-x-[16.66%] top-[54px] hidden h-px bg-gradient-to-r from-primary/10 via-primary/40 to-primary/10 md:block"
                 />
                 {copy.steps.map((step, index) => {
                   const StepIcon = stepIcons[index] ?? ShieldCheck;
                   return (
                     <li
                       key={step.title}
-                      className={`relative flex gap-4 border-slate-200 py-4 md:flex-col md:items-center md:border-0 md:px-8 md:py-0 md:text-center ${
+                      className={`relative flex gap-4 border-slate-200/80 py-5 md:min-h-[214px] md:flex-col md:items-center md:justify-center md:border-0 md:px-10 md:py-8 md:text-center ${
                         index === 0 ? "" : "border-t"
                       }`}
                     >
-                      <span className="relative z-10 flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-white text-primary">
+                      <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary-soft/70 text-primary shadow-[0_12px_28px_-22px_rgba(0,102,255,0.65)]">
                         <StepIcon className="size-5" aria-hidden="true" />
-                        <span className="absolute -end-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-extrabold text-white">
+                        <span className="absolute -end-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-extrabold text-white ring-4 ring-white">
                           {index + 1}
                         </span>
                       </span>
                       <div>
                         <h3 className="text-lg font-bold text-slate-950">{step.title}</h3>
-                        <p className="mt-1.5 text-sm leading-6 text-slate-600">{step.body}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{step.body}</p>
                       </div>
                     </li>
                   );
@@ -216,8 +223,12 @@ function Home() {
             </div>
           </section>
 
-          <section className="bg-white">
-            <div className="mx-auto grid max-w-[var(--home-content-max)] items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:px-8 lg:py-20">
+          <section className="relative overflow-hidden bg-white">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -start-32 top-12 size-80 rounded-full bg-primary-soft/35 blur-3xl"
+            />
+            <div className="relative mx-auto grid max-w-[var(--home-content-max)] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20 lg:px-8 lg:py-24">
               <EvidenceBecomesAccess />
 
               <div className="max-w-[590px]">
@@ -230,7 +241,7 @@ function Home() {
                 <p className="mt-4 leading-7 text-slate-600 md:text-lg md:leading-8">
                   {copy.aiBody}
                 </p>
-                <ul className="mt-5 divide-y divide-slate-100 border-y border-slate-100">
+                <ul className="mt-6 divide-y divide-slate-100 border-y border-slate-100">
                   <Principle icon={Eye} text={copy.aiObserves} />
                   <Principle icon={ShieldCheck} text={copy.humansVerify} />
                   <Principle icon={CircleCheck} text={copy.notVisiblePrinciple} />
@@ -246,9 +257,13 @@ function Home() {
             </div>
           </section>
 
-          <section className="border-y border-primary/10 bg-primary-soft/35">
-            <div className="mx-auto flex max-w-[var(--home-content-max)] flex-col justify-center gap-5 px-4 py-7 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-10 lg:min-h-[132px] lg:px-8 lg:py-6">
-              <div className="max-w-[780px]">
+          <section className="bg-white px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+            <div className="relative mx-auto flex max-w-[var(--home-content-max)] flex-col justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[linear-gradient(110deg,rgba(238,246,255,0.88)_0%,rgba(248,251,255,0.96)_58%,rgba(239,255,243,0.72)_100%)] px-6 py-7 shadow-[0_24px_70px_-60px_rgba(0,102,255,0.45)] sm:px-8 md:flex-row md:items-center md:justify-between md:gap-10 lg:min-h-[140px] lg:px-10 lg:py-7">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -end-16 -top-28 size-56 rounded-full border-[28px] border-primary/5"
+              />
+              <div className="relative max-w-[780px]">
                 <p className="text-sm font-bold text-primary">{copy.contributeEyebrow}</p>
                 <h2 className="mt-1.5 text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
                   {copy.contributeTitle}
@@ -260,7 +275,7 @@ function Home() {
               <Button
                 size="lg"
                 onClick={() => navigate({ to: "/contribute" })}
-                className="min-h-[50px] rounded-2xl px-7 md:shrink-0"
+                className="relative min-h-[50px] rounded-2xl px-7 shadow-[0_16px_32px_-20px_rgba(0,102,255,0.75)] transition hover:-translate-y-0.5 md:shrink-0"
               >
                 {copy.contributeCta}
                 <Camera className="size-5" aria-hidden="true" />
@@ -269,8 +284,8 @@ function Home() {
           </section>
         </main>
 
-        <footer className="bg-white">
-          <div className="mx-auto flex max-w-[var(--home-content-max)] flex-col gap-4 px-4 py-7 text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+        <footer className="border-t border-slate-100 bg-white">
+          <div className="mx-auto flex max-w-[var(--home-content-max)] flex-col gap-5 px-4 py-8 text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 lg:py-9">
             <div className="flex items-center gap-4">
               <MutahLogo className="h-7" />
               <p>{copy.footerLine}</p>
@@ -336,12 +351,15 @@ function HeroCanvas({
   arrow: typeof ArrowLeft;
 }) {
   return (
-    <section aria-labelledby="home-hero-title" className="overflow-hidden bg-white">
+    <section
+      aria-labelledby="home-hero-title"
+      className="relative isolate overflow-hidden bg-white"
+    >
       <div
         data-home-hero
         className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[500px] xl:h-[520px] min-[1800px]:!h-[600px]"
       >
-        <div className="mx-3 h-[clamp(13.5rem,56vw,15.625rem)] overflow-hidden sm:mx-4 md:mx-6 md:h-[300px] lg:absolute lg:inset-0 lg:m-0 lg:h-full">
+        <div className="relative isolate mx-3 h-[clamp(13.5rem,56vw,15.625rem)] overflow-hidden sm:mx-4 md:mx-6 md:h-[300px] lg:absolute lg:inset-0 lg:m-0 lg:h-full">
           <picture className="block size-full lg:absolute lg:inset-y-0 lg:left-0 lg:w-[112%]">
             <source media="(min-width: 768px)" srcSet={MUTAH_ASSETS.home.heroDesktop} />
             <img
@@ -356,23 +374,35 @@ function HeroCanvas({
               className="size-full object-cover object-[center_56%] md:object-center lg:object-cover"
             />
           </picture>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 bg-gradient-to-t from-white via-white/45 to-transparent lg:hidden"
+          />
         </div>
 
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 hidden w-[49%] bg-[linear-gradient(90deg,rgba(255,255,255,0.99)_0%,rgba(255,255,255,0.94)_58%,rgba(255,255,255,0)_100%)] lg:block"
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-[64%] bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.985)_39%,rgba(255,255,255,0.9)_58%,rgba(255,255,255,0.38)_76%,rgba(255,255,255,0)_100%)] lg:block"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-[28%] hidden w-[44%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_48%,rgba(255,255,255,0)_74%)] lg:block"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-24 bg-gradient-to-t from-white via-white/68 to-transparent lg:block"
         />
 
         <div
           dir={locale === "ar" ? "rtl" : "ltr"}
-          className="relative z-10 px-4 pb-0 pt-5 sm:px-6 md:pt-6 lg:absolute lg:left-[clamp(4.5rem,7.5vw,8rem)] lg:top-1/2 lg:w-[min(31vw,430px)] lg:-translate-y-1/2 lg:p-0"
+          className="relative z-10 px-4 pb-0 pt-4 sm:px-6 md:pt-5 lg:absolute lg:left-[clamp(4.5rem,7.5vw,8rem)] lg:top-1/2 lg:w-[min(31vw,430px)] lg:-translate-y-1/2 lg:p-0"
         >
           <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
             {copy.eyebrow}
           </p>
           <h1
             id="home-hero-title"
-            className="mt-2.5 text-[clamp(2.25rem,9.5vw,2.625rem)] font-bold leading-[1.08] tracking-[-0.035em] text-slate-950 lg:mt-3 lg:text-[clamp(3.25rem,4.15vw,var(--home-hero-desktop))] lg:leading-[1.06]"
+            className="mt-2.5 text-[clamp(2.25rem,9.5vw,2.625rem)] font-bold leading-[1.08] tracking-[-0.04em] text-slate-950 text-balance lg:mt-3 lg:text-[clamp(3.25rem,4.15vw,var(--home-hero-desktop))] lg:leading-[1.04]"
           >
             {copy.heroTitle}
           </h1>
@@ -390,7 +420,7 @@ function HeroCanvas({
             <label htmlFor="home-search" className="sr-only">
               {copy.searchPlaceholder}
             </label>
-            <div className="flex min-h-[50px] items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 shadow-[0_10px_28px_-26px_rgba(15,23,42,0.5)] transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 lg:min-h-[52px]">
+            <div className="flex min-h-[50px] items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/92 px-4 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.38)] backdrop-blur-md transition duration-300 focus-within:border-primary/45 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 lg:min-h-[54px]">
               <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
               <input
                 id="home-search"
@@ -406,7 +436,7 @@ function HeroCanvas({
             <Button
               size="lg"
               onClick={onPrimary}
-              className="min-h-[50px] rounded-2xl px-6 sm:flex-1"
+              className="min-h-[50px] rounded-2xl px-6 shadow-[0_16px_32px_-22px_rgba(0,102,255,0.75)] transition hover:-translate-y-0.5 sm:flex-1"
             >
               {copy.primaryCta}
               <Arrow className="size-5" aria-hidden="true" />
@@ -415,7 +445,7 @@ function HeroCanvas({
               size="lg"
               variant="outline"
               onClick={onSecondary}
-              className="min-h-[50px] rounded-2xl border-slate-200 bg-white/95 px-6 sm:flex-1"
+              className="min-h-[50px] rounded-2xl border-slate-200/90 bg-white/90 px-6 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-primary/25 hover:bg-white sm:flex-1"
             >
               {copy.secondaryCta}
             </Button>
@@ -498,24 +528,34 @@ function EvidenceBecomesAccess() {
   return (
     <div
       aria-hidden="true"
-      className="relative min-h-[220px] overflow-hidden border-y border-primary/10 bg-[#f8faff] md:min-h-[250px]"
+      className="relative min-h-[250px] overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[radial-gradient(circle_at_74%_42%,rgba(0,255,0,0.1)_0%,transparent_24%),linear-gradient(145deg,#f9fbff_0%,#eef5ff_100%)] shadow-[0_28px_80px_-60px_rgba(0,102,255,0.55)] md:min-h-[310px]"
     >
-      <div className="absolute start-[8%] top-[22%] h-px w-[43%] bg-slate-300" />
-      <div className="absolute start-[13%] top-[39%] h-px w-[38%] bg-primary/25" />
-      <div className="absolute start-[18%] top-[56%] h-px w-[33%] bg-slate-300" />
-      <span className="absolute start-[8%] top-[22%] size-2 -translate-y-1/2 rounded-full bg-slate-400" />
-      <span className="absolute start-[13%] top-[39%] size-2 -translate-y-1/2 rounded-full bg-primary" />
-      <span className="absolute start-[18%] top-[56%] size-2 -translate-y-1/2 rounded-full bg-slate-400" />
+      <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(0,102,255,0.16)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(90deg,#000,transparent_58%)]" />
 
-      <div className="absolute bottom-[18%] end-[14%] h-[58%] w-[28%] rounded-t-[999px] bg-primary p-[10px]">
-        <div className="relative size-full rounded-t-[999px] bg-white">
+      <div className="absolute start-[8%] top-[20%] flex w-[43%] items-center gap-2.5 rounded-full border border-white bg-white/78 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+        <span className="size-2 shrink-0 rounded-full bg-slate-400" />
+        <span className="h-px flex-1 bg-gradient-to-r from-slate-300 to-primary/20" />
+      </div>
+      <div className="absolute start-[13%] top-[39%] flex w-[38%] items-center gap-2.5 rounded-full border border-primary/10 bg-white/82 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(0,102,255,0.5)] backdrop-blur-sm">
+        <span className="size-2 shrink-0 rounded-full bg-primary" />
+        <span className="h-px flex-1 bg-gradient-to-r from-primary/45 to-primary/10" />
+      </div>
+      <div className="absolute start-[18%] top-[58%] flex w-[33%] items-center gap-2.5 rounded-full border border-white bg-white/78 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+        <span className="size-2 shrink-0 rounded-full bg-slate-400" />
+        <span className="h-px flex-1 bg-gradient-to-r from-slate-300 to-primary/20" />
+      </div>
+
+      <div className="absolute bottom-[17%] end-[13%] h-[61%] w-[30%] rounded-t-[999px] bg-primary p-[9px] shadow-[0_20px_50px_-30px_rgba(0,102,255,0.8)]">
+        <div className="relative size-full overflow-hidden rounded-t-[999px] bg-white/95">
           <div className="absolute bottom-0 end-[12%] h-[76%] w-[48%] rounded-t-full bg-[var(--home-access)]" />
+          <div className="absolute inset-y-0 start-0 w-1/2 bg-gradient-to-r from-white to-transparent" />
         </div>
       </div>
-      <div className="absolute bottom-[18%] end-[7%] h-3 w-[43%] origin-right -skew-x-[28deg] bg-[var(--home-access)]/55" />
-      <div className="absolute bottom-[12%] end-[10%] flex items-center gap-2 text-xs font-bold text-slate-500">
-        <Sparkles className="size-4 text-primary" />
-        <ShieldCheck className="size-4 text-access-strong" />
+      <div className="absolute bottom-[17%] end-[6%] h-3 w-[45%] origin-right -skew-x-[28deg] bg-[var(--home-access)]/50 blur-[0.25px]" />
+      <div className="absolute bottom-[9%] end-[9%] flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-2 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-sm">
+        <Sparkles className="size-4 text-primary" aria-hidden="true" />
+        <span className="h-3 w-px bg-slate-200" />
+        <ShieldCheck className="size-4 text-access-strong" aria-hidden="true" />
       </div>
     </div>
   );
