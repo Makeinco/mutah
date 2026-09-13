@@ -82,12 +82,12 @@ export const HOME_LAYOUT = {
       heightBase: "500px",
       heightWide: "520px",
       heightVeryWide: "560px",
-      contentWidth: "min(42%, 430px)",
-      visualWidth: "70%",
+      contentWidth: "min(60%, 430px)",
+      visualWidth: "58%",
       imageFit: "contain",
       imagePosition: "center",
       imageScale: 1,
-      blendWidth: "54%",
+      blendWidth: "60%",
       blendRtl:
         "linear-gradient(90deg, #fff 0%, rgba(255,255,255,.985) 48%, rgba(255,255,255,.82) 70%, rgba(255,255,255,0) 100%)",
       blendLtr:
