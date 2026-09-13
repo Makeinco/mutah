@@ -18,6 +18,7 @@ import { type CSSProperties, useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { MutahLogo } from "@/components/mutah/Logo";
 import { Button } from "@/components/mutah/ui";
+import { HOME_LAYOUT } from "@/config/home-layout";
 import { MUTAH_ASSETS } from "@/content/assets";
 import { HOME_COPY, type HomeCopy } from "@/content/home";
 import { SHARED_COPY, type SharedCopy } from "@/content/shared";
@@ -64,9 +65,60 @@ const HOME_TOKEN_STYLE = {
   "--home-wide-max": MUTAH_DESIGN_TOKENS.layout.wideMax,
   "--home-header-desktop": MUTAH_DESIGN_TOKENS.layout.headerHeightDesktop,
   "--home-header-mobile": MUTAH_DESIGN_TOKENS.layout.headerHeightMobile,
-  "--home-bottom-nav": MUTAH_DESIGN_TOKENS.layout.bottomNavHeight,
-  "--home-hero-desktop": MUTAH_DESIGN_TOKENS.typography.heroDesktop,
-  "--home-hero-mobile": MUTAH_DESIGN_TOKENS.typography.heroMobile,
+  "--home-bottom-nav": HOME_LAYOUT.navigation.mobileBottomNavHeight,
+  "--home-bottom-safe-area": HOME_LAYOUT.navigation.mobileSafeAreaPadding,
+  "--home-hero-height-base": HOME_LAYOUT.hero.desktop.heightBase,
+  "--home-hero-height-wide": HOME_LAYOUT.hero.desktop.heightWide,
+  "--home-hero-height-very-wide": HOME_LAYOUT.hero.desktop.heightVeryWide,
+  "--home-hero-content-width": HOME_LAYOUT.hero.desktop.contentWidth,
+  "--home-hero-visual-width": HOME_LAYOUT.hero.desktop.visualWidth,
+  "--home-hero-desktop-image-fit": HOME_LAYOUT.hero.desktop.imageFit,
+  "--home-hero-desktop-image-position": HOME_LAYOUT.hero.desktop.imagePosition,
+  "--home-hero-desktop-image-scale": HOME_LAYOUT.hero.desktop.imageScale,
+  "--home-hero-blend-width": HOME_LAYOUT.hero.desktop.blendWidth,
+  "--home-hero-blend-rtl": HOME_LAYOUT.hero.desktop.blendRtl,
+  "--home-hero-blend-ltr": HOME_LAYOUT.hero.desktop.blendLtr,
+  "--home-hero-mask-rtl": HOME_LAYOUT.hero.desktop.maskRtl,
+  "--home-hero-mask-ltr": HOME_LAYOUT.hero.desktop.maskLtr,
+  "--home-hero-radial-width": HOME_LAYOUT.hero.desktop.radialGlowWidth,
+  "--home-hero-radial-offset": HOME_LAYOUT.hero.desktop.radialGlowOffset,
+  "--home-hero-radial": HOME_LAYOUT.hero.desktop.radialGlow,
+  "--home-hero-bottom-fade-height": HOME_LAYOUT.hero.desktop.bottomFadeHeight,
+  "--home-hero-bottom-fade": HOME_LAYOUT.hero.desktop.bottomFade,
+  "--home-hero-desktop-title-min": HOME_LAYOUT.hero.desktop.titleMin,
+  "--home-hero-desktop-title-fluid": HOME_LAYOUT.hero.desktop.titleFluid,
+  "--home-hero-desktop-title-max": HOME_LAYOUT.hero.desktop.titleMax,
+  "--home-hero-desktop-search-height": HOME_LAYOUT.hero.desktop.searchHeight,
+  "--home-hero-desktop-button-height": HOME_LAYOUT.hero.desktop.buttonHeight,
+  "--home-hero-tablet-visual-height": HOME_LAYOUT.hero.tablet.visualHeight,
+  "--home-hero-tablet-image-fit": HOME_LAYOUT.hero.tablet.imageFit,
+  "--home-hero-tablet-image-position": HOME_LAYOUT.hero.tablet.imagePosition,
+  "--home-hero-tablet-image-scale": HOME_LAYOUT.hero.tablet.imageScale,
+  "--home-hero-tablet-content-gap": HOME_LAYOUT.hero.tablet.visualToContentGap,
+  "--home-hero-mobile-visual-min": HOME_LAYOUT.hero.mobile.visualHeightMin,
+  "--home-hero-mobile-visual-fluid": HOME_LAYOUT.hero.mobile.visualHeightFluid,
+  "--home-hero-mobile-visual-max": HOME_LAYOUT.hero.mobile.visualHeightMax,
+  "--home-hero-mobile-image-height": HOME_LAYOUT.hero.mobile.imageHeightSmall,
+  "--home-hero-mobile-image-height-large": HOME_LAYOUT.hero.mobile.imageHeightLarge,
+  "--home-hero-mobile-image-fit": HOME_LAYOUT.hero.mobile.imageFit,
+  "--home-hero-mobile-image-position": HOME_LAYOUT.hero.mobile.imagePosition,
+  "--home-hero-mobile-image-scale": HOME_LAYOUT.hero.mobile.imageScale,
+  "--home-hero-mobile-title-min": HOME_LAYOUT.hero.mobile.titleMin,
+  "--home-hero-mobile-title-fluid": HOME_LAYOUT.hero.mobile.titleFluid,
+  "--home-hero-mobile-title-max": HOME_LAYOUT.hero.mobile.titleMax,
+  "--home-hero-mobile-search-height": HOME_LAYOUT.hero.mobile.searchHeight,
+  "--home-hero-mobile-button-height": HOME_LAYOUT.hero.mobile.buttonHeight,
+  "--home-hero-mobile-content-gap": HOME_LAYOUT.hero.mobile.visualToContentGap,
+  "--home-recent-top-mobile": HOME_LAYOUT.hero.mobile.ctaToRecentGap,
+  "--home-recent-top-desktop": HOME_LAYOUT.sections.recentTopGapDesktop,
+  "--home-how-padding-mobile": HOME_LAYOUT.sections.howItWorksPaddingMobile,
+  "--home-how-padding-desktop": HOME_LAYOUT.sections.howItWorksPaddingDesktop,
+  "--home-ai-padding-mobile": HOME_LAYOUT.sections.aiPaddingMobile,
+  "--home-ai-padding-desktop": HOME_LAYOUT.sections.aiPaddingDesktop,
+  "--home-contribution-padding-mobile": HOME_LAYOUT.sections.contributionPaddingMobile,
+  "--home-contribution-padding-desktop": HOME_LAYOUT.sections.contributionPaddingDesktop,
+  "--home-footer-padding-mobile": HOME_LAYOUT.sections.footerPaddingMobile,
+  "--home-footer-padding-desktop": HOME_LAYOUT.sections.footerPaddingDesktop,
   "--home-h2-desktop": MUTAH_DESIGN_TOKENS.typography.h2Desktop,
   "--home-h2-mobile": MUTAH_DESIGN_TOKENS.typography.h2Mobile,
   "--home-access": MUTAH_DESIGN_TOKENS.color.brand.green,
@@ -83,7 +135,7 @@ function Home() {
   const Arrow = locale === "ar" ? ArrowLeft : ArrowRight;
   const recent = [...facilities]
     .sort((a, b) => b.lastVerifiedISO.localeCompare(a.lastVerifiedISO))
-    .slice(0, 3);
+    .slice(0, HOME_LAYOUT.cards.desktopCount);
 
   const submitSearch = () => {
     navigate({ to: "/discover", search: { q: query || undefined } });
@@ -94,7 +146,7 @@ function Home() {
       <HomeSplash />
       <div
         style={HOME_TOKEN_STYLE}
-        className="min-h-dvh bg-white pb-[calc(var(--home-bottom-nav)+env(safe-area-inset-bottom))] text-foreground lg:pb-0"
+        className="min-h-dvh bg-white pb-[calc(var(--home-bottom-nav)+var(--home-bottom-safe-area))] text-foreground lg:pb-0"
       >
         <HomeHeader copy={copy} shared={shared} />
 
@@ -114,7 +166,7 @@ function Home() {
             aria-labelledby="recent-title"
             className="relative bg-[linear-gradient(180deg,#fff_0%,#fbfcff_100%)]"
           >
-            <div className="mx-auto max-w-[var(--home-content-max)] px-4 pb-14 pt-12 sm:px-6 md:pb-16 lg:px-8 lg:pb-20 lg:pt-14">
+            <div className="mx-auto max-w-[var(--home-content-max)] px-4 pb-14 pt-[var(--home-recent-top-mobile)] sm:px-6 md:pb-16 lg:px-8 lg:pb-20 lg:pt-[var(--home-recent-top-desktop)]">
               <SectionHeading
                 id="recent-title"
                 eyebrow={copy.recentEyebrow}
@@ -132,7 +184,7 @@ function Home() {
                       to="/facility/$id"
                       params={{ id: facility.id }}
                       className={`group flex h-full flex-col overflow-hidden rounded-[1.375rem] border border-slate-200/85 bg-white shadow-[0_18px_50px_-44px_rgba(15,23,42,0.45)] transition duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_24px_55px_-38px_rgba(15,23,42,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-                        index === 2 ? "hidden lg:flex" : ""
+                        index >= HOME_LAYOUT.cards.mobileInitialCount ? "hidden lg:flex" : ""
                       }`}
                     >
                       <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
@@ -181,7 +233,7 @@ function Home() {
           </section>
 
           <section className="bg-[linear-gradient(180deg,#f8faff_0%,#f4f7fd_100%)]">
-            <div className="mx-auto max-w-[74rem] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+            <div className="mx-auto max-w-[74rem] px-4 py-[var(--home-how-padding-mobile)] sm:px-6 lg:px-8 lg:py-[var(--home-how-padding-desktop)]">
               <SectionHeading
                 eyebrow={copy.howEyebrow}
                 title={copy.howTitle}
@@ -228,7 +280,7 @@ function Home() {
               aria-hidden="true"
               className="pointer-events-none absolute -start-32 top-12 size-80 rounded-full bg-primary-soft/35 blur-3xl"
             />
-            <div className="relative mx-auto grid max-w-[var(--home-content-max)] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20 lg:px-8 lg:py-24">
+            <div className="relative mx-auto grid max-w-[var(--home-content-max)] items-center gap-10 px-4 py-[var(--home-ai-padding-mobile)] sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20 lg:px-8 lg:py-[var(--home-ai-padding-desktop)]">
               <EvidenceBecomesAccess />
 
               <div className="max-w-[590px]">
@@ -257,7 +309,7 @@ function Home() {
             </div>
           </section>
 
-          <section className="bg-white px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+          <section className="bg-white px-4 pb-[var(--home-contribution-padding-mobile)] sm:px-6 lg:px-8 lg:pb-[var(--home-contribution-padding-desktop)]">
             <div className="relative mx-auto flex max-w-[var(--home-content-max)] flex-col justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[linear-gradient(110deg,rgba(238,246,255,0.88)_0%,rgba(248,251,255,0.96)_58%,rgba(239,255,243,0.72)_100%)] px-6 py-7 shadow-[0_24px_70px_-60px_rgba(0,102,255,0.45)] sm:px-8 md:flex-row md:items-center md:justify-between md:gap-10 lg:min-h-[140px] lg:px-10 lg:py-7">
               <div
                 aria-hidden="true"
@@ -285,7 +337,7 @@ function Home() {
         </main>
 
         <footer className="border-t border-slate-100 bg-white">
-          <div className="mx-auto flex max-w-[var(--home-content-max)] flex-col gap-5 px-4 py-8 text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 lg:py-9">
+          <div className="mx-auto flex max-w-[var(--home-content-max)] flex-col gap-5 px-4 py-[var(--home-footer-padding-mobile)] text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 lg:py-[var(--home-footer-padding-desktop)]">
             <div className="flex items-center gap-4">
               <MutahLogo className="h-7" />
               <p>{copy.footerLine}</p>
@@ -357,18 +409,18 @@ function HeroCanvas({
     >
       <div
         data-home-hero
-        className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[500px] xl:h-[520px] min-[1800px]:!h-[560px]"
+        className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[var(--home-hero-height-base)] xl:h-[var(--home-hero-height-wide)] min-[1800px]:!h-[var(--home-hero-height-very-wide)]"
       >
         <div
-          className={`relative isolate mx-3 h-[clamp(13.75rem,56vw,16.25rem)] overflow-hidden sm:mx-4 md:mx-6 md:h-[300px] lg:absolute lg:inset-y-0 lg:m-0 lg:h-full lg:w-[58%] lg:px-3 lg:py-5 xl:px-2 xl:py-6 ${
+          className={`relative isolate mx-3 h-[clamp(var(--home-hero-mobile-visual-min),var(--home-hero-mobile-visual-fluid),var(--home-hero-mobile-visual-max))] overflow-hidden sm:mx-4 md:mx-6 md:h-[var(--home-hero-tablet-visual-height)] lg:absolute lg:inset-y-0 lg:m-0 lg:h-full lg:w-[var(--home-hero-visual-width)] lg:px-3 lg:py-5 xl:px-2 xl:py-6 ${
             locale === "ar" ? "lg:right-0" : "lg:left-0"
           }`}
         >
           <picture
             className={`relative block size-full ${
               locale === "ar"
-                ? "lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_18%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_18%,black_100%)]"
-                : "lg:[-webkit-mask-image:linear-gradient(to_left,transparent_0%,black_18%,black_100%)] lg:[mask-image:linear-gradient(to_left,transparent_0%,black_18%,black_100%)]"
+                ? "lg:[-webkit-mask-image:var(--home-hero-mask-rtl)] lg:[mask-image:var(--home-hero-mask-rtl)]"
+                : "lg:[-webkit-mask-image:var(--home-hero-mask-ltr)] lg:[mask-image:var(--home-hero-mask-ltr)]"
             }`}
           >
             <source media="(min-width: 768px)" srcSet={MUTAH_ASSETS.home.heroDesktop} />
@@ -381,7 +433,7 @@ function HeroCanvas({
               fetchPriority="high"
               decoding="async"
               sizes="(min-width: 1024px) 58vw, (min-width: 768px) calc(100vw - 3rem), 19rem"
-              className="absolute left-1/2 top-1/2 h-[500px] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain object-center min-[420px]:h-[520px] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0"
+              className="absolute left-1/2 top-1/2 h-[var(--home-hero-mobile-image-height)] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 scale-[var(--home-hero-mobile-image-scale)] [object-fit:var(--home-hero-mobile-image-fit)] [object-position:var(--home-hero-mobile-image-position)] min-[420px]:h-[var(--home-hero-mobile-image-height-large)] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0 md:scale-[var(--home-hero-tablet-image-scale)] md:[object-fit:var(--home-hero-tablet-image-fit)] md:[object-position:var(--home-hero-tablet-image-position)] lg:scale-[var(--home-hero-desktop-image-scale)] lg:[object-fit:var(--home-hero-desktop-image-fit)] lg:[object-position:var(--home-hero-desktop-image-position)]"
             />
           </picture>
           <div
@@ -392,26 +444,28 @@ function HeroCanvas({
 
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 hidden w-[54%] lg:block ${
+          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-blend-width)] lg:block ${
             locale === "ar"
-              ? "left-0 bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.985)_48%,rgba(255,255,255,0.82)_70%,rgba(255,255,255,0)_100%)]"
-              : "right-0 bg-[linear-gradient(270deg,#fff_0%,rgba(255,255,255,0.985)_48%,rgba(255,255,255,0.82)_70%,rgba(255,255,255,0)_100%)]"
+              ? "left-0 bg-[image:var(--home-hero-blend-rtl)]"
+              : "right-0 bg-[image:var(--home-hero-blend-ltr)]"
           }`}
         />
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 hidden w-[30%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0.16)_48%,rgba(255,255,255,0)_74%)] lg:block ${
-            locale === "ar" ? "left-[34%]" : "right-[34%]"
+          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-radial-width)] bg-[image:var(--home-hero-radial)] lg:block ${
+            locale === "ar"
+              ? "left-[var(--home-hero-radial-offset)]"
+              : "right-[var(--home-hero-radial-offset)]"
           }`}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-16 bg-gradient-to-t from-white via-white/42 to-transparent lg:block"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-[var(--home-hero-bottom-fade-height)] bg-[image:var(--home-hero-bottom-fade)] lg:block"
         />
 
         <div
           dir={locale === "ar" ? "rtl" : "ltr"}
-          className={`relative z-10 px-4 pb-0 pt-4 sm:px-6 md:pt-5 lg:absolute lg:top-1/2 lg:w-[min(42%,430px)] lg:-translate-y-1/2 lg:p-0 ${
+          className={`relative z-10 px-4 pb-0 pt-[var(--home-hero-mobile-content-gap)] sm:px-6 md:pt-[var(--home-hero-tablet-content-gap)] lg:absolute lg:top-1/2 lg:w-[var(--home-hero-content-width)] lg:-translate-y-1/2 lg:p-0 ${
             locale === "ar"
               ? "lg:left-[clamp(4.5rem,7.5vw,8rem)]"
               : "lg:right-[clamp(4.5rem,7.5vw,8rem)]"
@@ -422,7 +476,7 @@ function HeroCanvas({
           </p>
           <h1
             id="home-hero-title"
-            className="mt-2.5 text-[clamp(2.25rem,9.5vw,2.625rem)] font-bold leading-[1.08] tracking-[-0.04em] text-slate-950 text-balance lg:mt-3 lg:text-[clamp(3.25rem,4.15vw,var(--home-hero-desktop))] lg:leading-[1.04]"
+            className="mt-2.5 text-[clamp(var(--home-hero-mobile-title-min),var(--home-hero-mobile-title-fluid),var(--home-hero-mobile-title-max))] font-bold leading-[1.08] tracking-[-0.04em] text-slate-950 text-balance lg:mt-3 lg:text-[clamp(var(--home-hero-desktop-title-min),var(--home-hero-desktop-title-fluid),var(--home-hero-desktop-title-max))] lg:leading-[1.04]"
           >
             {copy.heroTitle}
           </h1>
@@ -440,7 +494,7 @@ function HeroCanvas({
             <label htmlFor="home-search" className="sr-only">
               {copy.searchPlaceholder}
             </label>
-            <div className="flex min-h-[50px] items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/92 px-4 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.38)] backdrop-blur-md transition duration-300 focus-within:border-primary/45 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 lg:min-h-[54px]">
+            <div className="flex min-h-[var(--home-hero-mobile-search-height)] items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/92 px-4 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.38)] backdrop-blur-md transition duration-300 focus-within:border-primary/45 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 lg:min-h-[var(--home-hero-desktop-search-height)]">
               <Search className="size-5 shrink-0 text-slate-400" aria-hidden="true" />
               <input
                 id="home-search"
@@ -456,7 +510,7 @@ function HeroCanvas({
             <Button
               size="lg"
               onClick={onPrimary}
-              className="min-h-[50px] rounded-2xl px-6 shadow-[0_16px_32px_-22px_rgba(0,102,255,0.75)] transition hover:-translate-y-0.5 sm:flex-1"
+              className="min-h-[var(--home-hero-mobile-button-height)] rounded-2xl px-6 shadow-[0_16px_32px_-22px_rgba(0,102,255,0.75)] transition hover:-translate-y-0.5 sm:flex-1 lg:min-h-[var(--home-hero-desktop-button-height)]"
             >
               {copy.primaryCta}
               <Arrow className="size-5" aria-hidden="true" />
@@ -465,7 +519,7 @@ function HeroCanvas({
               size="lg"
               variant="outline"
               onClick={onSecondary}
-              className="min-h-[50px] rounded-2xl border-slate-200/90 bg-white/90 px-6 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-primary/25 hover:bg-white sm:flex-1"
+              className="min-h-[var(--home-hero-mobile-button-height)] rounded-2xl border-slate-200/90 bg-white/90 px-6 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-primary/25 hover:bg-white sm:flex-1 lg:min-h-[var(--home-hero-desktop-button-height)]"
             >
               {copy.secondaryCta}
             </Button>
@@ -663,7 +717,7 @@ function BottomNav({ copy, shared }: { copy: HomeCopy; shared: SharedCopy }) {
   return (
     <nav
       aria-label={copy.navigation.bottomLabel}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 pb-[var(--home-bottom-safe-area)] backdrop-blur-xl lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--home-bottom-nav)] max-w-md grid-cols-5 px-1">
         {bottomNav.map(({ to, label, icon: Icon, prominent }) => (
