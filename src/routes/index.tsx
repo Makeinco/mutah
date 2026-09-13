@@ -357,10 +357,20 @@ function HeroCanvas({
     >
       <div
         data-home-hero
-        className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[500px] xl:h-[520px] min-[1800px]:!h-[600px]"
+        className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[500px] xl:h-[520px] min-[1800px]:!h-[560px]"
       >
-        <div className="relative isolate mx-3 h-[clamp(13.5rem,56vw,15.625rem)] overflow-hidden sm:mx-4 md:mx-6 md:h-[300px] lg:absolute lg:inset-0 lg:m-0 lg:h-full">
-          <picture className="block size-full lg:absolute lg:inset-y-0 lg:left-0 lg:w-[112%]">
+        <div
+          className={`relative isolate mx-3 h-[clamp(13.75rem,56vw,16.25rem)] overflow-hidden sm:mx-4 md:mx-6 md:h-[300px] lg:absolute lg:inset-y-0 lg:m-0 lg:h-full lg:w-[58%] lg:px-3 lg:py-5 xl:px-2 xl:py-6 ${
+            locale === "ar" ? "lg:right-0" : "lg:left-0"
+          }`}
+        >
+          <picture
+            className={`relative block size-full ${
+              locale === "ar"
+                ? "lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_18%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_18%,black_100%)]"
+                : "lg:[-webkit-mask-image:linear-gradient(to_left,transparent_0%,black_18%,black_100%)] lg:[mask-image:linear-gradient(to_left,transparent_0%,black_18%,black_100%)]"
+            }`}
+          >
             <source media="(min-width: 768px)" srcSet={MUTAH_ASSETS.home.heroDesktop} />
             <img
               src={MUTAH_ASSETS.home.heroMobile}
@@ -370,8 +380,8 @@ function HeroCanvas({
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              sizes="(min-width: 1440px) 1613px, (min-width: 1024px) 112vw, calc(100vw - 1.5rem)"
-              className="size-full object-cover object-[center_56%] md:object-center lg:object-cover"
+              sizes="(min-width: 1024px) 58vw, (min-width: 768px) calc(100vw - 3rem), 19rem"
+              className="absolute left-1/2 top-1/2 h-[500px] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain object-center min-[420px]:h-[520px] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0"
             />
           </picture>
           <div
@@ -382,20 +392,30 @@ function HeroCanvas({
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 hidden w-[64%] bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.985)_39%,rgba(255,255,255,0.9)_58%,rgba(255,255,255,0.38)_76%,rgba(255,255,255,0)_100%)] lg:block"
+          className={`pointer-events-none absolute inset-y-0 hidden w-[54%] lg:block ${
+            locale === "ar"
+              ? "left-0 bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.985)_48%,rgba(255,255,255,0.82)_70%,rgba(255,255,255,0)_100%)]"
+              : "right-0 bg-[linear-gradient(270deg,#fff_0%,rgba(255,255,255,0.985)_48%,rgba(255,255,255,0.82)_70%,rgba(255,255,255,0)_100%)]"
+          }`}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-[28%] hidden w-[44%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_48%,rgba(255,255,255,0)_74%)] lg:block"
+          className={`pointer-events-none absolute inset-y-0 hidden w-[30%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0.16)_48%,rgba(255,255,255,0)_74%)] lg:block ${
+            locale === "ar" ? "left-[34%]" : "right-[34%]"
+          }`}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-24 bg-gradient-to-t from-white via-white/68 to-transparent lg:block"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-16 bg-gradient-to-t from-white via-white/42 to-transparent lg:block"
         />
 
         <div
           dir={locale === "ar" ? "rtl" : "ltr"}
-          className="relative z-10 px-4 pb-0 pt-4 sm:px-6 md:pt-5 lg:absolute lg:left-[clamp(4.5rem,7.5vw,8rem)] lg:top-1/2 lg:w-[min(31vw,430px)] lg:-translate-y-1/2 lg:p-0"
+          className={`relative z-10 px-4 pb-0 pt-4 sm:px-6 md:pt-5 lg:absolute lg:top-1/2 lg:w-[min(42%,430px)] lg:-translate-y-1/2 lg:p-0 ${
+            locale === "ar"
+              ? "lg:left-[clamp(4.5rem,7.5vw,8rem)]"
+              : "lg:right-[clamp(4.5rem,7.5vw,8rem)]"
+          }`}
         >
           <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
             {copy.eyebrow}
