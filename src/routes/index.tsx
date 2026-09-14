@@ -4,24 +4,21 @@ import {
   ArrowRight,
   Camera,
   CircleCheck,
-  Compass,
   Eye,
-  Home as HomeIcon,
   MapPin,
-  Network,
   Search,
   ShieldCheck,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
 import { MutahLogo } from "@/components/mutah/Logo";
+import { SiteBottomNav } from "@/components/mutah/SiteBottomNav";
 import { SiteHeader } from "@/components/mutah/SiteHeader";
 import { Button } from "@/components/mutah/ui";
 import { HOME_LAYOUT } from "@/config/home-layout";
 import { MUTAH_ASSETS } from "@/content/assets";
 import { HOME_COPY, type HomeCopy } from "@/content/home";
-import { SHARED_COPY, type SharedCopy } from "@/content/shared";
+import { SHARED_COPY } from "@/content/shared";
 import { decideFor, VERDICT_LABEL } from "@/lib/mutah/decision";
 import { MUTAH_DESIGN_TOKENS } from "@/lib/mutah/design-tokens";
 import { useLang } from "@/lib/mutah/i18n";
@@ -40,30 +37,10 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-type HomePath = "/" | "/discover" | "/contribute" | "/ecosystem" | "/preferences";
-type NavigationLabel = "home" | "explore" | "contribute" | "mutah" | "account";
-
-type BottomNavItem = {
-  to: HomePath;
-  label: NavigationLabel;
-  icon: typeof HomeIcon;
-  prominent?: boolean;
-};
-
-const bottomNav: readonly BottomNavItem[] = [
-  { to: "/", label: "home", icon: HomeIcon },
-  { to: "/discover", label: "explore", icon: Compass },
-  { to: "/contribute", label: "contribute", icon: Camera, prominent: true },
-  { to: "/ecosystem", label: "mutah", icon: Network },
-  { to: "/preferences", label: "account", icon: UserRound },
-] as const;
-
 const stepIcons = [Search, Camera, ShieldCheck] as const;
 
 const HOME_TOKEN_STYLE = {
   "--home-content-max": MUTAH_DESIGN_TOKENS.layout.contentMax,
-  "--home-bottom-nav": HOME_LAYOUT.navigation.mobileBottomNavHeight,
-  "--home-bottom-safe-area": HOME_LAYOUT.navigation.mobileSafeAreaPadding,
   "--home-hero-height-base": HOME_LAYOUT.hero.desktop.heightBase,
   "--home-hero-height-wide": HOME_LAYOUT.hero.desktop.heightWide,
   "--home-hero-height-very-wide": HOME_LAYOUT.hero.desktop.heightVeryWide,
@@ -155,7 +132,7 @@ function Home() {
       <HomeSplash />
       <div
         style={HOME_TOKEN_STYLE}
-        className="min-h-dvh bg-white pb-[calc(var(--home-bottom-nav)+var(--home-bottom-safe-area))] text-foreground lg:pb-0"
+        className="min-h-dvh bg-white pb-28 text-foreground md:pb-0"
       >
         <SiteHeader wide />
 
@@ -362,7 +339,7 @@ function Home() {
           </div>
         </footer>
 
-        <BottomNav copy={copy} shared={shared} />
+        <SiteBottomNav />
       </div>
     </>
   );
@@ -644,57 +621,6 @@ function HomeSplash() {
 function finishSplash(setLeaving: (value: boolean) => void, setShow: (value: boolean) => void) {
   setLeaving(true);
   window.setTimeout(() => setShow(false), 380);
-}
-
-function getNavigationLabel(label: NavigationLabel, copy: HomeCopy, shared: SharedCopy) {
-  switch (label) {
-    case "home":
-      return copy.navigation.home;
-    case "explore":
-      return shared.explore;
-    case "contribute":
-      return shared.contribute;
-    case "mutah":
-      return copy.navigation.mutah;
-    case "account":
-      return copy.navigation.account;
-  }
-}
-
-function BottomNav({ copy, shared }: { copy: HomeCopy; shared: SharedCopy }) {
-  return (
-    <nav
-      aria-label={copy.navigation.bottomLabel}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/96 pb-[var(--home-bottom-safe-area)] backdrop-blur-xl lg:hidden"
-    >
-      <ul className="mx-auto grid h-[var(--home-bottom-nav)] max-w-md grid-cols-5 px-1">
-        {bottomNav.map(({ to, label, icon: Icon, prominent }) => (
-          <li key={to}>
-            <Link
-              to={to}
-              className={`flex size-full min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-bold transition ${
-                prominent ? "text-primary" : "text-slate-500"
-              }`}
-              activeProps={{ className: "text-primary" }}
-            >
-              <span
-                className={
-                  prominent
-                    ? "flex size-8 items-center justify-center rounded-xl bg-primary-soft text-primary"
-                    : "flex size-8 items-center justify-center"
-                }
-              >
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-              <span className="max-w-full truncate px-0.5">
-                {getNavigationLabel(label, copy, shared)}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
 }
 
 function verdictClass(verdict: "available" | "partial" | "not_available" | "insufficient") {

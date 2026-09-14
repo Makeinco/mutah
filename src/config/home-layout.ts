@@ -78,10 +78,6 @@ export type HomeLayoutConfig = {
     desktopCount: number;
     mobileInitialCount: number;
   };
-  navigation: {
-    mobileBottomNavHeight: string;
-    mobileSafeAreaPadding: string;
-  };
 };
 
 /**
@@ -172,9 +168,5 @@ export const HOME_LAYOUT = {
   cards: {
     desktopCount: 3,
     mobileInitialCount: 2,
-  },
-  navigation: {
-    mobileBottomNavHeight: MUTAH_DESIGN_TOKENS.layout.bottomNavHeight,
-    mobileSafeAreaPadding: "env(safe-area-inset-bottom)",
   },
 } as const satisfies HomeLayoutConfig;
