@@ -83,6 +83,13 @@ const HOME_TOKEN_STYLE = {
   "--home-hero-radial-width": HOME_LAYOUT.hero.desktop.radialGlowWidth,
   "--home-hero-radial-offset": HOME_LAYOUT.hero.desktop.radialGlowOffset,
   "--home-hero-radial": HOME_LAYOUT.hero.desktop.radialGlow,
+  "--home-hero-radial-opacity": HOME_LAYOUT.hero.desktop.radialGlowOpacity,
+  "--home-hero-content-veil-width": HOME_LAYOUT.hero.desktop.contentVeilWidth,
+  "--home-hero-content-veil-opacity": HOME_LAYOUT.hero.desktop.contentVeilOpacity,
+  "--home-hero-content-veil-rtl": HOME_LAYOUT.hero.desktop.contentVeilRtl,
+  "--home-hero-content-veil-ltr": HOME_LAYOUT.hero.desktop.contentVeilLtr,
+  "--home-hero-top-fade-height": HOME_LAYOUT.hero.desktop.topFadeHeight,
+  "--home-hero-top-fade": HOME_LAYOUT.hero.desktop.topFade,
   "--home-hero-bottom-fade-height": HOME_LAYOUT.hero.desktop.bottomFadeHeight,
   "--home-hero-bottom-fade": HOME_LAYOUT.hero.desktop.bottomFade,
   "--home-hero-desktop-title-min": HOME_LAYOUT.hero.desktop.titleMin,
@@ -103,6 +110,9 @@ const HOME_TOKEN_STYLE = {
   "--home-hero-mobile-image-fit": HOME_LAYOUT.hero.mobile.imageFit,
   "--home-hero-mobile-image-position": HOME_LAYOUT.hero.mobile.imagePosition,
   "--home-hero-mobile-image-scale": HOME_LAYOUT.hero.mobile.imageScale,
+  "--home-hero-mobile-arch-center": HOME_LAYOUT.hero.mobile.archCenterX,
+  "--home-hero-mobile-edge-fade-height": HOME_LAYOUT.hero.mobile.edgeFadeHeight,
+  "--home-hero-mobile-edge-fade": HOME_LAYOUT.hero.mobile.edgeFade,
   "--home-hero-mobile-title-min": HOME_LAYOUT.hero.mobile.titleMin,
   "--home-hero-mobile-title-fluid": HOME_LAYOUT.hero.mobile.titleFluid,
   "--home-hero-mobile-title-max": HOME_LAYOUT.hero.mobile.titleMax,
@@ -433,12 +443,16 @@ function HeroCanvas({
               fetchPriority="high"
               decoding="async"
               sizes="(min-width: 1024px) 58vw, (min-width: 768px) calc(100vw - 3rem), 19rem"
-              className="absolute left-1/2 top-1/2 h-[var(--home-hero-mobile-image-height)] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 scale-[var(--home-hero-mobile-image-scale)] [object-fit:var(--home-hero-mobile-image-fit)] [object-position:var(--home-hero-mobile-image-position)] min-[420px]:h-[var(--home-hero-mobile-image-height-large)] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0 md:scale-[var(--home-hero-tablet-image-scale)] md:[object-fit:var(--home-hero-tablet-image-fit)] md:[object-position:var(--home-hero-tablet-image-position)] lg:scale-[var(--home-hero-desktop-image-scale)] lg:[object-fit:var(--home-hero-desktop-image-fit)] lg:[object-position:var(--home-hero-desktop-image-position)]"
+              className="absolute left-[var(--home-hero-mobile-arch-center)] top-1/2 h-[var(--home-hero-mobile-image-height)] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 scale-[var(--home-hero-mobile-image-scale)] [object-fit:var(--home-hero-mobile-image-fit)] [object-position:var(--home-hero-mobile-image-position)] min-[420px]:h-[var(--home-hero-mobile-image-height-large)] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0 md:scale-[var(--home-hero-tablet-image-scale)] md:[object-fit:var(--home-hero-tablet-image-fit)] md:[object-position:var(--home-hero-tablet-image-position)] lg:scale-[var(--home-hero-desktop-image-scale)] lg:[object-fit:var(--home-hero-desktop-image-fit)] lg:[object-position:var(--home-hero-desktop-image-position)]"
             />
           </picture>
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 bg-gradient-to-t from-white via-white/45 to-transparent lg:hidden"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[var(--home-hero-mobile-edge-fade-height)] bg-[image:var(--home-hero-mobile-edge-fade)] lg:hidden"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-[var(--home-hero-top-fade-height)] bg-[image:var(--home-hero-top-fade)] lg:block"
           />
         </div>
 
@@ -452,11 +466,25 @@ function HeroCanvas({
         />
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-radial-width)] bg-[image:var(--home-hero-radial)] lg:block ${
+          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-radial-width)] bg-[image:var(--home-hero-radial)] opacity-[var(--home-hero-radial-opacity)] lg:block ${
             locale === "ar"
               ? "left-[var(--home-hero-radial-offset)]"
               : "right-[var(--home-hero-radial-offset)]"
           }`}
+        />
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-y-[6%] z-[6] hidden w-[var(--home-hero-content-veil-width)] bg-[image:var(--home-hero-content-veil)] opacity-[var(--home-hero-content-veil-opacity)] lg:block ${
+            locale === "ar" ? "left-0" : "right-0"
+          }`}
+          style={
+            {
+              "--home-hero-content-veil":
+                locale === "ar"
+                  ? "var(--home-hero-content-veil-rtl)"
+                  : "var(--home-hero-content-veil-ltr)",
+            } as CSSProperties
+          }
         />
         <div
           aria-hidden="true"
