@@ -111,7 +111,7 @@ export const HOME_LAYOUT = {
       visualHeight: "300px",
       imageFit: "contain",
       imagePosition: "center",
-      imageScale: 4,
+      imageScale: 1,
       visualToContentGap: "1.25rem",
     },
     mobile: {
