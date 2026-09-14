@@ -15,8 +15,8 @@ import {
   UserRound,
 } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
-import { LanguageSwitcher } from "@/components/mutah/LanguageSwitcher";
 import { MutahLogo } from "@/components/mutah/Logo";
+import { SiteHeader } from "@/components/mutah/SiteHeader";
 import { Button } from "@/components/mutah/ui";
 import { HOME_LAYOUT } from "@/config/home-layout";
 import { MUTAH_ASSETS } from "@/content/assets";
@@ -62,9 +62,6 @@ const stepIcons = [Search, Camera, ShieldCheck] as const;
 
 const HOME_TOKEN_STYLE = {
   "--home-content-max": MUTAH_DESIGN_TOKENS.layout.contentMax,
-  "--home-wide-max": MUTAH_DESIGN_TOKENS.layout.wideMax,
-  "--home-header-desktop": MUTAH_DESIGN_TOKENS.layout.headerHeightDesktop,
-  "--home-header-mobile": MUTAH_DESIGN_TOKENS.layout.headerHeightMobile,
   "--home-bottom-nav": HOME_LAYOUT.navigation.mobileBottomNavHeight,
   "--home-bottom-safe-area": HOME_LAYOUT.navigation.mobileSafeAreaPadding,
   "--home-hero-height-base": HOME_LAYOUT.hero.desktop.heightBase,
@@ -160,7 +157,7 @@ function Home() {
         style={HOME_TOKEN_STYLE}
         className="min-h-dvh bg-white pb-[calc(var(--home-bottom-nav)+var(--home-bottom-safe-area))] text-foreground lg:pb-0"
       >
-        <HomeHeader copy={copy} shared={shared} />
+        <SiteHeader wide />
 
         <main id="main-content">
           <HeroCanvas
@@ -371,30 +368,6 @@ function Home() {
   );
 }
 
-function HomeHeader({ copy, shared }: { copy: HomeCopy; shared: SharedCopy }) {
-  return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/95 backdrop-blur-xl">
-      <div className="relative mx-auto flex h-[var(--home-header-mobile)] max-w-[var(--home-wide-max)] items-center justify-between px-4 sm:px-6 lg:h-[var(--home-header-desktop)] lg:px-10">
-        <Link to="/" aria-label={copy.navigation.home} className="shrink-0">
-          <MutahLogo className="h-7 lg:h-8" />
-        </Link>
-
-        <nav
-          aria-label={copy.navigation.mainLabel}
-          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
-        >
-          <HeaderLink to="/" active label={copy.navigation.home} />
-          <HeaderLink to="/discover" label={shared.explore} />
-          <HeaderLink to="/contribute" label={shared.contribute} />
-          <HeaderLink to="/ecosystem" label={copy.navigation.mutah} />
-        </nav>
-
-        <LanguageSwitcher />
-      </div>
-    </header>
-  );
-}
-
 function HeroCanvas({
   copy,
   locale,
@@ -525,29 +498,6 @@ function HeroCanvas({
         </div>
       </div>
     </section>
-  );
-}
-
-function HeaderLink({
-  to,
-  label,
-  active = false,
-}: {
-  to: HomePath;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <Link
-      to={to}
-      className={
-        active
-          ? "rounded-full bg-primary-soft px-5 py-2.5 text-sm font-bold text-primary"
-          : "rounded-full px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-      }
-    >
-      {label}
-    </Link>
   );
 }
 
