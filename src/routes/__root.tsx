@@ -7,28 +7,29 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { MutahProvider } from "../lib/mutah/store";
-import { LangProvider } from "../lib/mutah/i18n";
+import { LangProvider, useLang } from "../lib/mutah/i18n";
+import { AuthProvider } from "../lib/mutah/auth";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4" lang="ar" dir="rtl">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+        <p className="text-sm font-semibold text-primary">مُتاح ماب | MUTAH MAP</p>
+        <h1 className="mt-3 text-5xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">الصفحة غير موجودة</h2>
+        <p className="mt-2 text-base text-muted-foreground">
+          ربما تغيّر الرابط. يمكنك العودة إلى الرئيسية أو استكشاف الأماكن من جديد.
         </p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Go home
+            العودة إلى الرئيسية
           </Link>
         </div>
       </div>
@@ -39,34 +40,31 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4" lang="ar" dir="rtl">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <p className="text-sm font-semibold text-primary">مُتاح ماب | MUTAH MAP</p>
+        <h1 className="mt-3 text-xl font-semibold tracking-tight text-foreground">تعذر تحميل الصفحة</h1>
+        <p className="mt-2 text-base text-muted-foreground">
+          حدث خطأ غير متوقع. جرّب مرة أخرى، أو عد إلى الرئيسية.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Try again
+            حاول مرة أخرى
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-input bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Go home
+            الرئيسية
           </a>
         </div>
       </div>
@@ -82,13 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "مُتاح ماب | اعرف قبل أن تصل" },
       {
         name: "description",
-        content: "منصة قرار عن إتاحة المداخل: أدلة مرئية واضحة قبل زيارة المكان.",
+        content:
+          "أدلة وصول مرئية متعددة تساعدك على فهم المرفق وفق احتياجاتك قبل الزيارة، مع توضيح ما هو موثق وما يحتاج إلى دليل إضافي.",
       },
       { name: "author", content: "MUTAH" },
       { property: "og:title", content: "مُتاح ماب | اعرف قبل أن تصل" },
       {
         property: "og:description",
-        content: "منصة قرار عن إتاحة المداخل: أدلة مرئية واضحة قبل زيارة المكان.",
+        content: "أدلة الوصول أولًا: ما نعرفه، ما لا نعرفه، ولماذا — قبل أن تصل.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -101,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "icon", type: "image/svg+xml", href: "/mutah-icon.svg" },
     ],
   }),
   shellComponent: RootShell,
@@ -117,12 +116,6 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:right-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground"
-        >
-          تخطَّ إلى المحتوى
-        </a>
         {children}
         <Scripts />
       </body>
@@ -136,12 +129,26 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
-        <MutahProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </MutahProvider>
+        <SkipLink />
+        <AuthProvider>
+          <MutahProvider>
+            <Outlet />
+          </MutahProvider>
+        </AuthProvider>
       </LangProvider>
     </QueryClientProvider>
   );
 }
 
+function SkipLink() {
+  const { t } = useLang();
+
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:absolute focus:right-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground"
+    >
+      {t("skipToContent")}
+    </a>
+  );
+}

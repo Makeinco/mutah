@@ -195,7 +195,7 @@ export const UI = {
     "ساعد في جعل معلومات الوصول أكثر وضوحًا وحداثة.",
     "Help keep access information clear and current.",
   ),
-  chooseFacility: l("اختر المكان", "Choose a place"),
+  chooseFacility: l("ابحث عن المرفق", "Search for a facility"),
   chooseView: l("اختر المسار الذي ستصوّره", "Choose the view you are photographing"),
   startContribution: l("ابدأ المساهمة", "Start contributing"),
   stepPhoto: l("الصورة", "Photo"),

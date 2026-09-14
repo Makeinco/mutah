@@ -1,7 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Camera, FileText, Flag } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Camera } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
+import { FacilityProposalFlow } from "@/components/mutah/FacilityProposalFlow";
+import { FacilityFinder } from "@/components/mutah/FacilityFinder";
 import { Button, Card, SectionTitle } from "@/components/mutah/ui";
 import { useLang } from "@/lib/mutah/i18n";
 import { ZONE_LABEL, ZONE_ORDER } from "@/lib/mutah/labels";
@@ -32,7 +34,7 @@ function Contribute() {
   const { t, pick, lang } = useLang();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
   const [zone, setZone] = useState<ZoneKey>("entrance");
-  const [reported, setReported] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
 
   return (
     <AppShell title={t("contributeTitle")}>
@@ -58,21 +60,13 @@ function Contribute() {
           </div>
 
           <div className="mt-5">
-            <label htmlFor="facility-select" className="mb-2 block text-sm font-semibold">
-              {t("chooseFacility")}
-            </label>
-            <select
-              id="facility-select"
+            <p className="mb-2 text-sm font-semibold">{t("chooseFacility")}</p>
+            <FacilityFinder
+              facilities={facilities}
               value={facilityId}
-              onChange={(e) => setFacilityId(e.target.value)}
-              className="min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base"
-            >
-              {facilities.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {pick(f.name)} — {pick(f.area)}
-                </option>
-              ))}
-            </select>
+              onChange={setFacilityId}
+              onMissing={() => setShowProposal(true)}
+            />
           </div>
 
           <div className="mt-4">
@@ -105,49 +99,25 @@ function Contribute() {
           </Button>
         </Card>
 
-        <div className="mt-8">
-          <SectionTitle>{lang === "ar" ? "خيارات أخرى" : "Other options"}</SectionTitle>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <FileText className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">{lang === "ar" ? "أضف مكانًا" : "Suggest a place"}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {lang === "ar"
-                  ? "مكان غير موجود في مُتاح؟ أرسل اسمه وموقعه ليُضاف لاحقًا."
-                  : "A place missing from MUTAH? Send its name and location to be added."}
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                {lang === "ar" ? "إرسال اقتراح" : "Send suggestion"}
-              </Button>
-            </Card>
-            <Card>
-              <Flag className="size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 font-bold">{t("reportChange")}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {lang === "ar"
-                  ? "تغيّر المكان عمّا هو منشور؟ أخبرنا لنعيد التحقق منه."
-                  : "Has the place changed since it was published? Tell us so we re-verify."}
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setReported(true)}>
-                {lang === "ar" ? "إرسال بلاغ" : "Send report"}
-              </Button>
-            </Card>
-          </div>
-          <p aria-live="polite" className="mt-4 text-sm font-semibold text-access-strong">
-            {reported
-              ? lang === "ar"
-                ? "شكرًا لك. سجّلنا ملاحظتك وستتم مراجعتها قبل النشر."
-                : "Thank you. We've logged your note; it will be reviewed before publishing."
-              : ""}
+        <div className="mt-8" id="facility-proposal">
+          <SectionTitle>
+            {lang === "ar" ? "المرافق والتغييرات" : "Facilities and changes"}
+          </SectionTitle>
+          <p className="text-sm text-muted-foreground">
+            {lang === "ar"
+              ? "المساهم يقترح، فريق مُتاح يراجع، والمدير وحده يعتمد التغيير الرسمي."
+              : "Contributors propose, MUTAH reviews, and only an admin approves official changes."}
           </p>
+          {showProposal ? (
+            <FacilityProposalFlow />
+          ) : (
+            <Button variant="outline" className="mt-4" onClick={() => setShowProposal(true)}>
+              {lang === "ar" ? "فتح نموذج المقترح" : "Open proposal form"}
+            </Button>
+          )}
         </div>
 
-        <p className="mt-10 text-sm text-muted-foreground">
-          {t("reviewedBeforePublish")}{" "}
-          <Link to="/review" className="font-semibold text-primary hover:underline">
-            {t("navReview")}
-          </Link>
-        </p>
+        <p className="mt-10 text-sm text-muted-foreground">{t("reviewedBeforePublish")}</p>
       </div>
     </AppShell>
   );

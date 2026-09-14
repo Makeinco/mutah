@@ -15,9 +15,41 @@ MUTAH MAP is an evidence-first accessibility decision prototype built for a hack
 
 ## Current scope
 
-The current working product is a React + TypeScript + TanStack Start application. It is maintained directly in this repository and is independent of external app builders.
+The product uses multi-view facility evidence rather than a single entrance photo.
 
-For hackathon delivery, keep changes incremental, preserve Arabic RTL and English LTR behavior, and keep all secrets in environment variables.
+Facility zones:
+- Approach path / مسار الوصول
+- Entrance / المدخل
+- Parking / المواقف
+- Elevator / المصعد
+- Accessible restroom / دورة المياه المخصصة
+
+User-facing access needs:
+- Step-free route / مسار بلا درجات
+- Ramp / منحدر
+- Obstacle-free path / مسار خالٍ من العوائق
+- Handrail / درابزين
+- Accessible parking / موقف مخصص
+- Elevator / مصعد
+- Accessible restroom / دورة مياه مخصصة
+
+Personalized status uses four states only:
+- متاح
+- متاح جزئيًا
+- غير متاح وفق احتياجاتك الحالية
+- معلومات غير كافية
+
+## Architecture
+
+Frontend: React + TypeScript + TanStack Start.
+
+Backend project is provisioned on Supabase in `eu-central-1` with the core migration applied. The schema includes facilities, facility zones, evidence images, AI analyses, observations, contributor confirmations, moderation queue, facility summaries, reports, audit events, and pilot metrics. Row-level security is enabled; public reads are limited to reviewed facility data and sanitized reviewed images.
+
+Production data flow:
+
+`Facility → Facility Zone → Evidence Image(s) → AI Observation(s) → User Confirmation → Human Moderation → Verified Facility Summary`
+
+The current UI keeps local demo data as a resilient fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
 
 ## Development
 
@@ -32,6 +64,14 @@ Quality gate:
 bun run lint
 bun run build
 ```
+
+## Demo journey
+
+Home → choose access needs → Explore → Facility Profile → personalized status → why this result → inspect missing evidence → Contribute → choose zone → upload one or multiple images → AI preliminary observation → contributor confirms/corrects → human review → facility evidence updates.
+
+## Deployment
+
+Preview validation is performed from the `mutah/refinement-v3` branch before merging into `main`.
 
 ## Data honesty
 

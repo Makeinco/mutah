@@ -1,6 +1,17 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { FACILITIES, INITIAL_CONTRIBUTIONS } from "./data";
 import { bi } from "./i18n";
+import { persistLiveContribution } from "./operational";
+import { supabase } from "./supabase-client";
+import { loadReviewedFacilityModels } from "./supabase";
 import type {
   AccessNeed,
   Contribution,
@@ -11,9 +22,9 @@ import type {
 } from "./types";
 
 /**
- * Application state layer. Everything the UI mutates goes through here, so the
- * mock implementation can be swapped for Supabase mutations without touching
- * screens.
+ * Application state layer. Public demo fixtures remain local, while signed-in
+ * contributions created from real browser-selected files are also persisted
+ * through the operational Supabase workflow.
  */
 
 interface MutahState {
@@ -27,7 +38,7 @@ interface MutahState {
   submitContribution: (input: {
     facilityId: string;
     zone: ZoneKey;
-    imageUrl: string;
+    imageUrls: string[];
     aiObservations: IndicatorEvidence[];
     confirmed: Contribution["confirmed"];
   }) => string;
@@ -40,11 +51,66 @@ const MutahContext = createContext<MutahState | null>(null);
 
 let seq = 2000;
 
+async function persistSignedInLiveContribution(input: {
+  facilityId: string;
+  zone: ZoneKey;
+  imageUrls: string[];
+  aiObservations: IndicatorEvidence[];
+  confirmed: Contribution["confirmed"];
+}) {
+  const liveUrls = input.imageUrls.filter((url) => url.startsWith("blob:"));
+  if (liveUrls.length === 0) return;
+
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  if (!user) return;
+
+  const files = await Promise.all(
+    liveUrls.map(async (url, index) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("LOCAL_IMAGE_UNAVAILABLE");
+      const blob = await response.blob();
+      const type = blob.type || "image/jpeg";
+      const extension = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+      return new File([blob], `mutah-evidence-${index + 1}.${extension}`, { type });
+    }),
+  );
+
+  await persistLiveContribution({
+    facilityExternalKey: input.facilityId,
+    zone: input.zone,
+    focusIndicator: "general",
+    userId: user.id,
+    files,
+    observations: input.aiObservations,
+    confirmations: input.confirmed,
+  });
+}
+
 export function MutahProvider({ children }: { children: ReactNode }) {
   const [facilities, setFacilities] = useState<Facility[]>(FACILITIES);
   const [contributions, setContributions] = useState<Contribution[]>(INITIAL_CONTRIBUTIONS);
   const [needs, setNeedsState] = useState<AccessNeed[]>([]);
   const [needsChosen, setNeedsChosen] = useState(false);
+
+  const refreshReviewedFacilities = useCallback(async () => {
+    try {
+      const reviewed = await loadReviewedFacilityModels();
+      setFacilities((current) => {
+        const reviewedIds = new Set(reviewed.map((facility) => facility.id));
+        return [...current.filter((facility) => !reviewedIds.has(facility.id)), ...reviewed];
+      });
+    } catch (error) {
+      console.error("Could not refresh reviewed public facilities", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshReviewedFacilities();
+    const refresh = () => void refreshReviewedFacilities();
+    window.addEventListener("mutah:reviewed-evidence-changed", refresh);
+    return () => window.removeEventListener("mutah:reviewed-evidence-changed", refresh);
+  }, [refreshReviewedFacilities]);
 
   const setNeeds = useCallback((next: AccessNeed[]) => {
     setNeedsState(next);
@@ -62,9 +128,11 @@ export function MutahProvider({ children }: { children: ReactNode }) {
   );
 
   const submitContribution: MutahState["submitContribution"] = useCallback(
-    ({ facilityId, zone, imageUrl, aiObservations, confirmed }) => {
+    ({ facilityId, zone, imageUrls, aiObservations, confirmed }) => {
       const id = `c-${++seq}`;
-      const facility = FACILITIES.find((f) => f.id === facilityId);
+      const facility = facilities.find((f) => f.id === facilityId);
+      const cleanUrls = imageUrls.filter(Boolean);
+      const imageUrl = cleanUrls[0] ?? "";
       setContributions((prev) => [
         {
           id,
@@ -72,6 +140,7 @@ export function MutahProvider({ children }: { children: ReactNode }) {
           facilityName: facility?.name ?? bi("مرفق", "Facility"),
           zone,
           imageUrl,
+          imageUrls: cleanUrls,
           submittedISO: new Date().toISOString().slice(0, 10),
           status: "pending_review",
           aiObservations,
@@ -82,9 +151,23 @@ export function MutahProvider({ children }: { children: ReactNode }) {
       setFacilities((prev) =>
         prev.map((f) => (f.id === facilityId ? { ...f, verification: "pending_review" } : f)),
       );
+
+      void persistSignedInLiveContribution({
+        facilityId,
+        zone,
+        imageUrls: cleanUrls,
+        aiObservations,
+        confirmed,
+      }).catch((error) => {
+        console.error("Operational contribution persistence failed", {
+          localContributionId: id,
+          message: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        });
+      });
+
       return id;
     },
-    [],
+    [facilities],
   );
 
   const approveContribution = useCallback((id: string, note: string) => {
@@ -108,8 +191,8 @@ export function MutahProvider({ children }: { children: ReactNode }) {
                 note:
                   confirmed.action === "corrected"
                     ? bi(
-                        "صححها المساهم بعد مراجعة الصورة.",
-                        "Corrected by the contributor after reviewing the photo.",
+                        "صححها المساهم بعد مراجعة الأدلة المرئية.",
+                        "Corrected by the contributor after reviewing the visual evidence.",
                       )
                     : confirmed.action === "unsure"
                       ? bi(
@@ -122,21 +205,27 @@ export function MutahProvider({ children }: { children: ReactNode }) {
 
             const today = new Date().toISOString().slice(0, 10);
             const zone = f.zones[contribution.zone];
+            const contributionImages = (
+              contribution.imageUrls?.length
+                ? contribution.imageUrls
+                : contribution.imageUrl
+                  ? [contribution.imageUrl]
+                  : []
+            ).map((url, index) => ({
+              url,
+              alt: bi(
+                `صورة ${index + 1} من مساهمة معتمدة لهذا المسار.`,
+                `Photo ${index + 1} from an approved contribution for this zone.`,
+              ),
+              capturedISO: contribution.submittedISO,
+            }));
+
             const zones = {
               ...f.zones,
               [contribution.zone]: {
                 key: contribution.zone,
-                documented: true,
-                images: contribution.imageUrl
-                  ? [
-                      {
-                        url: contribution.imageUrl,
-                        alt: bi("صورة من مساهمة معتمدة.", "Photo from an approved contribution."),
-                        capturedISO: contribution.submittedISO,
-                      },
-                      ...zone.images,
-                    ]
-                  : zone.images,
+                documented: contributionImages.length > 0 || zone.documented,
+                images: [...contributionImages, ...zone.images],
               },
             } satisfies Facility["zones"];
 
@@ -144,7 +233,9 @@ export function MutahProvider({ children }: { children: ReactNode }) {
               ...f,
               indicators: next,
               zones,
-              imageUrl: contribution.imageUrl || f.imageUrl,
+              // Approved access evidence remains inside its zone; it never becomes
+              // the facility's official public display image implicitly.
+              imageUrl: f.imageUrl,
               lastVerifiedISO: today,
               verification: "team_reviewed",
               source: "contributor_image",
@@ -206,9 +297,7 @@ export function useMutah(): MutahState {
   return ctx;
 }
 
-export function emptyConfirmations(
-  observations: IndicatorEvidence[],
-): Contribution["confirmed"] {
+export function emptyConfirmations(observations: IndicatorEvidence[]): Contribution["confirmed"] {
   return Object.fromEntries(
     observations.map((o) => [o.key, { state: o.state, action: "confirmed" as const }]),
   ) as Contribution["confirmed"];

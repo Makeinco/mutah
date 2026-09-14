@@ -20,7 +20,7 @@ import { INDICATOR_LABEL, stateLabel } from "@/lib/mutah/labels";
 import type { IndicatorEvidence, IndicatorKey, IndicatorState } from "@/lib/mutah/types";
 import { cn } from "@/lib/utils";
 
-const INDICATOR_ICON: Record<IndicatorKey, ComponentType<{ className?: string }>> = {
+export const INDICATOR_ICON: Record<IndicatorKey, ComponentType<{ className?: string }>> = {
   path_surface: Footprints,
   curb_ramp: MoveUpRight,
   steps: ArrowUpNarrowWide,
@@ -43,13 +43,15 @@ const STATE_STYLE: Record<
   present: { icon: Check, chip: "bg-access-soft text-access-strong border-access" },
   absent: { icon: Minus, chip: "bg-muted text-foreground border-input" },
   not_visible: { icon: EyeOff, chip: "bg-unknown-soft text-unknown border-input border-dashed" },
+  not_documented: { icon: EyeOff, chip: "bg-unknown-soft text-unknown border-input border-dashed" },
+  conflicting: { icon: TriangleAlert, chip: "bg-warn-soft text-warn-strong border-warn" },
   unknown: { icon: CircleHelp, chip: "bg-unknown-soft text-unknown border-input border-dashed" },
   not_applicable: { icon: Minus, chip: "bg-muted text-muted-foreground border-input" },
 };
 
 export function StateChip({ indicator, state }: { indicator: IndicatorKey; state: IndicatorState }) {
   const { pick } = useLang();
-  const style = STATE_STYLE[state];
+  const style = STATE_STYLE[state] ?? STATE_STYLE.unknown;
   const Icon = style.icon;
   return (
     <span
@@ -73,7 +75,11 @@ export function EvidenceItem({
 }) {
   const { pick } = useLang();
   const Icon = INDICATOR_ICON[evidence.key];
-  const uncertain = evidence.state === "unknown" || evidence.state === "not_visible";
+  const uncertain =
+    evidence.state === "unknown" ||
+    evidence.state === "not_visible" ||
+    evidence.state === "not_documented" ||
+    evidence.state === "conflicting";
   return (
     <li
       className={cn(

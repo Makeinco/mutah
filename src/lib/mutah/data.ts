@@ -3,7 +3,7 @@ import libraryImg from "@/assets/entrance-library.jpg";
 import pharmacyImg from "@/assets/entrance-pharmacy.jpg";
 import mallImg from "@/assets/entrance-mall.jpg";
 import { bi } from "./i18n";
-import { INDICATOR_ORDER, INDICATOR_ZONE, ZONE_ORDER } from "./labels";
+import { INDICATOR_ZONE, ZONE_ORDER } from "./labels";
 import type {
   Contribution,
   EvidenceImage,
@@ -15,9 +15,24 @@ import type {
 } from "./types";
 
 /**
- * Mock repository. Replace the bodies of these functions with Supabase queries
- * later — component code only depends on the shapes returned here.
+ * Demo repository. These records demonstrate product behaviour only.
+ * No demo image is allowed to support an indoor claim it does not visibly show.
  */
+
+const ALL_INDICATORS: IndicatorKey[] = [
+  "path_surface",
+  "curb_ramp",
+  "steps",
+  "ramp",
+  "handrail",
+  "obstruction",
+  "parking",
+  "parking_route",
+  "elevator",
+  "elevator_space",
+  "accessible_restroom",
+  "restroom_door",
+];
 
 const ev = (
   key: IndicatorKey,
@@ -27,15 +42,14 @@ const ev = (
 ): IndicatorEvidence => ({ key, state, note: bi(ar, en) });
 
 const UNDOCUMENTED = bi(
-  "لا توجد صورة موثقة لهذا المسار بعد.",
-  "This view has not been photographed yet.",
+  "لا توجد أدلة مرئية موثقة لهذا العنصر بعد.",
+  "There is no documented visual evidence for this feature yet.",
 );
 
-/** Fill every indicator; anything not supplied stays honestly unknown. */
 function indicators(list: IndicatorEvidence[]): Facility["indicators"] {
   const map = Object.fromEntries(list.map((e) => [e.key, e])) as Partial<Facility["indicators"]>;
-  for (const key of INDICATOR_ORDER) {
-    if (!map[key]) map[key] = { key, state: "unknown", note: UNDOCUMENTED };
+  for (const key of ALL_INDICATORS) {
+    if (!map[key]) map[key] = { key, state: "not_documented", note: UNDOCUMENTED };
   }
   return map as Facility["indicators"];
 }
@@ -72,20 +86,59 @@ export const FACILITIES: Facility[] = [
     verification: "team_reviewed",
     source: "contributor_image",
     indicators: indicators([
-      ev("path_surface", "present", "الرصيف أمام المقهى مستوٍ ومرصوف.", "The sidewalk in front of the café is even and paved."),
-      ev("curb_ramp", "not_visible", "طرف الرصيف خارج إطار الصورة.", "The curb edge is outside the photo frame."),
-      ev("steps", "present", "تظهر درجة أمام الباب الرئيسي.", "One step is visible in front of the main door."),
-      ev("ramp", "not_visible", "لا يظهر منحدر داخل إطار الصورة الحالية.", "No ramp appears within the current frame."),
-      ev("handrail", "present", "يظهر عمود معدني بمحاذاة الدرجة.", "A metal rail runs alongside the step."),
-      ev("obstruction", "absent", "مسار الرصيف أمام الباب يبدو خاليًا.", "The sidewalk route to the door looks clear."),
-      ev("elevator", "not_applicable", "المقهى بطابق واحد.", "The café is single-storey."),
+      ev(
+        "path_surface",
+        "present",
+        "يظهر رصيف مرصوف أمام المقهى.",
+        "A paved sidewalk is visible in front of the café.",
+      ),
+      ev(
+        "curb_ramp",
+        "not_visible",
+        "طرف الرصيف خارج إطار الصورة.",
+        "The curb edge is outside the photo frame.",
+      ),
+      ev(
+        "steps",
+        "present",
+        "تظهر درجة أمام الباب الرئيسي.",
+        "One step is visible in front of the main door.",
+      ),
+      ev(
+        "ramp",
+        "not_visible",
+        "لا يظهر كامل محيط المدخل في الصورة الحالية.",
+        "The full entrance surroundings are not visible in the current image.",
+      ),
+      ev(
+        "handrail",
+        "unknown",
+        "لا تكفي الصورة لتأكيد وجود درابزين مناسب.",
+        "The image is not sufficient to confirm a handrail.",
+      ),
+      ev(
+        "obstruction",
+        "absent",
+        "لا يظهر عائق واضح في الجزء المصور من المسار.",
+        "No clear obstruction is shown in the photographed part of the route.",
+      ),
     ]),
     zones: zones({
       approach: [
-        img(cafeImg, "الرصيف المؤدي إلى مقهى نسيم.", "The sidewalk leading to Naseem Café.", "2026-08-24"),
+        img(
+          cafeImg,
+          "الرصيف المؤدي إلى مقهى نسيم.",
+          "The sidewalk leading to Naseem Café.",
+          "2026-08-24",
+        ),
       ],
       entrance: [
-        img(cafeImg, "الباب الزجاجي وأمامه درجة واحدة.", "The glass door with a single step in front.", "2026-08-24"),
+        img(
+          cafeImg,
+          "الباب الزجاجي وأمامه درجة واحدة.",
+          "The glass door with a single step in front.",
+          "2026-08-24",
+        ),
       ],
     }),
   },
@@ -98,32 +151,61 @@ export const FACILITIES: Facility[] = [
     point: { x: 0.62, y: 0.24 },
     imageUrl: libraryImg,
     imageAlt: bi(
-      "مدخل مكتبة عامة: أبواب زجاجية وأرضية مستوية بلا درجات.",
-      "Public library entrance: glass doors and a level, step-free floor.",
+      "مدخل مكتبة عامة: أبواب زجاجية وأرضية تبدو مستوية في الجزء المصور.",
+      "Public library entrance: glass doors and a floor that appears level in the photographed area.",
     ),
     lastVerifiedISO: "2026-08-20",
     verification: "team_reviewed",
     source: "team_survey",
     indicators: indicators([
-      ev("path_surface", "present", "المسار من الشارع مرصوف ومستوٍ.", "The route from the street is paved and level."),
-      ev("curb_ramp", "present", "يظهر منحدر رصيف عند مدخل الموقع.", "A curb ramp is visible at the site entrance."),
-      ev("steps", "absent", "لا تظهر درجات؛ الأرضية مستوية حتى الباب.", "No steps; the floor is level up to the door."),
-      ev("ramp", "not_applicable", "لا يوجد ارتفاع يستدعي منحدرًا.", "There is no rise that would need a ramp."),
-      ev("handrail", "absent", "لا يظهر درابزين، ولا يوجد ارتفاع يستدعيه.", "No handrail is visible, and no rise requires one."),
-      ev("obstruction", "absent", "المسار أمام الباب واسع وخالٍ.", "The route to the door is wide and clear."),
-      ev("parking", "present", "تظهر لوحة موقف مخصص قرب المدخل الرئيسي.", "A designated parking sign is visible near the main entrance."),
-      ev("parking_route", "present", "المسار من الموقف إلى الباب مرصوف وبلا درجات.", "The route from parking to the door is paved and step-free."),
-      ev("elevator", "present", "يظهر مصعد في بهو المكتبة.", "An elevator is visible in the library lobby."),
-      ev("elevator_space", "present", "المساحة داخل المصعد تتسع لكرسي متحرك.", "The elevator has space for a wheelchair."),
-      ev("accessible_restroom", "present", "تظهر دورة مياه متاحة مع علامة إتاحة.", "An accessible restroom with an access sign is visible."),
-      ev("restroom_door", "present", "باب دورة المياه واسع ويفتح للخارج.", "The restroom door is wide and opens outward."),
+      ev(
+        "path_surface",
+        "present",
+        "يظهر مسار مرصوف في الجزء المصور.",
+        "A paved route is visible in the photographed area.",
+      ),
+      ev(
+        "steps",
+        "absent",
+        "لا تظهر درجات في الجزء الموثق حتى الباب.",
+        "No steps are shown in the documented section up to the door.",
+      ),
+      ev(
+        "ramp",
+        "not_applicable",
+        "لا يظهر ارتفاع عند المدخل الموثق يستدعي منحدرًا.",
+        "No rise requiring a ramp is shown at the documented entrance.",
+      ),
+      ev(
+        "obstruction",
+        "absent",
+        "لا يظهر عائق واضح أمام الباب في الصورة المراجعة.",
+        "No clear obstruction is shown in front of the door in the reviewed image.",
+      ),
+      ev(
+        "parking",
+        "not_visible",
+        "منطقة المواقف خارج إطار الصورة الحالية.",
+        "The parking area is outside the current image frame.",
+      ),
     ]),
     zones: zones({
-      approach: [img(libraryImg, "المسار المرصوف من الشارع إلى المكتبة.", "The paved route from the street to the library.", "2026-08-20")],
-      entrance: [img(libraryImg, "أبواب زجاجية وأرضية مستوية.", "Glass doors and a level floor.", "2026-08-20")],
-      parking: [img(libraryImg, "موقف مخصص قرب المدخل.", "Designated parking near the entrance.", "2026-08-20")],
-      elevator: [img(libraryImg, "مصعد في بهو المكتبة.", "Elevator in the library lobby.", "2026-08-20")],
-      restroom: [img(libraryImg, "دورة مياه متاحة بعلامة إتاحة.", "Accessible restroom with an access sign.", "2026-08-20")],
+      approach: [
+        img(
+          libraryImg,
+          "المسار الظاهر أمام المكتبة.",
+          "The visible route in front of the library.",
+          "2026-08-20",
+        ),
+      ],
+      entrance: [
+        img(
+          libraryImg,
+          "أبواب المكتبة والمنطقة الظاهرة أمامها.",
+          "The library doors and the visible area in front of them.",
+          "2026-08-20",
+        ),
+      ],
     }),
   },
   {
@@ -135,25 +217,79 @@ export const FACILITIES: Facility[] = [
     point: { x: 0.44, y: 0.66 },
     imageUrl: pharmacyImg,
     imageAlt: bi(
-      "مدخل صيدلية: درجة مرتفعة أمام الباب وأحواض نباتات على الرصيف.",
-      "Pharmacy entrance: a raised step at the door and planters on the sidewalk.",
+      "مدخل صيدلية: عتبة مرتفعة أمام الباب وأحواض نباتات على الرصيف.",
+      "Pharmacy entrance: a raised threshold at the door and planters on the sidewalk.",
     ),
     lastVerifiedISO: "2026-05-11",
     verification: "stale",
     source: "contributor_image",
     indicators: indicators([
-      ev("path_surface", "present", "الرصيف مرصوف لكنه ضيق.", "The sidewalk is paved but narrow."),
-      ev("curb_ramp", "absent", "لا يظهر منحدر رصيف قرب المحل.", "No curb ramp is visible near the shop."),
-      ev("steps", "present", "تظهر عتبة مرتفعة أمام الباب.", "A raised threshold is visible at the door."),
-      ev("ramp", "absent", "لا يظهر منحدر بجانب المدخل.", "No ramp is visible beside the entrance."),
-      ev("handrail", "absent", "لا يظهر درابزين.", "No handrail is visible."),
-      ev("obstruction", "present", "أحواض نباتات تضيّق مسار الوصول إلى الباب.", "Planters narrow the route to the door."),
-      ev("parking", "unknown", "لا يمكن التأكد من وجود موقف مخصص.", "Designated parking can't be confirmed."),
-      ev("elevator", "not_applicable", "المحل بطابق واحد.", "The shop is single-storey."),
+      ev(
+        "path_surface",
+        "present",
+        "يظهر رصيف مرصوف أمام الصيدلية.",
+        "A paved sidewalk is shown in front of the pharmacy.",
+      ),
+      ev(
+        "curb_ramp",
+        "not_visible",
+        "حافة الرصيف ليست موثقة بالكامل.",
+        "The curb edge is not fully documented.",
+      ),
+      ev(
+        "steps",
+        "present",
+        "تظهر عتبة مرتفعة أمام الباب.",
+        "A raised threshold is visible at the door.",
+      ),
+      ev(
+        "ramp",
+        "absent",
+        "لا يظهر منحدر في منطقة المدخل الموثقة.",
+        "No ramp is shown in the documented entrance area.",
+      ),
+      ev(
+        "handrail",
+        "absent",
+        "لا يظهر درابزين في منطقة المدخل الموثقة.",
+        "No handrail is shown in the documented entrance area.",
+      ),
+      ev(
+        "obstruction",
+        "present",
+        "تظهر أحواض نباتات تضيق الجزء المصور من مسار الوصول.",
+        "Planters narrow the photographed part of the access route.",
+      ),
+      ev(
+        "parking",
+        "not_visible",
+        "منطقة المواقف خارج إطار الصور الحالية.",
+        "The parking area is outside the current image frames.",
+      ),
+      ev(
+        "elevator",
+        "not_applicable",
+        "تمت مراجعة هذا المثال التجريبي كمحل بطابق واحد.",
+        "This demo example is reviewed as a single-storey shop.",
+      ),
     ]),
     zones: zones({
-      approach: [img(pharmacyImg, "الرصيف الضيق أمام الصيدلية.", "The narrow sidewalk in front of the pharmacy.", "2026-05-11")],
-      entrance: [img(pharmacyImg, "عتبة مرتفعة وأحواض نباتات أمام الباب.", "A raised threshold and planters in front of the door.", "2026-05-11")],
+      approach: [
+        img(
+          pharmacyImg,
+          "الجزء المصور من الرصيف أمام الصيدلية.",
+          "The photographed part of the sidewalk in front of the pharmacy.",
+          "2026-05-11",
+        ),
+      ],
+      entrance: [
+        img(
+          pharmacyImg,
+          "عتبة مرتفعة وأحواض نباتات قرب الباب.",
+          "A raised threshold and planters near the door.",
+          "2026-05-11",
+        ),
+      ],
     }),
   },
   {
@@ -165,31 +301,93 @@ export const FACILITIES: Facility[] = [
     point: { x: 0.74, y: 0.58 },
     imageUrl: mallImg,
     imageAlt: bi(
-      "مدخل جانبي لمركز تسوق: منحدر طويل بدرابزين على الجانبين ولوحة موقف مخصص.",
-      "Shopping centre side entrance: a long ramp with handrails on both sides and a designated parking sign.",
+      "مدخل جانبي لمركز تسوق يظهر فيه منحدر ودرابزين في الجزء المصور.",
+      "A shopping-centre side entrance showing a ramp and handrails in the photographed area.",
     ),
     lastVerifiedISO: "2026-08-26",
     verification: "team_reviewed",
     source: "team_survey",
     indicators: indicators([
-      ev("path_surface", "present", "المسار من الموقف مرصوف ومستوٍ.", "The route from the car park is paved and level."),
-      ev("curb_ramp", "present", "يظهر منحدر رصيف عند نهاية الممر.", "A curb ramp is visible at the end of the walkway."),
-      ev("steps", "present", "تظهر درجات بجانب المنحدر.", "Steps are visible beside the ramp."),
-      ev("ramp", "present", "يظهر منحدر طويل يصل إلى الباب.", "A long ramp leads to the door."),
-      ev("handrail", "present", "يظهر درابزين على جانبي المنحدر.", "Handrails run along both sides of the ramp."),
-      ev("obstruction", "absent", "المسار على المنحدر يبدو خاليًا.", "The ramp route looks clear."),
-      ev("parking", "present", "تظهر لوحة موقف مخصص قرب المدخل.", "A designated parking sign is visible near the entrance."),
-      ev("parking_route", "present", "المسار من الموقف إلى المنحدر متصل وبلا درجات.", "The route from parking to the ramp is continuous and step-free."),
-      ev("elevator", "present", "يظهر مصعد بعد المدخل الجانبي مباشرة.", "An elevator is visible just inside the side entrance."),
-      ev("elevator_space", "not_visible", "داخل المصعد غير ظاهر في الصور الحالية.", "The inside of the elevator isn't shown in current photos."),
-      ev("accessible_restroom", "present", "تظهر لوحة دورة مياه متاحة في الممر.", "An accessible restroom sign is visible in the corridor."),
-      ev("restroom_door", "not_visible", "باب دورة المياه خارج إطار الصورة.", "The restroom door is outside the photo frame."),
+      ev(
+        "path_surface",
+        "present",
+        "يظهر مسار مرصوف في الجزء الموثق.",
+        "A paved route is visible in the documented area.",
+      ),
+      ev(
+        "steps",
+        "present",
+        "تظهر درجات بجانب المنحدر.",
+        "Steps are visible beside the ramp.",
+      ),
+      ev(
+        "ramp",
+        "present",
+        "يظهر منحدر يصل إلى منطقة الباب.",
+        "A ramp is shown leading toward the doorway area.",
+      ),
+      ev(
+        "handrail",
+        "present",
+        "يظهر درابزين بمحاذاة المنحدر.",
+        "A handrail is visible alongside the ramp.",
+      ),
+      ev(
+        "obstruction",
+        "absent",
+        "لا يظهر عائق واضح على الجزء المصور من المنحدر.",
+        "No clear obstruction is shown on the photographed part of the ramp.",
+      ),
+      ev(
+        "parking",
+        "present",
+        "تظهر علامة موقف مخصص ضمن الدليل التجريبي.",
+        "An accessible-parking marking is shown in the demo evidence.",
+      ),
+      ev(
+        "parking_route",
+        "unknown",
+        "لا تكفي الصورة الحالية لتأكيد كامل المسار من الموقف إلى المدخل.",
+        "The current image is not enough to confirm the full route from parking to the entrance.",
+      ),
+      ev(
+        "elevator",
+        "not_documented",
+        "لا توجد صورة داخلية موثقة للمصعد بعد.",
+        "No documented interior elevator image is available yet.",
+      ),
+      ev(
+        "accessible_restroom",
+        "not_documented",
+        "لا توجد صور موثقة لدورة المياه المخصصة بعد.",
+        "No documented accessible-restroom images are available yet.",
+      ),
     ]),
     zones: zones({
-      approach: [img(mallImg, "ممر مرصوف من الموقف إلى المدخل الجانبي.", "A paved walkway from the car park to the side entrance.", "2026-08-26")],
-      entrance: [img(mallImg, "منحدر طويل بدرابزين على الجانبين.", "A long ramp with handrails on both sides.", "2026-08-26")],
-      parking: [img(mallImg, "لوحة موقف مخصص قرب المدخل.", "Designated parking sign near the entrance.", "2026-08-26")],
-      elevator: [img(mallImg, "مصعد قرب المدخل الجانبي.", "Elevator near the side entrance.", "2026-08-26")],
+      approach: [
+        img(
+          mallImg,
+          "المسار الظاهر المؤدي إلى المدخل الجانبي.",
+          "The visible route leading to the side entrance.",
+          "2026-08-26",
+        ),
+      ],
+      entrance: [
+        img(
+          mallImg,
+          "منحدر ودرابزين عند المدخل الجانبي.",
+          "Ramp and handrail at the side entrance.",
+          "2026-08-26",
+        ),
+      ],
+      parking: [
+        img(
+          mallImg,
+          "جزء من منطقة الموقف المخصص الظاهرة في الدليل التجريبي.",
+          "Part of the accessible-parking area shown in the demo evidence.",
+          "2026-08-26",
+        ),
+      ],
     }),
   },
   {
@@ -216,13 +414,34 @@ export const INITIAL_CONTRIBUTIONS: Contribution[] = [
     facilityName: bi("صيدلية الركن", "Al Rukn Pharmacy"),
     zone: "entrance",
     imageUrl: pharmacyImg,
+    imageUrls: [pharmacyImg],
     submittedISO: "2026-08-26",
     status: "pending_review",
     aiObservations: [
-      ev("steps", "present", "تظهر عتبة مرتفعة أمام الباب.", "A raised threshold is visible at the door."),
-      ev("ramp", "absent", "لا يظهر منحدر بجانب المدخل.", "No ramp is visible beside the entrance."),
-      ev("handrail", "absent", "لا يظهر درابزين.", "No handrail is visible."),
-      ev("obstruction", "present", "أحواض نباتات على مسار الوصول.", "Planters sit on the access route."),
+      ev(
+        "steps",
+        "present",
+        "تظهر عتبة مرتفعة أمام الباب.",
+        "A raised threshold is visible at the door.",
+      ),
+      ev(
+        "ramp",
+        "absent",
+        "لا يظهر منحدر في منطقة المدخل الموثقة.",
+        "No ramp is shown in the documented entrance area.",
+      ),
+      ev(
+        "handrail",
+        "absent",
+        "لا يظهر درابزين في منطقة المدخل الموثقة.",
+        "No handrail is shown in the documented entrance area.",
+      ),
+      ev(
+        "obstruction",
+        "present",
+        "تظهر أحواض نباتات على الجزء المصور من مسار الوصول.",
+        "Planters appear on the photographed part of the access route.",
+      ),
     ],
     confirmed: {
       steps: { state: "present", action: "confirmed" },

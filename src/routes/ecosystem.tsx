@@ -1,145 +1,215 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Building2, ClipboardCheck, Compass, Users } from "lucide-react";
+import {
+  BarChart3,
+  BriefcaseBusiness,
+  HeartPulse,
+  MapPinned,
+  ShoppingBag,
+  UsersRound,
+} from "lucide-react";
 import type { ComponentType } from "react";
 import { AppShell } from "@/components/mutah/AppShell";
-import { Card, SectionTitle } from "@/components/mutah/ui";
+import { Card } from "@/components/mutah/ui";
 import { bi, useLang } from "@/lib/mutah/i18n";
 import type { L } from "@/lib/mutah/types";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/ecosystem")({
   head: () => ({
     meta: [
-      { title: "منظومة مُتاح | مُتاح ماب" },
+      { title: "مُتاح | منظومة الوصول" },
       {
         name: "description",
-        content: "أدوار منظومة مُتاح: الزائر، المساهم، فريق المراجعة، الجهات، ومُتاح إنسايتس.",
+        content:
+          "منظومة مُتاح: مُتاح ماب هو المنتج الحالي، مع خدمات مستقبلية وطبقة إنسايتس قيد التطوير.",
       },
-      { property: "og:title", content: "منظومة مُتاح | مُتاح ماب" },
-      { property: "og:description", content: "دور واضح لكل طرف: من يرصد، من يتحقق، ومن يقرر." },
     ],
   }),
-  component: Ecosystem,
+  component: MutahEcosystem,
 });
 
-interface Role {
+type ServiceStatus = "current" | "future" | "pilot";
+
+interface Service {
   id: string;
   icon: ComponentType<{ className?: string }>;
-  title: L;
+  name: L;
+  english: string;
   body: L;
-  link?: { to: "/discover" | "/contribute" | "/review" | "/insights"; label: L };
+  status: ServiceStatus;
+  to?: "/discover" | "/insights";
 }
 
-const ROLES: Role[] = [
+const SERVICES: Service[] = [
   {
-    id: "visitor",
-    icon: Compass,
-    title: bi("الزائر", "Visitor"),
+    id: "map",
+    icon: MapPinned,
+    name: bi("مُتاح ماب", "MUTAH MAP"),
+    english: "MUTAH MAP",
     body: bi(
-      "يرى حالة مخصصة لاحتياجاته، مع سبب واضح لكل نتيجة قبل أن يقرر الزيارة.",
-      "Sees a status personalised to their needs, with a clear reason behind every result.",
+      "أدلة موثقة تساعدك على فهم إتاحة المرافق قبل الزيارة.",
+      "Verified evidence that helps you understand facility access before visiting.",
     ),
-    link: { to: "/discover", label: bi("استكشف الأماكن", "Explore places") },
+    status: "current",
+    to: "/discover",
   },
   {
-    id: "contributor",
-    icon: Users,
-    title: bi("المساهم", "Contributor"),
+    id: "care",
+    icon: HeartPulse,
+    name: bi("مُتاح كير", "MUTAH CARE"),
+    english: "MUTAH CARE",
     body: bi(
-      "يصوّر مسارًا واحدًا في كل مرة، ويؤكد أو يصحّح ما رصده الذكاء الاصطناعي.",
-      "Photographs one view at a time and confirms or corrects what the AI observed.",
+      "وصول أسهل إلى الخدمات الصحية والتأهيلية المناسبة.",
+      "Easier access to relevant health and rehabilitation services.",
     ),
-    link: { to: "/contribute", label: bi("ابدأ المساهمة", "Start contributing") },
+    status: "future",
   },
   {
-    id: "reviewer",
-    icon: ClipboardCheck,
-    title: bi("فريق المراجعة", "Review team"),
+    id: "market",
+    icon: ShoppingBag,
+    name: bi("مُتاح ماركت", "MUTAH MARKET"),
+    english: "MUTAH MARKET",
     body: bi(
-      "لا نشر تلقائي: كل مساهمة تُعتمد أو تُرفض أو يُطلب توضيحها بقرار بشري مسجّل.",
-      "No automatic publishing: every contribution is approved, rejected, or queried by a recorded human decision.",
+      "اكتشاف ومقارنة الأجهزة والحلول المساعدة بسهولة.",
+      "Discover and compare assistive products and solutions more easily.",
     ),
-    link: { to: "/review", label: bi("مركز المراجعة", "Review centre") },
+    status: "future",
   },
   {
-    id: "operators",
-    icon: Building2,
-    title: bi("الجهات ومشغلو المرافق", "Venues and operators"),
+    id: "works",
+    icon: BriefcaseBusiness,
+    name: bi("مُتاح ووركس", "MUTAH WORKS"),
+    english: "MUTAH WORKS",
     body: bi(
-      "يرون ما هو موثّق عن أماكنهم وما ينقصه دليل، فيعرفون أين يبدأ التحسين.",
-      "See what is documented about their places and what still lacks evidence, so they know where to start.",
+      "تمكين مهني وربط أكثر ذكاءً بين المهارات والفرص.",
+      "Professional empowerment and smarter connections between skills and opportunities.",
     ),
+    status: "future",
+  },
+  {
+    id: "connect",
+    icon: UsersRound,
+    name: bi("مُتاح كونكت", "MUTAH CONNECT"),
+    english: "MUTAH CONNECT",
+    body: bi(
+      "مجتمع آمن يربط الأفراد والأسر والجهات ويعزز الدعم والتواصل.",
+      "A safe community connecting individuals, families and organisations.",
+    ),
+    status: "future",
   },
   {
     id: "insights",
     icon: BarChart3,
-    title: bi("مُتاح إنسايتس", "MUTAH Insights"),
+    name: bi("مُتاح إنسايتس", "MUTAH INSIGHTS"),
+    english: "MUTAH INSIGHTS",
     body: bi(
-      "قراءة مجمّعة للبيانات ضمن نطاق المرحلة التجريبية، بلا ترتيب للمدن وبلا أرقام وطنية.",
-      "An aggregate reading within the pilot scope only — no city rankings, no national figures.",
+      "تحويل بيانات الإتاحة إلى مؤشرات تساعد المرافق وصنّاع القرار.",
+      "Turning accessibility data into insights for facilities and decision-makers.",
     ),
-    link: { to: "/insights", label: bi("افتح إنسايتس", "Open Insights") },
+    status: "pilot",
+    to: "/insights",
   },
 ];
 
-function Ecosystem() {
-  const { pick, lang } = useLang();
+function StatusLabel({ status }: { status: ServiceStatus }) {
+  const { lang } = useLang();
+  const copy = {
+    current: lang === "ar" ? "الحالي" : "Current",
+    future: lang === "ar" ? "مستقبلي" : "Future",
+    pilot: lang === "ar" ? "قيد التطوير · Pilot" : "Pilot · In development",
+  }[status];
 
   return (
-    <AppShell title={lang === "ar" ? "المنظومة" : "Ecosystem"} wide>
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-2xl font-bold">
-          {lang === "ar" ? "منظومة مُتاح" : "The MUTAH ecosystem"}
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          {lang === "ar"
-            ? "مُتاح ليس تطبيقًا واحدًا، بل سلسلة أدوار: من يرصد، من يتحقق، ومن يقرر."
-            : "MUTAH is not a single app but a chain of roles: who observes, who verifies, and who decides."}
-        </p>
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 text-xs font-semibold",
+        status === "current" ? "text-primary" : status === "pilot" ? "text-access-strong" : "text-muted-foreground",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-2 rounded-full",
+          status === "current" ? "bg-primary" : status === "pilot" ? "bg-access-strong" : "bg-muted-foreground/50",
+        )}
+      />
+      {copy}
+    </span>
+  );
+}
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {ROLES.map(({ id, icon: Icon, title, body, link }) => (
-            <Card key={id} className="door-reveal transition-shadow hover:shadow-md">
-              <span className="flex size-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Icon className="size-6" aria-hidden="true" />
-              </span>
-              <h2 className="mt-4 text-lg font-bold">{pick(title)}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{pick(body)}</p>
-              {link ? (
-                <Link
-                  to={link.to}
-                  className="mt-4 inline-flex min-h-11 items-center rounded-xl border-2 border-input px-4 text-sm font-semibold hover:bg-muted"
-                >
-                  {pick(link.label)}
-                </Link>
-              ) : null}
-            </Card>
-          ))}
+function MutahEcosystem() {
+  const { pick, lang } = useLang();
+  const ar = lang === "ar";
+
+  return (
+    <AppShell title={ar ? "مُتاح" : "MUTAH"} wide>
+      <div className="mx-auto max-w-5xl">
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold text-primary">{ar ? "المنظومة الأم" : "The MUTAH ecosystem"}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight">{ar ? "مُتاح" : "MUTAH"}</h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+            {ar
+              ? "مُتاح ماب هو المنتج العامل الآن. بقية الخدمات تظهر كامتداد مستقبلي واضح، بينما مُتاح إنسايتس طبقة قيد التطوير مرتبطة ببيانات التجربة."
+              : "MUTAH MAP is the product working today. The remaining services are clearly presented as future extensions, while MUTAH INSIGHTS is an in-development data layer tied to pilot evidence."}
+          </p>
         </div>
 
-        <div className="mt-12">
-          <SectionTitle
-            hint={
-              lang === "ar"
-                ? "المعلومة تمر بالمسار نفسه في كل مرة."
-                : "Information always travels the same path."
-            }
-          >
-            {lang === "ar" ? "كيف تتحرك المعلومة" : "How information moves"}
-          </SectionTitle>
-          <ol className="grid gap-3 sm:grid-cols-5">
-            {(lang === "ar"
-              ? ["صورة", "رصد أولي", "تأكيد المساهم", "مراجعة بشرية", "نشر"]
-              : ["Photo", "AI observation", "Contributor confirms", "Human review", "Published"]
-            ).map((step, i) => (
-              <li
-                key={step}
-                className="rounded-2xl border border-border bg-surface p-4 text-sm font-semibold"
+        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICES.map((service) => {
+            const Icon = service.icon;
+            const current = service.status === "current";
+            const content = (
+              <Card
+                className={cn(
+                  "h-full transition-transform duration-200 hover:-translate-y-0.5",
+                  current && "border-primary/40 bg-primary-soft/25 ring-1 ring-primary/10 lg:col-span-1",
+                )}
               >
-                <span className="block text-xs text-muted-foreground">{i + 1}</span>
-                {step}
-              </li>
-            ))}
-          </ol>
+                <div className="flex items-start justify-between gap-3">
+                  <span
+                    className={cn(
+                      "flex size-11 items-center justify-center rounded-xl border",
+                      current
+                        ? "border-primary/20 bg-primary text-primary-foreground"
+                        : service.status === "pilot"
+                          ? "border-access/30 bg-access-soft text-access-strong"
+                          : "border-border bg-surface text-foreground",
+                    )}
+                  >
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <StatusLabel status={service.status} />
+                </div>
+                <h2 className="mt-5 text-lg font-bold">{pick(service.name)}</h2>
+                <p className="mt-1 text-xs font-semibold tracking-wide text-muted-foreground">{service.english}</p>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{pick(service.body)}</p>
+                {current ? (
+                  <p className="mt-5 text-sm font-semibold text-primary">{ar ? "اعرف قبل أن تصل" : "Know Before You Go"}</p>
+                ) : null}
+              </Card>
+            );
+
+            return service.to ? (
+              <Link
+                key={service.id}
+                to={service.to}
+                className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {content}
+              </Link>
+            ) : (
+              <div key={service.id}>{content}</div>
+            );
+          })}
+        </div>
+
+        <div className="mt-10 border-t border-border pt-6">
+          <p className="text-base font-semibold">
+            {ar
+              ? "مُتاح ماب هو الخطوة الأولى، ومُتاح هي المنظومة الكاملة."
+              : "MUTAH MAP is the first step; MUTAH is the full ecosystem."}
+          </p>
         </div>
       </div>
     </AppShell>
