@@ -70,28 +70,26 @@ const HOME_TOKEN_STYLE = {
   "--home-hero-height-base": HOME_LAYOUT.hero.desktop.heightBase,
   "--home-hero-height-wide": HOME_LAYOUT.hero.desktop.heightWide,
   "--home-hero-height-very-wide": HOME_LAYOUT.hero.desktop.heightVeryWide,
-  "--home-hero-content-width": HOME_LAYOUT.hero.desktop.contentWidth,
-  "--home-hero-visual-width": HOME_LAYOUT.hero.desktop.visualWidth,
+  "--home-hero-content-max-width": HOME_LAYOUT.hero.desktop.contentMaxWidth,
+  "--home-hero-content-inset": HOME_LAYOUT.hero.desktop.contentInset,
+  "--home-hero-content-y": HOME_LAYOUT.hero.desktop.contentVerticalPosition,
   "--home-hero-desktop-image-fit": HOME_LAYOUT.hero.desktop.imageFit,
   "--home-hero-desktop-image-position": HOME_LAYOUT.hero.desktop.imagePosition,
   "--home-hero-desktop-image-scale": HOME_LAYOUT.hero.desktop.imageScale,
-  "--home-hero-blend-width": HOME_LAYOUT.hero.desktop.blendWidth,
-  "--home-hero-blend-rtl": HOME_LAYOUT.hero.desktop.blendRtl,
-  "--home-hero-blend-ltr": HOME_LAYOUT.hero.desktop.blendLtr,
-  "--home-hero-mask-rtl": HOME_LAYOUT.hero.desktop.maskRtl,
-  "--home-hero-mask-ltr": HOME_LAYOUT.hero.desktop.maskLtr,
-  "--home-hero-radial-width": HOME_LAYOUT.hero.desktop.radialGlowWidth,
-  "--home-hero-radial-offset": HOME_LAYOUT.hero.desktop.radialGlowOffset,
-  "--home-hero-radial": HOME_LAYOUT.hero.desktop.radialGlow,
-  "--home-hero-radial-opacity": HOME_LAYOUT.hero.desktop.radialGlowOpacity,
+  "--home-hero-top-blend-height": HOME_LAYOUT.hero.desktop.topBlendHeight,
+  "--home-hero-top-blend-opacity": HOME_LAYOUT.hero.desktop.topBlendOpacity,
+  "--home-hero-top-blend": HOME_LAYOUT.hero.desktop.topBlend,
   "--home-hero-content-veil-width": HOME_LAYOUT.hero.desktop.contentVeilWidth,
   "--home-hero-content-veil-opacity": HOME_LAYOUT.hero.desktop.contentVeilOpacity,
-  "--home-hero-content-veil-rtl": HOME_LAYOUT.hero.desktop.contentVeilRtl,
-  "--home-hero-content-veil-ltr": HOME_LAYOUT.hero.desktop.contentVeilLtr,
-  "--home-hero-top-fade-height": HOME_LAYOUT.hero.desktop.topFadeHeight,
-  "--home-hero-top-fade": HOME_LAYOUT.hero.desktop.topFade,
-  "--home-hero-bottom-fade-height": HOME_LAYOUT.hero.desktop.bottomFadeHeight,
-  "--home-hero-bottom-fade": HOME_LAYOUT.hero.desktop.bottomFade,
+  "--home-hero-content-veil": HOME_LAYOUT.hero.desktop.contentVeil,
+  "--home-hero-radial-width": HOME_LAYOUT.hero.desktop.radialHazeWidth,
+  "--home-hero-radial-height": HOME_LAYOUT.hero.desktop.radialHazeHeight,
+  "--home-hero-radial-position": HOME_LAYOUT.hero.desktop.radialHazePosition,
+  "--home-hero-radial-opacity": HOME_LAYOUT.hero.desktop.radialHazeOpacity,
+  "--home-hero-radial": HOME_LAYOUT.hero.desktop.radialHaze,
+  "--home-hero-lower-fade-height": HOME_LAYOUT.hero.desktop.lowerFadeHeight,
+  "--home-hero-lower-fade-opacity": HOME_LAYOUT.hero.desktop.lowerFadeOpacity,
+  "--home-hero-lower-fade": HOME_LAYOUT.hero.desktop.lowerFade,
   "--home-hero-desktop-title-min": HOME_LAYOUT.hero.desktop.titleMin,
   "--home-hero-desktop-title-fluid": HOME_LAYOUT.hero.desktop.titleFluid,
   "--home-hero-desktop-title-max": HOME_LAYOUT.hero.desktop.titleMax,
@@ -111,8 +109,12 @@ const HOME_TOKEN_STYLE = {
   "--home-hero-mobile-image-position": HOME_LAYOUT.hero.mobile.imagePosition,
   "--home-hero-mobile-image-scale": HOME_LAYOUT.hero.mobile.imageScale,
   "--home-hero-mobile-arch-center": HOME_LAYOUT.hero.mobile.archCenterX,
-  "--home-hero-mobile-edge-fade-height": HOME_LAYOUT.hero.mobile.edgeFadeHeight,
-  "--home-hero-mobile-edge-fade": HOME_LAYOUT.hero.mobile.edgeFade,
+  "--home-hero-mobile-top-height": HOME_LAYOUT.hero.mobile.topBlendHeight,
+  "--home-hero-mobile-top-opacity": HOME_LAYOUT.hero.mobile.topBlendOpacity,
+  "--home-hero-mobile-top": HOME_LAYOUT.hero.mobile.topBlend,
+  "--home-hero-mobile-lower-height": HOME_LAYOUT.hero.mobile.lowerFadeHeight,
+  "--home-hero-mobile-lower-opacity": HOME_LAYOUT.hero.mobile.lowerFadeOpacity,
+  "--home-hero-mobile-lower": HOME_LAYOUT.hero.mobile.lowerFade,
   "--home-hero-mobile-title-min": HOME_LAYOUT.hero.mobile.titleMin,
   "--home-hero-mobile-title-fluid": HOME_LAYOUT.hero.mobile.titleFluid,
   "--home-hero-mobile-title-max": HOME_LAYOUT.hero.mobile.titleMax,
@@ -419,85 +421,53 @@ function HeroCanvas({
     >
       <div
         data-home-hero
-        className="relative mx-auto max-w-[var(--home-wide-max)] lg:h-[var(--home-hero-height-base)] xl:h-[var(--home-hero-height-wide)] min-[1800px]:!h-[var(--home-hero-height-very-wide)]"
+        className="relative w-full lg:h-[var(--home-hero-height-base)] xl:h-[var(--home-hero-height-wide)] min-[1800px]:!h-[var(--home-hero-height-very-wide)]"
       >
-        <div
-          className={`relative isolate mx-3 h-[clamp(var(--home-hero-mobile-visual-min),var(--home-hero-mobile-visual-fluid),var(--home-hero-mobile-visual-max))] overflow-hidden sm:mx-4 md:mx-6 md:h-[var(--home-hero-tablet-visual-height)] lg:absolute lg:inset-y-0 lg:m-0 lg:h-full lg:w-[var(--home-hero-visual-width)] lg:px-3 lg:py-5 xl:px-2 xl:py-6 ${
-            locale === "ar" ? "lg:right-0" : "lg:left-0"
-          }`}
-        >
-          <picture
-            className={`relative block size-full ${
-              locale === "ar"
-                ? "lg:[-webkit-mask-image:var(--home-hero-mask-rtl)] lg:[mask-image:var(--home-hero-mask-rtl)]"
-                : "lg:[-webkit-mask-image:var(--home-hero-mask-ltr)] lg:[mask-image:var(--home-hero-mask-ltr)]"
-            }`}
-          >
+        <div className="relative isolate h-[clamp(var(--home-hero-mobile-visual-min),var(--home-hero-mobile-visual-fluid),var(--home-hero-mobile-visual-max))] w-full overflow-hidden md:h-[var(--home-hero-tablet-visual-height)] lg:absolute lg:inset-0 lg:h-full">
+          <picture className="relative block size-full">
             <source media="(min-width: 768px)" srcSet={MUTAH_ASSETS.home.heroDesktop} />
             <img
               src={MUTAH_ASSETS.home.heroMobile}
-              width={1520}
-              height={2688}
+              width={4800}
+              height={3584}
               alt={copy.heroVisualLabel}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              sizes="(min-width: 1024px) 58vw, (min-width: 768px) calc(100vw - 3rem), 19rem"
-              className="absolute left-[var(--home-hero-mobile-arch-center)] top-1/2 h-[var(--home-hero-mobile-image-height)] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 scale-[var(--home-hero-mobile-image-scale)] [object-fit:var(--home-hero-mobile-image-fit)] [object-position:var(--home-hero-mobile-image-position)] min-[420px]:h-[var(--home-hero-mobile-image-height-large)] md:static md:size-full md:max-w-full md:translate-x-0 md:translate-y-0 md:scale-[var(--home-hero-tablet-image-scale)] md:[object-fit:var(--home-hero-tablet-image-fit)] md:[object-position:var(--home-hero-tablet-image-position)] lg:scale-[var(--home-hero-desktop-image-scale)] lg:[object-fit:var(--home-hero-desktop-image-fit)] lg:[object-position:var(--home-hero-desktop-image-position)]"
+              sizes="100vw"
+              className="absolute left-[var(--home-hero-mobile-arch-center)] top-1/2 h-[var(--home-hero-mobile-image-height)] w-full max-w-none -translate-x-1/2 -translate-y-1/2 scale-[var(--home-hero-mobile-image-scale)] [object-fit:var(--home-hero-mobile-image-fit)] [object-position:var(--home-hero-mobile-image-position)] min-[420px]:h-[var(--home-hero-mobile-image-height-large)] md:static md:size-full md:translate-x-0 md:translate-y-0 md:scale-[var(--home-hero-tablet-image-scale)] md:[object-fit:var(--home-hero-tablet-image-fit)] md:[object-position:var(--home-hero-tablet-image-position)] lg:scale-[var(--home-hero-desktop-image-scale)] lg:[object-fit:var(--home-hero-desktop-image-fit)] lg:[object-position:var(--home-hero-desktop-image-position)]"
             />
           </picture>
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[var(--home-hero-mobile-edge-fade-height)] bg-[image:var(--home-hero-mobile-edge-fade)] lg:hidden"
+            className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[var(--home-hero-mobile-top-height)] bg-[image:var(--home-hero-mobile-top)] opacity-[var(--home-hero-mobile-top-opacity)] lg:hidden"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-[var(--home-hero-top-fade-height)] bg-[image:var(--home-hero-top-fade)] lg:block"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[var(--home-hero-mobile-lower-height)] bg-[image:var(--home-hero-mobile-lower)] opacity-[var(--home-hero-mobile-lower-opacity)] lg:hidden"
           />
         </div>
 
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-blend-width)] lg:block ${
-            locale === "ar"
-              ? "left-0 bg-[image:var(--home-hero-blend-rtl)]"
-              : "right-0 bg-[image:var(--home-hero-blend-ltr)]"
-          }`}
+          className="pointer-events-none absolute inset-x-0 top-0 z-[2] hidden h-[var(--home-hero-top-blend-height)] bg-[image:var(--home-hero-top-blend)] opacity-[var(--home-hero-top-blend-opacity)] lg:block"
         />
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 hidden w-[var(--home-hero-radial-width)] bg-[image:var(--home-hero-radial)] opacity-[var(--home-hero-radial-opacity)] lg:block ${
-            locale === "ar"
-              ? "left-[var(--home-hero-radial-offset)]"
-              : "right-[var(--home-hero-radial-offset)]"
-          }`}
+          className="pointer-events-none absolute inset-y-0 left-0 z-[3] hidden w-[var(--home-hero-content-veil-width)] bg-[image:var(--home-hero-content-veil)] opacity-[var(--home-hero-content-veil-opacity)] lg:block"
         />
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-[6%] z-[6] hidden w-[var(--home-hero-content-veil-width)] bg-[image:var(--home-hero-content-veil)] opacity-[var(--home-hero-content-veil-opacity)] lg:block ${
-            locale === "ar" ? "left-0" : "right-0"
-          }`}
-          style={
-            {
-              "--home-hero-content-veil":
-                locale === "ar"
-                  ? "var(--home-hero-content-veil-rtl)"
-                  : "var(--home-hero-content-veil-ltr)",
-            } as CSSProperties
-          }
+          className="pointer-events-none absolute left-0 top-[var(--home-hero-radial-position)] z-[4] hidden h-[var(--home-hero-radial-height)] w-[var(--home-hero-radial-width)] -translate-y-1/2 bg-[image:var(--home-hero-radial)] opacity-[var(--home-hero-radial-opacity)] lg:block"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-[var(--home-hero-bottom-fade-height)] bg-[image:var(--home-hero-bottom-fade)] lg:block"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] hidden h-[var(--home-hero-lower-fade-height)] bg-[image:var(--home-hero-lower-fade)] opacity-[var(--home-hero-lower-fade-opacity)] lg:block"
         />
 
         <div
           dir={locale === "ar" ? "rtl" : "ltr"}
-          className={`relative z-10 px-4 pb-0 pt-[var(--home-hero-mobile-content-gap)] sm:px-6 md:pt-[var(--home-hero-tablet-content-gap)] lg:absolute lg:top-1/2 lg:w-[var(--home-hero-content-width)] lg:-translate-y-1/2 lg:p-0 ${
-            locale === "ar"
-              ? "lg:left-[clamp(4.5rem,7.5vw,8rem)]"
-              : "lg:right-[clamp(4.5rem,7.5vw,8rem)]"
-          }`}
+          className="relative z-10 px-4 pb-0 pt-[var(--home-hero-mobile-content-gap)] sm:px-6 md:pt-[var(--home-hero-tablet-content-gap)] lg:absolute lg:left-[var(--home-hero-content-inset)] lg:top-[var(--home-hero-content-y)] lg:w-[var(--home-hero-content-max-width)] lg:-translate-y-1/2 lg:p-0"
         >
           <p className="text-xs font-extrabold tracking-[0.16em] text-primary md:text-sm">
             {copy.eyebrow}

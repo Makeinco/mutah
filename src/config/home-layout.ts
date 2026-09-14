@@ -14,25 +14,23 @@ export type HomeLayoutConfig = {
       heightBase: string;
       heightWide: string;
       heightVeryWide: string;
-      contentWidth: string;
-      visualWidth: string;
-      blendWidth: string;
-      blendRtl: string;
-      blendLtr: string;
-      maskRtl: string;
-      maskLtr: string;
-      radialGlowWidth: string;
-      radialGlowOffset: string;
-      radialGlow: string;
-      radialGlowOpacity: number;
+      contentMaxWidth: string;
+      contentInset: string;
+      contentVerticalPosition: string;
+      topBlendHeight: string;
+      topBlendOpacity: number;
+      topBlend: string;
       contentVeilWidth: string;
       contentVeilOpacity: number;
-      contentVeilRtl: string;
-      contentVeilLtr: string;
-      topFadeHeight: string;
-      topFade: string;
-      bottomFadeHeight: string;
-      bottomFade: string;
+      contentVeil: string;
+      radialHazeWidth: string;
+      radialHazeHeight: string;
+      radialHazePosition: string;
+      radialHazeOpacity: number;
+      radialHaze: string;
+      lowerFadeHeight: string;
+      lowerFadeOpacity: number;
+      lowerFade: string;
       titleMin: string;
       titleFluid: string;
       titleMax: string;
@@ -50,8 +48,12 @@ export type HomeLayoutConfig = {
       imageHeightSmall: string;
       imageHeightLarge: string;
       archCenterX: string;
-      edgeFadeHeight: string;
-      edgeFade: string;
+      topBlendHeight: string;
+      topBlendOpacity: number;
+      topBlend: string;
+      lowerFadeHeight: string;
+      lowerFadeOpacity: number;
+      lowerFade: string;
       titleMin: string;
       titleFluid: string;
       titleMax: string;
@@ -89,38 +91,33 @@ export type HomeLayoutConfig = {
 export const HOME_LAYOUT = {
   hero: {
     desktop: {
-      heightBase: "490px",
-      heightWide: "510px",
-      heightVeryWide: "540px",
-      contentWidth: "min(43%, 430px)",
-      visualWidth: "58%",
-      imageFit: "contain",
-      imagePosition: "center",
-      imageScale: 0.91,
-      blendWidth: "58%",
-      blendRtl:
-        "linear-gradient(90deg, #fff 0%, rgba(255,255,255,.96) 46%, rgba(255,255,255,.76) 70%, rgba(255,255,255,0) 100%)",
-      blendLtr:
-        "linear-gradient(270deg, #fff 0%, rgba(255,255,255,.96) 46%, rgba(255,255,255,.76) 70%, rgba(255,255,255,0) 100%)",
-      maskRtl: "linear-gradient(to right, transparent 0%, black 22%, black 96%, transparent 100%)",
-      maskLtr: "linear-gradient(to left, transparent 0%, black 22%, black 96%, transparent 100%)",
-      radialGlowWidth: "36%",
-      radialGlowOffset: "30%",
-      radialGlow:
-        "radial-gradient(ellipse at center, rgba(255,255,255,.42) 0%, rgba(255,255,255,.12) 48%, rgba(255,255,255,0) 76%)",
-      radialGlowOpacity: 0.8,
-      contentVeilWidth: "52%",
-      contentVeilOpacity: 0.78,
-      contentVeilRtl:
-        "radial-gradient(ellipse at 28% 50%, rgba(255,255,255,.94) 0%, rgba(255,255,255,.62) 58%, rgba(255,255,255,0) 100%)",
-      contentVeilLtr:
-        "radial-gradient(ellipse at 72% 50%, rgba(255,255,255,.94) 0%, rgba(255,255,255,.62) 58%, rgba(255,255,255,0) 100%)",
-      topFadeHeight: "6rem",
-      topFade:
-        "linear-gradient(to bottom, #fff 0%, rgba(255,255,255,.9) 34%, rgba(255,255,255,0) 100%)",
-      bottomFadeHeight: "4.5rem",
-      bottomFade:
-        "linear-gradient(to top, #fff 0%, rgba(255,255,255,.34) 55%, rgba(255,255,255,0) 100%)",
+      heightBase: "720px",
+      heightWide: "800px",
+      heightVeryWide: "900px",
+      contentMaxWidth: "430px",
+      contentInset: "max(2rem, calc((100vw - 1280px) / 2))",
+      contentVerticalPosition: "51%",
+      imageFit: "cover",
+      imagePosition: "center center",
+      imageScale: 1,
+      topBlendHeight: "5rem",
+      topBlendOpacity: 0.72,
+      topBlend:
+        "linear-gradient(to bottom, rgba(255,255,255,.72) 0%, rgba(255,255,255,.2) 46%, rgba(255,255,255,0) 100%)",
+      contentVeilWidth: "43%",
+      contentVeilOpacity: 0.94,
+      contentVeil:
+        "linear-gradient(90deg, rgba(255,255,255,.97) 0%, rgba(255,255,255,.9) 42%, rgba(255,255,255,.52) 72%, rgba(255,255,255,0) 100%)",
+      radialHazeWidth: "48%",
+      radialHazeHeight: "88%",
+      radialHazePosition: "0% 50%",
+      radialHazeOpacity: 0.56,
+      radialHaze:
+        "radial-gradient(ellipse at 30% 50%, rgba(255,255,255,.86) 0%, rgba(255,255,255,.34) 52%, rgba(255,255,255,0) 78%)",
+      lowerFadeHeight: "3.75rem",
+      lowerFadeOpacity: 0.46,
+      lowerFade:
+        "linear-gradient(to top, rgba(255,255,255,.62) 0%, rgba(255,255,255,.16) 48%, rgba(255,255,255,0) 100%)",
       titleMin: "3.25rem",
       titleFluid: "4.15vw",
       titleMax: MUTAH_DESIGN_TOKENS.typography.heroDesktop,
@@ -128,25 +125,30 @@ export const HOME_LAYOUT = {
       buttonHeight: "3.125rem",
     },
     tablet: {
-      visualHeight: "300px",
-      imageFit: "contain",
+      visualHeight: "340px",
+      imageFit: "cover",
       imagePosition: "center",
       imageScale: 1,
       visualToContentGap: "1.25rem",
     },
     mobile: {
-      visualHeightMin: "13.75rem",
-      visualHeightFluid: "56vw",
-      visualHeightMax: "16.25rem",
-      imageHeightSmall: "500px",
-      imageHeightLarge: "520px",
-      imageFit: "contain",
-      imagePosition: "center",
-      imageScale: 0.94,
+      visualHeightMin: "18rem",
+      visualHeightFluid: "82vw",
+      visualHeightMax: "22rem",
+      imageHeightSmall: "100%",
+      imageHeightLarge: "100%",
+      imageFit: "cover",
+      imagePosition: "center 48%",
+      imageScale: 1,
       archCenterX: "50%",
-      edgeFadeHeight: "3.25rem",
-      edgeFade:
-        "linear-gradient(to top, rgba(255,255,255,.92) 0%, rgba(255,255,255,.24) 55%, rgba(255,255,255,0) 100%)",
+      topBlendHeight: "3.25rem",
+      topBlendOpacity: 0.5,
+      topBlend:
+        "linear-gradient(to bottom, rgba(255,255,255,.64) 0%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 100%)",
+      lowerFadeHeight: "4.5rem",
+      lowerFadeOpacity: 0.78,
+      lowerFade:
+        "linear-gradient(to top, rgba(255,255,255,.92) 0%, rgba(255,255,255,.28) 48%, rgba(255,255,255,0) 100%)",
       titleMin: "2.25rem",
       titleFluid: "9.5vw",
       titleMax: "2.625rem",

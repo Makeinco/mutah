@@ -37,8 +37,8 @@ export const ASSETS = {
     icon: "/assets/brand/mutah-icon.svg",
   },
   home: {
-    heroDesktop: "/assets/home/mutah-home-web.webp",
-    heroMobile: "/assets/home/mutah-home-mobile.webp",
+    heroDesktop: "/assets/home/mutah-home-desktop-fullbleed.webp",
+    heroMobile: "/assets/home/mutah-home-mobile-fullbleed.webp",
     splashVideo: "/assets/home/mutah-splash-intro.mp4",
   },
   explore: {
