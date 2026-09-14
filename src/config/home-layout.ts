@@ -80,7 +80,7 @@ export const HOME_LAYOUT = {
   hero: {
     desktop: {
       heightBase: "500px",
-      heightWide: "520px",
+      heightWide: "800px",
       heightVeryWide: "560px",
       contentWidth: "min(50%, 430px)",
       visualWidth: "58%",
