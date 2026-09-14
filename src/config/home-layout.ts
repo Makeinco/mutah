@@ -115,9 +115,9 @@ export const HOME_LAYOUT = {
       visualToContentGap: "1.25rem",
     },
     mobile: {
-      visualHeightMin: "25.75rem",
+      visualHeightMin: "30rem",
       visualHeightFluid: "56vw",
-      visualHeightMax: "17.25rem",
+      visualHeightMax: "20rem",
       imageHeightSmall: "500px",
       imageHeightLarge: "520px",
       imageFit: "contain",
