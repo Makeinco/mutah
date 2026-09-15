@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/lib/mutah/auth";
 import { useLang } from "@/lib/mutah/i18n";
 import {
-  listDisplayImageProposals,
+  listMyDisplayImageProposals,
   respondToDisplayImageClarification,
   type DisplayImageProposal,
 } from "@/lib/mutah/operational";
 import { Button, Card, SectionTitle } from "./ui";
 
 export function MyDisplayImageProposals() {
+  const { user } = useAuth();
   const { lang } = useLang();
   const ar = lang === "ar";
   const [items, setItems] = useState<DisplayImageProposal[]>([]);
@@ -16,19 +18,20 @@ export function MyDisplayImageProposals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const load = useCallback(() => {
+    if (!user) return;
     setLoading(true);
     setError(false);
-    void listDisplayImageProposals()
+    void listMyDisplayImageProposals(user.id)
       .then(setItems)
       .catch(() => {
         setItems([]);
         setError(true);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
   useEffect(load, [load]);
   return (
-    <section>
+    <section id="display-image-proposals" className="scroll-mt-24">
       <SectionTitle>{ar ? "مقترحات صور المرافق" : "Facility photo proposals"}</SectionTitle>
       {loading ? (
         <p className="mt-2 text-sm text-muted-foreground" role="status">
