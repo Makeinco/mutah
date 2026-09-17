@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { FileImage, ImagePlus, LoaderCircle, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { AuthCheckpoint } from "./AuthCheckpoint";
 import { useAuth } from "@/lib/mutah/auth";
+import { facilityPhotoReturnPath } from "@/lib/mutah/auth-navigation";
 import { useLang } from "@/lib/mutah/i18n";
 import {
   DisplayImageFlowError,
@@ -110,8 +112,10 @@ export function OfficialImageAction({ facility }: { facility: Facility }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [authExpired, setAuthExpired] = useState(false);
   const userId = user?.id;
   const databaseId = facility.databaseId;
+  const returnTo = facilityPhotoReturnPath(facility.id);
   const previewUrl = useMemo(
     () => (selection ? URL.createObjectURL(selection.file) : ""),
     [selection],
@@ -122,6 +126,11 @@ export function OfficialImageAction({ facility }: { facility: Facility }) {
     },
     [previewUrl],
   );
+
+  useEffect(() => {
+    if (user) setAuthExpired(false);
+    else if (selection) setAuthExpired(true);
+  }, [selection, user]);
 
   const eligible =
     Boolean(userId && databaseId) && (profile?.role === "contributor" || profile?.role === "admin");
@@ -198,6 +207,8 @@ export function OfficialImageAction({ facility }: { facility: Facility }) {
       clearSelection();
       setNote("");
     } catch (nextError) {
+      if (nextError instanceof DisplayImageFlowError && nextError.code === "session_expired")
+        setAuthExpired(true);
       setError(safeErrorText(nextError, ar));
     } finally {
       setBusy(false);
@@ -252,30 +263,27 @@ export function OfficialImageAction({ facility }: { facility: Facility }) {
   }
 
   if (!eligible) {
-    if (facility.imageUrl || !databaseId) return null;
+    if (!databaseId) return null;
     return (
-      <Card className="mt-4 border-2 border-dashed border-input bg-surface">
-        <h2 className="font-bold">{ar ? "لا توجد صورة رسمية بعد" : "No official photo yet"}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {ar
-            ? "هذه الصورة لعرض المرفق فقط، ولا تُستخدم تلقائيًا كدليل على الإتاحة."
-            : "This photo is for facility display only and is not automatically used as accessibility evidence."}
-        </p>
+      <div id="facility-photo-proposal" className="mt-4">
         {!user ? (
-          <Link
-            to="/account"
-            className="mt-3 inline-flex min-h-11 items-center rounded-xl border-2 border-primary px-4 text-sm font-semibold text-primary hover:bg-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {actionLabel}
-          </Link>
-        ) : null}
-      </Card>
+          <AuthCheckpoint next={returnTo} context="facility-photo" recovery={authExpired} />
+        ) : (
+          <Card className="border-2 border-dashed border-input bg-surface">
+            <h2 className="font-bold">
+              {ar
+                ? "اقتراح صورة المرفق غير متاح لهذا الحساب"
+                : "Facility photo proposals are unavailable for this account"}
+            </h2>
+          </Card>
+        )}
+      </div>
     );
   }
 
   if (!open) {
     return (
-      <div className="mt-4">
+      <div id="facility-photo-proposal" className="mt-4">
         <Button variant="outline" disabled={checking} onClick={() => setOpen(true)}>
           {checking ? (
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -297,132 +305,139 @@ export function OfficialImageAction({ facility }: { facility: Facility }) {
     selection && (selection.width < SMALL_IMAGE_WIDTH || selection.height < SMALL_IMAGE_HEIGHT);
 
   return (
-    <Card className="mt-4 bg-surface">
-      <h2 className="text-lg font-bold">{ar ? "صورة المرفق" : "Facility photo"}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {ar
-          ? "أضف صورة واضحة تمثل المرفق نفسه. هذه الصورة لعرض المرفق فقط، ولا تُستخدم تلقائيًا كدليل على الإتاحة."
-          : "Add a clear photo that represents the facility itself. This photo is for facility display only and is not automatically used as accessibility evidence."}
-      </p>
-      <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-muted-foreground">
-        <li>
+    <div id="facility-photo-proposal" className="mt-4">
+      <Card className="bg-surface">
+        <h2 className="text-lg font-bold">{ar ? "صورة المرفق" : "Facility photo"}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           {ar
-            ? "صوّر الواجهة أو المدخل الأمامي أو منظرًا معروفًا للمرفق."
-            : "Use the exterior, front entrance, or a recognizable facility view."}
-        </li>
-        <li>
-          {ar
-            ? "اجعل المرفق واضحًا، وتجنب صور الشعارات وحدها أو الصور التي تركز على أشخاص."
-            : "Keep the facility identifiable; avoid logo-only or people-focused images."}
-        </li>
-        <li>
-          {ar
-            ? "هذا ليس مسار رفع أدلة الإتاحة."
-            : "This is not the accessibility-evidence upload flow."}
-        </li>
-      </ul>
-
-      <div className="mt-4 rounded-2xl border-2 border-input bg-background p-4 text-center">
-        <FileImage className="mx-auto size-7 text-primary" aria-hidden="true" />
-        <label
-          htmlFor={inputId}
-          className="mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 focus-within:ring-2 focus-within:ring-ring"
-        >
-          {selection ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "اختر صورة" : "Choose photo"}
-        </label>
-        <input
-          ref={fileInput}
-          id={inputId}
-          name="facility-display-photo"
-          className="sr-only"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          aria-label={ar ? "اختر صورة للمرفق" : "Choose a facility photo"}
-          onChange={(event) => void selectFile(event.target.files?.[0] ?? null)}
-        />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {ar ? "JPEG أو PNG أو WebP — حتى 8 م.ب." : "JPEG, PNG, or WebP — up to 8 MB"}
+            ? "أضف صورة واضحة تمثل المرفق نفسه. هذه الصورة لعرض المرفق فقط، ولا تُستخدم تلقائيًا كدليل على الإتاحة."
+            : "Add a clear photo that represents the facility itself. This photo is for facility display only and is not automatically used as accessibility evidence."}
         </p>
-      </div>
+        <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-muted-foreground">
+          <li>
+            {ar
+              ? "صوّر الواجهة أو المدخل الأمامي أو منظرًا معروفًا للمرفق."
+              : "Use the exterior, front entrance, or a recognizable facility view."}
+          </li>
+          <li>
+            {ar
+              ? "اجعل المرفق واضحًا، وتجنب صور الشعارات وحدها أو الصور التي تركز على أشخاص."
+              : "Keep the facility identifiable; avoid logo-only or people-focused images."}
+          </li>
+          <li>
+            {ar
+              ? "هذا ليس مسار رفع أدلة الإتاحة."
+              : "This is not the accessibility-evidence upload flow."}
+          </li>
+        </ul>
 
-      {previewUrl && selection ? (
-        <figure className="mt-4">
-          <img
-            src={previewUrl}
-            alt={ar ? "معاينة صورة المرفق المقترحة" : "Preview of the proposed facility photo"}
-            className="aspect-video w-full rounded-2xl object-cover"
+        <div className="mt-4 rounded-2xl border-2 border-input bg-background p-4 text-center">
+          <FileImage className="mx-auto size-7 text-primary" aria-hidden="true" />
+          <label
+            htmlFor={inputId}
+            className="mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 focus-within:ring-2 focus-within:ring-ring"
+          >
+            {selection ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "اختر صورة" : "Choose photo"}
+          </label>
+          <input
+            ref={fileInput}
+            id={inputId}
+            name="facility-display-photo"
+            className="sr-only"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            aria-label={ar ? "اختر صورة للمرفق" : "Choose a facility photo"}
+            onChange={(event) => void selectFile(event.target.files?.[0] ?? null)}
           />
-          <figcaption className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span className="min-w-0 truncate" dir="auto">
-              {selection.file.name}
-            </span>
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center gap-1 rounded-xl px-3 font-semibold text-destructive hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              onClick={clearSelection}
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-              {ar ? "إزالة" : "Remove"}
-            </button>
-          </figcaption>
-          {smallImage ? (
-            <p className="mt-2 rounded-xl bg-caution-soft p-3 text-sm">
-              {ar
-                ? "الصورة صغيرة وقد لا تبدو واضحة في بطاقة المرفق. يمكنك اختيار صورة أكبر."
-                : "This image is small and may not look clear on the facility card. You may choose a larger one."}
-            </p>
-          ) : null}
-        </figure>
-      ) : null}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {ar ? "JPEG أو PNG أو WebP — حتى 8 م.ب." : "JPEG, PNG, or WebP — up to 8 MB"}
+          </p>
+        </div>
 
-      <div className="mt-4">
-        <label htmlFor={`${inputId}-note`} className="text-sm font-semibold">
-          {ar ? "ملاحظة للمراجع — اختيارية" : "Note for reviewer — optional"}
-        </label>
-        <p id={`${inputId}-note-help`} className="mt-1 text-sm text-muted-foreground">
-          {ar
-            ? "يمكنك توضيح مكان الصورة أو سبب اقتراحها."
-            : "You can explain where the photo was taken or why you are suggesting it."}
-        </p>
-        <textarea
-          id={`${inputId}-note`}
-          name="facility-display-photo-reviewer-note"
-          autoComplete="off"
-          aria-describedby={`${inputId}-note-help`}
-          rows={3}
-          className="mt-2 w-full rounded-xl border-2 border-input bg-background p-3 text-sm"
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-        />
-      </div>
+        {previewUrl && selection ? (
+          <figure className="mt-4">
+            <img
+              src={previewUrl}
+              alt={ar ? "معاينة صورة المرفق المقترحة" : "Preview of the proposed facility photo"}
+              className="aspect-video w-full rounded-2xl object-cover"
+            />
+            <figcaption className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span className="min-w-0 truncate" dir="auto">
+                {selection.file.name}
+              </span>
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center gap-1 rounded-xl px-3 font-semibold text-destructive hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={clearSelection}
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+                {ar ? "إزالة" : "Remove"}
+              </button>
+            </figcaption>
+            {smallImage ? (
+              <p className="mt-2 rounded-xl bg-caution-soft p-3 text-sm">
+                {ar
+                  ? "الصورة صغيرة وقد لا تبدو واضحة في بطاقة المرفق. يمكنك اختيار صورة أكبر."
+                  : "This image is small and may not look clear on the facility card. You may choose a larger one."}
+              </p>
+            ) : null}
+          </figure>
+        ) : null}
 
-      {error ? (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button disabled={!selection || busy} onClick={() => void submit()}>
-          {busy ? (
-            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <ImagePlus className="size-4" aria-hidden="true" />
-          )}
-          {busy ? (ar ? "جارٍ الإرسال…" : "Sending…") : actionLabel}
-        </Button>
-        <Button
-          variant="quiet"
-          disabled={busy}
-          onClick={() => {
-            setOpen(false);
-            clearSelection();
-            setError("");
-          }}
-        >
-          <RotateCcw className="size-4" aria-hidden="true" />
-          {ar ? "إلغاء" : "Cancel"}
-        </Button>
-      </div>
-    </Card>
+        <div className="mt-4">
+          <label htmlFor={`${inputId}-note`} className="text-sm font-semibold">
+            {ar ? "ملاحظة للمراجع — اختيارية" : "Note for reviewer — optional"}
+          </label>
+          <p id={`${inputId}-note-help`} className="mt-1 text-sm text-muted-foreground">
+            {ar
+              ? "يمكنك توضيح مكان الصورة أو سبب اقتراحها."
+              : "You can explain where the photo was taken or why you are suggesting it."}
+          </p>
+          <textarea
+            id={`${inputId}-note`}
+            name="facility-display-photo-reviewer-note"
+            autoComplete="off"
+            aria-describedby={`${inputId}-note-help`}
+            rows={3}
+            className="mt-2 w-full rounded-xl border-2 border-input bg-background p-3 text-sm"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+          />
+        </div>
+
+        {error ? (
+          <p role="alert" className="mt-3 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+        {authExpired && !user ? (
+          <div className="mt-4">
+            <AuthCheckpoint next={returnTo} context="facility-photo" recovery />
+          </div>
+        ) : null}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button disabled={!selection || busy} onClick={() => void submit()}>
+            {busy ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <ImagePlus className="size-4" aria-hidden="true" />
+            )}
+            {busy ? (ar ? "جارٍ الإرسال…" : "Sending…") : actionLabel}
+          </Button>
+          <Button
+            variant="quiet"
+            disabled={busy}
+            onClick={() => {
+              setOpen(false);
+              clearSelection();
+              setError("");
+            }}
+          >
+            <RotateCcw className="size-4" aria-hidden="true" />
+            {ar ? "إلغاء" : "Cancel"}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 }

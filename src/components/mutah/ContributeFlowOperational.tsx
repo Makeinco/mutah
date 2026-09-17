@@ -11,16 +11,17 @@ import {
   ImagePlus,
   ImageUp,
   LoaderCircle,
-  LogIn,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EvidenceItem } from "@/components/mutah/Evidence";
+import { AuthCheckpoint } from "@/components/mutah/AuthCheckpoint";
 import { Button, Card, EmptyState, SectionTitle } from "@/components/mutah/ui";
 import { analyseEvidenceServer } from "@/lib/mutah/ai.functions";
 import { ANALYSIS_STEPS, analyseZoneImage } from "@/lib/mutah/ai";
 import { useAuth } from "@/lib/mutah/auth";
+import { contributionReturnPath } from "@/lib/mutah/auth-navigation";
 import {
   ZONE_FOCUS_OPTIONS,
   focusLabel,
@@ -53,9 +54,11 @@ const ZONE_ICON = {
 export function ContributeFlowOperational({
   facilityId,
   initialZone,
+  initialFocus,
 }: {
   facilityId: string;
   initialZone?: ZoneKey;
+  initialFocus?: FocusIndicator;
 }) {
   const navigate = useNavigate();
   const { getFacility, submitContribution } = useMutah();
@@ -65,7 +68,7 @@ export function ContributeFlowOperational({
   const ar = lang === "ar";
 
   const [zone, setZone] = useState<ZoneKey>(initialZone ?? "entrance");
-  const [focusIndicator, setFocusIndicator] = useState<FocusIndicator>("general");
+  const [focusIndicator, setFocusIndicator] = useState<FocusIndicator>(initialFocus ?? "general");
   const [step, setStep] = useState<Step>("capture");
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -77,12 +80,19 @@ export function ContributeFlowOperational({
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState("");
   const [persistedId, setPersistedId] = useState<string | null>(null);
+  const [authRecovery, setAuthRecovery] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const returnTo = contributionReturnPath(facilityId, zone, focusIndicator);
 
   useEffect(
     () => () => previews.forEach((url) => url.startsWith("blob:") && URL.revokeObjectURL(url)),
     [previews],
   );
+
+  useEffect(() => {
+    if (user) setAuthRecovery(false);
+    else if (selectedFiles.length > 0) setAuthRecovery(true);
+  }, [selectedFiles.length, user]);
 
   if (!facility) {
     return (
@@ -140,11 +150,7 @@ export function ContributeFlowOperational({
   const startAnalysis = async () => {
     if (!previews.length) return;
     if (selectedFiles.length > 0 && !user) {
-      setFileError(
-        ar
-          ? "سجّل الدخول أولًا قبل تحليل صور مساهمة حقيقية حتى نستطيع حفظها بأمان بعد تأكيدك."
-          : "Sign in before analysing real contribution images so they can be saved securely after your confirmation.",
-      );
+      setAuthRecovery(true);
       return;
     }
     setStep("analysing");
@@ -169,6 +175,11 @@ export function ContributeFlowOperational({
       setStep("confirm");
     } catch (cause) {
       console.error("Live evidence analysis failed", cause);
+      if (cause instanceof Error && cause.message.includes("AUTH_REQUIRED")) {
+        setAuthRecovery(true);
+        setStep("capture");
+        return;
+      }
       const fallback = analyseZoneImage(facility, zone);
       setObservations(fallback);
       setConfirmed(emptyConfirmations(fallback));
@@ -188,6 +199,7 @@ export function ContributeFlowOperational({
             ? "انتهت جلسة الدخول. سجّل الدخول ثم أعد المحاولة؛ لم نعتبر المساهمة مرسلة."
             : "Your session ended. Sign in and try again; the contribution has not been marked as submitted.",
         );
+        setAuthRecovery(true);
         return;
       }
       setSubmitState("saving");
@@ -257,32 +269,6 @@ export function ContributeFlowOperational({
 
       {step === "capture" ? (
         <>
-          {!user ? (
-            <Card className="mt-6 border-2 border-primary/20 bg-primary-soft/40">
-              <div className="flex items-start gap-3">
-                <LogIn className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                <div>
-                  <p className="font-bold">
-                    {ar
-                      ? "لإرسال مساهمة حقيقية، سجّل الدخول قبل اختيار الصور"
-                      : "Sign in before selecting images for a real contribution"}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {ar
-                      ? "يمكنك استكشاف المثال التجريبي دون حساب، لكن الصور الحقيقية تُحفظ فقط لحساب مساهم موثّق."
-                      : "You can explore the demo without an account, but real images are saved only for a signed-in contributor."}
-                  </p>
-                  <Link
-                    to="/account"
-                    className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-primary px-4 text-sm font-semibold text-primary hover:bg-primary-soft"
-                  >
-                    {ar ? "تسجيل الدخول" : "Sign in"}
-                  </Link>
-                </div>
-              </div>
-            </Card>
-          ) : null}
-
           <fieldset className="mt-8">
             <legend className="text-lg font-bold">
               {ar ? "اختر الجزء الذي تظهره الصورة" : "Choose the area shown in the photo"}
@@ -370,18 +356,20 @@ export function ContributeFlowOperational({
                 </li>
               </ul>
             </Card>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="sr-only"
-              aria-label={t("pickPhoto")}
-              onChange={(event) => {
-                if (event.target.files?.length) addFiles(event.target.files);
-                event.currentTarget.value = "";
-              }}
-            />
+            {user ? (
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                aria-label={t("pickPhoto")}
+                onChange={(event) => {
+                  if (event.target.files?.length) addFiles(event.target.files);
+                  event.currentTarget.value = "";
+                }}
+              />
+            ) : null}
             {fileError ? (
               <p
                 role="alert"
@@ -426,25 +414,45 @@ export function ContributeFlowOperational({
                     </li>
                   ))}
                 </ul>
-                <Button size="lg" block className="mt-4" onClick={() => void startAnalysis()}>
-                  {t("continueToAnalysis")}
-                </Button>
+                {selectedFiles.length > 0 && !user ? (
+                  <div className="mt-4">
+                    <AuthCheckpoint
+                      next={returnTo}
+                      context="contribution"
+                      recovery={authRecovery}
+                    />
+                  </div>
+                ) : (
+                  <Button size="lg" block className="mt-4" onClick={() => void startAnalysis()}>
+                    {t("continueToAnalysis")}
+                  </Button>
+                )}
               </div>
             ) : (
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" className="sm:flex-1" onClick={() => fileRef.current?.click()}>
-                  <Camera className="size-5" aria-hidden="true" />
-                  {t("takePhoto")}
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="sm:flex-1"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <ImageUp className="size-5" aria-hidden="true" />
-                  {t("pickPhoto")}
-                </Button>
+              <div className="mt-6 space-y-3">
+                {user ? (
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button
+                      size="lg"
+                      className="sm:flex-1"
+                      onClick={() => fileRef.current?.click()}
+                    >
+                      <Camera className="size-5" aria-hidden="true" />
+                      {t("takePhoto")}
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="sm:flex-1"
+                      onClick={() => fileRef.current?.click()}
+                    >
+                      <ImageUp className="size-5" aria-hidden="true" />
+                      {t("pickPhoto")}
+                    </Button>
+                  </div>
+                ) : (
+                  <AuthCheckpoint next={returnTo} context="contribution" />
+                )}
                 {facility.imageUrl ? (
                   <Button
                     size="lg"
@@ -466,26 +474,33 @@ export function ContributeFlowOperational({
       {step === "analysing" ? <AnalysingStep count={previews.length} /> : null}
 
       {step === "confirm" && confirmed ? (
-        <ConfirmStep
-          observations={observations}
-          confirmed={confirmed}
-          setConfirmed={setConfirmed}
-          evidenceCount={previews.length}
-          analysisMode={analysisMode}
-          analysisError={analysisError}
-          submitState={submitState}
-          submitError={submitError}
-          onTryAgain={() => {
-            clearImages();
-            setObservations([]);
-            setConfirmed(null);
-            setAnalysisError(false);
-            setSubmitError("");
-            setStep("capture");
-            window.setTimeout(() => fileRef.current?.click(), 0);
-          }}
-          onSubmit={() => void submit()}
-        />
+        <>
+          <ConfirmStep
+            observations={observations}
+            confirmed={confirmed}
+            setConfirmed={setConfirmed}
+            evidenceCount={previews.length}
+            analysisMode={analysisMode}
+            analysisError={analysisError}
+            submitState={submitState}
+            submitError={submitError}
+            onTryAgain={() => {
+              clearImages();
+              setObservations([]);
+              setConfirmed(null);
+              setAnalysisError(false);
+              setSubmitError("");
+              setStep("capture");
+              window.setTimeout(() => fileRef.current?.click(), 0);
+            }}
+            onSubmit={() => void submit()}
+          />
+          {authRecovery && !user ? (
+            <div className="mt-4">
+              <AuthCheckpoint next={returnTo} context="contribution" recovery />
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       {step === "done" ? (
