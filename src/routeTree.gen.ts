@@ -18,6 +18,7 @@ import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as ContributeIndexRouteImport } from './routes/contribute.index'
 import { Route as ContributeFacilityIdRouteImport } from './routes/contribute.$facilityId'
 import { Route as FacilityIdRouteImport } from './routes/facility.$id'
@@ -67,6 +68,11 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm',
+  path: '/auth/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContributeIndexRoute = ContributeIndexRouteImport.update({
   id: '/contribute/',
   path: '/contribute/',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute/': typeof ContributeIndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute': typeof ContributeIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/ops': typeof OpsRoute
   '/preferences': typeof PreferencesRoute
   '/review': typeof ReviewRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/contribute/$facilityId': typeof ContributeFacilityIdRoute
   '/facility/$id': typeof FacilityIdRoute
   '/contribute/': typeof ContributeIndexRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/preferences'
     | '/review'
+    | '/auth/confirm'
     | '/contribute/$facilityId'
     | '/facility/$id'
     | '/contribute/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/preferences'
     | '/review'
+    | '/auth/confirm'
     | '/contribute/$facilityId'
     | '/facility/$id'
     | '/contribute'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/preferences'
     | '/review'
+    | '/auth/confirm'
     | '/contribute/$facilityId'
     | '/facility/$id'
     | '/contribute/'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   OpsRoute: typeof OpsRoute
   PreferencesRoute: typeof PreferencesRoute
   ReviewRoute: typeof ReviewRoute
+  AuthConfirmRoute: typeof AuthConfirmRoute
   ContributeFacilityIdRoute: typeof ContributeFacilityIdRoute
   FacilityIdRoute: typeof FacilityIdRoute
   ContributeIndexRoute: typeof ContributeIndexRoute
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/auth/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contribute/': {
       id: '/contribute/'
       path: '/contribute'
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpsRoute: OpsRoute,
   PreferencesRoute: PreferencesRoute,
   ReviewRoute: ReviewRoute,
+  AuthConfirmRoute: AuthConfirmRoute,
   ContributeFacilityIdRoute: ContributeFacilityIdRoute,
   FacilityIdRoute: FacilityIdRoute,
   ContributeIndexRoute: ContributeIndexRoute,

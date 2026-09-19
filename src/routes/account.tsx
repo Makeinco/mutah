@@ -3,14 +3,15 @@ import {
   Languages,
   ImagePlus,
   LockKeyhole,
-  LogIn,
   LogOut,
   SlidersHorizontal,
   UploadCloud,
   UserRound,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { AppShell } from "@/components/mutah/AppShell";
+import { AuthCheckpoint } from "@/components/mutah/AuthCheckpoint";
 import { ClarificationResponseFlow } from "@/components/mutah/ClarificationResponseFlow";
 import { MyFacilityProposals } from "@/components/mutah/MyFacilityProposals";
 import { MyDisplayImageProposals } from "@/components/mutah/MyDisplayImageProposals";
@@ -21,7 +22,12 @@ import { FOCUS_LABEL } from "@/lib/mutah/guide-assets";
 import { useLang } from "@/lib/mutah/i18n";
 import { listMyContributions, type PersistedContribution } from "@/lib/mutah/operational";
 
-export const Route = createFileRoute("/account")({ component: AccountPage });
+const accountSearchSchema = z.object({ next: z.string().optional() });
+
+export const Route = createFileRoute("/account")({
+  validateSearch: accountSearchSchema,
+  component: AccountPage,
+});
 
 const STATUS_LABEL: Record<PersistedContribution["status"], { ar: string; en: string }> = {
   draft: { ar: "قيد التجهيز", en: "Draft" },
@@ -34,11 +40,9 @@ const STATUS_LABEL: Record<PersistedContribution["status"], { ar: string; en: st
 };
 
 function AccountPage() {
+  const { next = "/account" } = Route.useSearch();
   const { lang } = useLang();
-  const { ready, user, profile, signInWithEmail, signOut, canReview } = useAuth();
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
+  const { ready, user, profile, signOut, canReview } = useAuth();
   const [contributions, setContributions] = useState<PersistedContribution[]>([]);
   const [loadingContributions, setLoadingContributions] = useState(false);
   const [clarifyingId, setClarifyingId] = useState("");
@@ -61,23 +65,6 @@ function AccountPage() {
     void loadContributions();
   }, [loadContributions]);
 
-  const submitLogin = async () => {
-    if (!email.trim()) return;
-    setSending(true);
-    setMessage("");
-    const result = await signInWithEmail(email.trim(), lang);
-    setSending(false);
-    setMessage(
-      result.error
-        ? ar
-          ? "تعذر إرسال رابط الدخول. تحقق من البريد وحاول مرة أخرى."
-          : "Could not send the sign-in link. Check the email and try again."
-        : ar
-          ? "أرسلنا رابط دخول آمن إلى بريدك. افتحه للعودة إلى مُتاح."
-          : "We sent a secure sign-in link to your email. Open it to return to MUTAH.",
-    );
-  };
-
   return (
     <AppShell title={ar ? "حسابي" : "Account"}>
       <div className="mx-auto max-w-3xl space-y-5">
@@ -97,45 +84,7 @@ function AccountPage() {
             </p>
           </Card>
         ) : !user ? (
-          <Card className="border-2 border-primary/20">
-            <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <LogIn className="size-5" aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-bold">{ar ? "الدخول للمساهمة" : "Sign in to contribute"}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {ar
-                    ? "ندخل عبر رابط آمن إلى البريد الإلكتروني — بدون كلمة مرور."
-                    : "Sign in with a secure email link — no password required."}
-                </p>
-                <label htmlFor="account-email" className="mt-4 block text-sm font-semibold">
-                  {ar ? "البريد الإلكتروني" : "Email"}
-                </label>
-                <input
-                  id="account-email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-2 min-h-12 w-full rounded-xl border-2 border-input bg-background px-4 text-base"
-                  placeholder="name@example.com"
-                />
-                <Button className="mt-3" onClick={submitLogin} disabled={sending || !email.trim()}>
-                  {sending
-                    ? ar
-                      ? "جاري الإرسال…"
-                      : "Sending…"
-                    : ar
-                      ? "أرسل رابط الدخول"
-                      : "Send sign-in link"}
-                </Button>
-                <p aria-live="polite" className="mt-3 text-sm font-semibold text-muted-foreground">
-                  {message}
-                </p>
-              </div>
-            </div>
-          </Card>
+          <AuthCheckpoint next={next} />
         ) : (
           <Card>
             <div className="flex flex-wrap items-center justify-between gap-4">

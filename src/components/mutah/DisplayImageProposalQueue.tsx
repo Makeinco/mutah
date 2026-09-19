@@ -81,7 +81,19 @@ export function DisplayImageProposalQueue() {
                 <h3 className="font-bold">
                   {ar ? item.facility?.name_ar : item.facility?.name_en || item.facility?.name_ar}
                 </h3>
-                <p className="text-xs text-muted-foreground">{item.status}</p>
+                <p className="text-xs font-semibold text-primary">
+                  {item.status === "recommended"
+                    ? ar
+                      ? "موصى بها للمدير"
+                      : "Recommended to admin"
+                    : item.status === "clarification_requested"
+                      ? ar
+                        ? "بانتظار توضيح المساهم"
+                        : "Awaiting contributor clarification"
+                      : ar
+                        ? "قيد المراجعة"
+                        : "Under review"}
+                </p>
                 {item.signed_url ? (
                   <img
                     src={item.signed_url}
@@ -90,11 +102,25 @@ export function DisplayImageProposalQueue() {
                   />
                 ) : null}
                 {item.context_note ? <p className="mt-2 text-sm">{item.context_note}</p> : null}
+                <label
+                  className="mt-3 block text-sm font-semibold"
+                  htmlFor={`display-image-reason-${item.id}`}
+                >
+                  {item.status === "recommended" && profile?.role === "admin"
+                    ? ar
+                      ? "سبب النشر أو الاستبدال"
+                      : "Publication or replacement reason"
+                    : ar
+                      ? "سبب أو ملاحظة القرار"
+                      : "Decision reason or note"}
+                </label>
                 <input
-                  className="mt-3 min-h-11 w-full rounded-xl border-2 border-input px-3 text-sm"
+                  id={`display-image-reason-${item.id}`}
+                  name={`display-image-reason-${item.id}`}
+                  autoComplete="off"
+                  className="mt-2 min-h-11 w-full rounded-xl border-2 border-input px-3 text-sm"
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
-                  placeholder={ar ? "سبب أو ملاحظة" : "Reason or note"}
                 />
                 {item.status === "pending_review" ? (
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -104,17 +130,27 @@ export function DisplayImageProposalQueue() {
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={reason.trim().length < 4 || busy}
                       onClick={() => void review(item, "clarification")}
                     >
                       {ar ? "طلب توضيح" : "Request clarification"}
                     </Button>
-                    <Button size="sm" variant="quiet" onClick={() => void review(item, "reject")}>
+                    <Button
+                      size="sm"
+                      variant="quiet"
+                      disabled={reason.trim().length < 4 || busy}
+                      onClick={() => void review(item, "reject")}
+                    >
                       {ar ? "رفض" : "Reject"}
                     </Button>
                   </div>
                 ) : null}
                 {item.status === "recommended" && profile?.role === "admin" ? (
-                  <Button className="mt-3" onClick={() => void publish(item)}>
+                  <Button
+                    className="mt-3"
+                    disabled={reason.trim().length < 4 || busy}
+                    onClick={() => void publish(item)}
+                  >
                     {ar ? "اعتماد ونشر" : "Approve and publish"}
                   </Button>
                 ) : null}

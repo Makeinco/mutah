@@ -586,19 +586,137 @@ export async function listOperationalFacilities() {
   return (data ?? []) as OperationalFacility[];
 }
 
+export type DisplayImageFlowErrorCode =
+  | "session_expired"
+  | "permission_denied"
+  | "facility_unavailable"
+  | "pending_proposal"
+  | "upload_failed"
+  | "proposal_creation_failed"
+  | "network_unavailable";
+
+export class DisplayImageFlowError extends Error {
+  readonly code: DisplayImageFlowErrorCode;
+
+  constructor(code: DisplayImageFlowErrorCode, options?: { cause?: unknown }) {
+    super(code, options);
+    this.name = "DisplayImageFlowError";
+    this.code = code;
+  }
+}
+
+function errorDetails(error: unknown) {
+  if (!error || typeof error !== "object") return {};
+  const value = error as Record<string, unknown>;
+  return {
+    message: typeof value["message"] === "string" ? value["message"] : "",
+    code: typeof value["code"] === "string" ? value["code"] : "",
+    status:
+      typeof value["status"] === "number"
+        ? value["status"]
+        : typeof value["statusCode"] === "string"
+          ? Number(value["statusCode"])
+          : undefined,
+  };
+}
+
+function classifyDisplayImageError(
+  error: unknown,
+  fallback: DisplayImageFlowErrorCode,
+): DisplayImageFlowError {
+  if (error instanceof DisplayImageFlowError) return error;
+  const details = errorDetails(error);
+  const searchable = `${details.code} ${details.message}`.toLowerCase();
+  const code =
+    searchable.includes("display_image_proposal_pending") ||
+    searchable.includes("duplicate") ||
+    details.code === "23505"
+      ? "pending_proposal"
+      : details.status === 401 || searchable.includes("jwt")
+        ? "session_expired"
+        : details.status === 403 ||
+            searchable.includes("permission") ||
+            searchable.includes("policy")
+          ? "permission_denied"
+          : searchable.includes("facility_not_found")
+            ? "facility_unavailable"
+            : searchable.includes("fetch") || searchable.includes("network")
+              ? "network_unavailable"
+              : fallback;
+  return new DisplayImageFlowError(code, { cause: error });
+}
+
+function logDisplayImageDiagnostic(stage: string, error: unknown) {
+  if (!import.meta.env.DEV) return;
+  const details = errorDetails(error);
+  console.error("[MUTAH display image]", {
+    stage,
+    code: details.code,
+    status: details.status,
+    message: details.message,
+  });
+}
+
+const ACTIVE_DISPLAY_IMAGE_STATUSES = [
+  "pending_review",
+  "clarification_requested",
+  "recommended",
+] as const;
+
+export async function getMyActiveDisplayImageProposal(facilityId: string, userId: string) {
+  const { data, error } = await supabase
+    .from("facility_display_image_proposals")
+    .select(
+      "id,facility_id,submitted_by,private_storage_path,mime_type,context_note,status,review_reason,published_storage_path,created_at,facility:facilities(id,name_ar,name_en,official_image_path)",
+    )
+    .eq("facility_id", facilityId)
+    .eq("submitted_by", userId)
+    .in("status", [...ACTIVE_DISPLAY_IMAGE_STATUSES])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw classifyDisplayImageError(error, "proposal_creation_failed");
+  return data as unknown as DisplayImageProposal | null;
+}
+
 export async function proposeFacilityDisplayImage(input: {
   facilityId: string;
   userId: string;
   file: File;
   context?: string;
 }) {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError || !authData.user || authData.user.id !== input.userId) {
+    logDisplayImageDiagnostic("auth", authError);
+    throw new DisplayImageFlowError("session_expired", { cause: authError });
+  }
+
+  const { data: facility, error: facilityError } = await supabase
+    .from("facilities")
+    .select("id,is_archived,is_demo")
+    .eq("id", input.facilityId)
+    .maybeSingle();
+  if (facilityError) {
+    logDisplayImageDiagnostic("facility", facilityError);
+    throw classifyDisplayImageError(facilityError, "facility_unavailable");
+  }
+  if (!facility || facility.is_archived || facility.is_demo) {
+    throw new DisplayImageFlowError("facility_unavailable");
+  }
+
+  const activeProposal = await getMyActiveDisplayImageProposal(input.facilityId, input.userId);
+  if (activeProposal) throw new DisplayImageFlowError("pending_proposal");
+
   const extension =
     input.file.type === "image/png" ? "png" : input.file.type === "image/webp" ? "webp" : "jpg";
   const path = `${input.userId}/display-images/${input.facilityId}/${crypto.randomUUID()}.${extension}`;
   const { error: uploadError } = await supabase.storage
     .from("mutah-raw-evidence")
     .upload(path, input.file, { contentType: input.file.type, upsert: false });
-  if (uploadError) throw uploadError;
+  if (uploadError) {
+    logDisplayImageDiagnostic("private-upload", uploadError);
+    throw classifyDisplayImageError(uploadError, "upload_failed");
+  }
   const { data, error } = await supabase.rpc("create_facility_display_image_proposal", {
     p_facility_id: input.facilityId,
     p_storage_path: path,
@@ -606,8 +724,12 @@ export async function proposeFacilityDisplayImage(input: {
     p_context_note: input.context?.trim() || null,
   });
   if (error) {
-    await supabase.storage.from("mutah-raw-evidence").remove([path]);
-    throw error;
+    logDisplayImageDiagnostic("proposal-create", error);
+    const { error: cleanupError } = await supabase.storage
+      .from("mutah-raw-evidence")
+      .remove([path]);
+    if (cleanupError) logDisplayImageDiagnostic("private-orphan-cleanup", cleanupError);
+    throw classifyDisplayImageError(error, "proposal_creation_failed");
   }
   return data as string;
 }
@@ -630,6 +752,18 @@ export async function listDisplayImageProposals(activeOnly = false) {
       return { ...proposal, signed_url: signed?.signedUrl ?? null };
     }),
   );
+}
+
+export async function listMyDisplayImageProposals(userId: string) {
+  const { data, error } = await supabase
+    .from("facility_display_image_proposals")
+    .select(
+      "id,facility_id,submitted_by,private_storage_path,mime_type,context_note,status,review_reason,published_storage_path,created_at,facility:facilities(id,name_ar,name_en,official_image_path)",
+    )
+    .eq("submitted_by", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as DisplayImageProposal[];
 }
 
 export async function reviewDisplayImageProposal(
@@ -659,8 +793,16 @@ async function uploadPublicFacilityImage(facilityId: string, file: Blob, mimeTyp
   const { error } = await supabase.storage
     .from("mutah-public-facility-media")
     .upload(path, file, { contentType: mimeType, upsert: false });
-  if (error) throw error;
+  if (error) {
+    logDisplayImageDiagnostic("public-upload", error);
+    throw classifyDisplayImageError(error, "upload_failed");
+  }
   return path;
+}
+
+async function removePublicFacilityImage(path: string) {
+  const { error } = await supabase.storage.from("mutah-public-facility-media").remove([path]);
+  if (error) logDisplayImageDiagnostic("public-orphan-cleanup", error);
 }
 
 export async function publishDisplayImageProposal(proposal: DisplayImageProposal, reason?: string) {
@@ -677,7 +819,10 @@ export async function publishDisplayImageProposal(proposal: DisplayImageProposal
     p_public_path: path,
     p_reason: reason?.trim() || null,
   });
-  if (error) throw error;
+  if (error) {
+    await removePublicFacilityImage(path);
+    throw error;
+  }
   window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
 }
 
@@ -692,7 +837,10 @@ export async function adminUploadFacilityDisplayImage(
     p_public_path: path,
     p_reason: reason,
   });
-  if (error) throw error;
+  if (error) {
+    await removePublicFacilityImage(path);
+    throw error;
+  }
   window.dispatchEvent(new Event("mutah:reviewed-evidence-changed"));
 }
 
