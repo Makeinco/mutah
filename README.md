@@ -1,30 +1,36 @@
-# MUTAH MAP | مُتاح ماب
+# MUTAH | مُتاح
+## MUTAH MAP | مُتاح ماب
 
-MUTAH MAP is an evidence-first accessibility decision prototype built for a hackathon MVP.
+**اعرف قبل أن تصل · Know Before You Go**
 
-**Product promise:** اعرف قبل أن تصل | Know Before You Go
+MUTAH MAP is an evidence-first accessibility decision prototype created for the AI Hackathon for People with Disabilities. It helps people understand key physical-access conditions before arriving at a facility.
 
-## Product principles
+**Live build:** https://mutah.vercel.app
 
-- Evidence → understanding → decision.
-- AI Observes. Humans Verify.
-- Not Visible ≠ Absent.
-- No universal accessibility score.
-- No certification or compliance claim.
-- Missing and conflicting evidence remain visible.
+## The problem
 
-## Current scope
+People often discover accessibility barriers only after reaching a destination. MUTAH turns that uncertainty into structured, reviewable information before the journey.
 
-The product uses multi-view facility evidence rather than a single entrance photo.
+## The solution
 
-Facility zones:
-- Approach path / مسار الوصول
+MUTAH MAP combines facility evidence, AI-assisted observation, contributor input, and human verification to publish clearer accessibility information without overstating what the evidence proves.
+
+**AI Observes. Humans Verify.**
+
+**Not Visible ≠ Absent.**
+
+## Current MVP scope
+
+The current product focuses on physical-access evidence across five facility zones:
+
+- Approach / مسار الوصول
 - Entrance / المدخل
 - Parking / المواقف
 - Elevator / المصعد
-- Accessible restroom / دورة المياه المخصصة
+- Restroom / دورة المياه المخصصة
 
-User-facing access needs:
+User-facing access needs include:
+
 - Step-free route / مسار بلا درجات
 - Ramp / منحدر
 - Obstacle-free path / مسار خالٍ من العوائق
@@ -33,46 +39,64 @@ User-facing access needs:
 - Elevator / مصعد
 - Accessible restroom / دورة مياه مخصصة
 
-Personalized status uses four states only:
-- متاح
-- متاح جزئيًا
-- غير متاح وفق احتياجاتك الحالية
-- معلومات غير كافية
+## Evidence model
+
+MUTAH preserves uncertainty instead of turning incomplete evidence into a false conclusion. Evidence can be represented as:
+
+- `present`
+- `absent`
+- `unknown`
+- `not_visible`
+- `not_documented`
+- `conflicting`
+- `not_applicable`
+
+The product does not provide a universal accessibility score, does not claim legal compliance or certification, and does not infer exact physical dimensions from images.
+
+## Workflow
+
+`Facility → Zone → Evidence → AI observation → Contributor confirmation → Human review → Published facility evidence`
+
+Public facility information is separated from private/raw evidence. Reviewed evidence is published through controlled reviewer/admin workflows.
 
 ## Architecture
 
-Frontend: React + TypeScript + TanStack Start.
+- React + TypeScript
+- TanStack Start
+- Supabase
+- Gemini Vision
+- Vercel
 
-Backend project is provisioned on Supabase in `eu-central-1` with the core migration applied. The schema includes facilities, facility zones, evidence images, AI analyses, observations, contributor confirmations, moderation queue, facility summaries, reports, audit events, and pilot metrics. Row-level security is enabled; public reads are limited to reviewed facility data and sanitized reviewed images.
+Privileged review and administration actions are enforced through authenticated database/RPC and storage controls rather than source-code secrecy.
 
-Production data flow:
+## Local development
 
-`Facility → Facility Zone → Evidence Image(s) → AI Observation(s) → User Confirmation → Human Moderation → Verified Facility Summary`
+Install dependencies and run the project using the package scripts defined in the repository.
 
-The current UI keeps local demo data as a resilient fallback while production adapters are being connected. Do not remove that fallback until the live Supabase/Gemini path is fully tested.
+Typical environment variables:
 
-## Development
-
-```bash
-bun install
-bun run dev
+```text
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+GEMINI_API_KEY=
 ```
 
-Quality gate:
+Do not commit real credentials or local environment files.
 
-```bash
-bun run lint
-bun run build
-```
+## Current product vs. future expansion
 
-## Demo journey
-
-Home → choose access needs → Explore → Facility Profile → personalized status → why this result → inspect missing evidence → Contribute → choose zone → upload one or multiple images → AI preliminary observation → contributor confirms/corrects → human review → facility evidence updates.
-
-## Deployment
-
-Preview validation is performed from the `mutah/refinement-v3` branch before merging into `main`.
+The current hackathon MVP demonstrates the MUTAH MAP accessibility-evidence workflow. Future expansion may extend the same approach to additional everyday and high-impact destinations, but those future contexts are not presented as current coverage.
 
 ## Data honesty
 
-Demo/sample information must be labeled as such. Do not present prototype facilities, sample metrics, model output, partnerships, integrations, national coverage, legal compliance, or accessibility certification as verified reality.
+Do not present prototype/sample information, partnerships, integrations, coverage, model output, legal compliance, or accessibility certification as verified reality unless explicitly supported by reviewed evidence.
+
+## Repository note
+
+This repository contains the hackathon implementation of MUTAH. The verified live product is available at:
+
+https://mutah.vercel.app
+
+MUTAH brand assets, logos, imagery, video, guide illustrations, and visual identity materials are owned by Makein.
+
+© Makein. All rights reserved for MUTAH brand and media assets.
