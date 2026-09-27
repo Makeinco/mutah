@@ -100,3 +100,9 @@ https://mutah.vercel.app
 MUTAH brand assets, logos, imagery, video, guide illustrations, and visual identity materials are owned by Makein.
 
 © Makein. All rights reserved for MUTAH brand and media assets.
+
+## License and asset use
+
+The source code is licensed under the [MIT License](LICENSE).
+
+MUTAH brand and media assets are proprietary Makein materials and are not licensed under MIT. See [NOTICE](NOTICE) and [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md).
