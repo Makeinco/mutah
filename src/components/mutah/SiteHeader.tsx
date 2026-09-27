@@ -34,12 +34,12 @@ export function SiteHeader({
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
       <div
         className={cn(
-          "mx-auto flex items-center justify-between gap-3 px-4 py-3",
+          "mx-auto flex items-center justify-between gap-3 px-4 py-[0.60625rem]",
           wide ? "max-w-7xl" : "max-w-5xl",
         )}
       >
         <Link to="/" aria-label={`${t("brand")} — ${t("home")}`} className="shrink-0">
-          <MutahLogo className="h-9" />
+          <MutahLogo className="h-[3.0375rem]" />
         </Link>
         {title ? (
           <p className="hidden truncate text-sm font-semibold text-muted-foreground sm:block">

@@ -87,14 +87,14 @@ export type HomeLayoutConfig = {
 export const HOME_LAYOUT = {
   hero: {
     desktop: {
-      heightBase: "720px",
-      heightWide: "800px",
-      heightVeryWide: "900px",
+      heightBase: "calc(100vw * 2688 / 6336)",
+      heightWide: "calc(100vw * 2688 / 6336)",
+      heightVeryWide: "calc(100vw * 2688 / 6336)",
       contentMaxWidth: "430px",
       contentInset: "max(2rem, calc((100vw - 1280px) / 2))",
       contentVerticalPosition: "51%",
-      imageFit: "cover",
-      imagePosition: "center center",
+      imageFit: "contain",
+      imagePosition: "right center",
       imageScale: 1,
       topBlendHeight: "5rem",
       topBlendOpacity: 0.72,

@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useState } from "react";
 import { MutahLogo } from "@/components/mutah/Logo";
 import { SiteBottomNav } from "@/components/mutah/SiteBottomNav";
 import { SiteHeader } from "@/components/mutah/SiteHeader";
@@ -129,7 +129,6 @@ function Home() {
 
   return (
     <>
-      <HomeSplash />
       <div
         style={HOME_TOKEN_STYLE}
         className="min-h-dvh bg-white pb-28 text-foreground md:pb-0"
@@ -567,60 +566,6 @@ function Principle({ icon: Icon, text }: { icon: typeof Eye; text: string }) {
       <span>{text}</span>
     </li>
   );
-}
-
-const SPLASH_SESSION_KEY = "mutah-home-splash-seen";
-
-function HomeSplash() {
-  const [show, setShow] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    try {
-      if (window.sessionStorage.getItem(SPLASH_SESSION_KEY) === "1") return;
-      window.sessionStorage.setItem(SPLASH_SESSION_KEY, "1");
-    } catch {
-      return;
-    }
-
-    setShow(true);
-  }, []);
-
-  useEffect(() => {
-    if (!show) return;
-    const fallback = window.setTimeout(() => finishSplash(setLeaving, setShow), 7000);
-    return () => window.clearTimeout(fallback);
-  }, [show]);
-
-  if (!show) return null;
-
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 motion-reduce:hidden ${
-        leaving ? "opacity-0" : "opacity-100"
-      }`}
-    >
-      <video
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        onEnded={() => finishSplash(setLeaving, setShow)}
-        onError={() => finishSplash(setLeaving, setShow)}
-        className="size-full object-contain"
-      >
-        <source src={MUTAH_ASSETS.home.splashVideo} type="video/mp4" />
-      </video>
-    </div>
-  );
-}
-
-function finishSplash(setLeaving: (value: boolean) => void, setShow: (value: boolean) => void) {
-  setLeaving(true);
-  window.setTimeout(() => setShow(false), 380);
 }
 
 function verdictClass(verdict: "available" | "partial" | "not_available" | "insufficient") {
