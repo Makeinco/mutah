@@ -29,12 +29,16 @@ export type HomeCopy = {
   howBody: string;
   steps: HomeStep[];
   aiKicker: string;
-  aiTitle: string;
+  aiTitleLines: readonly [string, string];
+  aiDecision: string;
   aiBody: string;
-  aiObserves: string;
-  humansVerify: string;
-  notVisiblePrinciple: string;
-  noAutoPublish: string;
+  aiSceneAlt: string;
+  aiExampleLabel: string;
+  aiStairsLabel: string;
+  aiRampLabel: string;
+  aiParkingLabel: string;
+  aiStages: readonly [HomeStep, HomeStep, HomeStep, HomeStep, HomeStep];
+  aiTrustBody: string;
   publishAfterReview: string;
   contributeEyebrow: string;
   contributeTitle: string;
@@ -73,14 +77,23 @@ export const HOME_COPY: Record<HomeLocale, HomeCopy> = {
       { title: "ساهم", body: "أضف صورًا ومعلومات من تجربتك لمساعدة الآخرين." },
       { title: "تحقق بشريًا", body: "تُراجع الأدلة قبل النشر لضمان الدقة والموثوقية." },
     ],
-    aiKicker: "من الصورة إلى قرار أوضح",
-    aiTitle: "الذكاء الاصطناعي يرى. البشر يتحققون.",
-    aiBody:
-      "يستخرج مُتاح أدلة الوصول المرئية من الصور، ويُبقي عدم اليقين واضحًا، ثم تمر المعلومات بمراجعة بشرية قبل النشر.",
-    aiObserves: "يرصد الذكاء الاصطناعي ما يظهر في الدليل فقط.",
-    humansVerify: "يتحقق الإنسان من الدليل وسياقه قبل النشر.",
-    notVisiblePrinciple: "غير ظاهر لا يعني غير موجود.",
-    noAutoPublish: "لا نشر تلقائيًا ولا درجات وصول شاملة.",
+    aiKicker: "ذكاء مُتاح",
+    aiTitleLines: ["الذكاء الاصطناعي يرصد.", "والإنسان يتحقق."],
+    aiDecision: "والقرار لك.",
+    aiBody: "من صور الأماكن إلى مؤشرات وصول واضحة، بتأكيد المساهم ومراجعة بشرية قبل النشر.",
+    aiSceneAlt: "مشهد توضيحي لمدخل مبنى ودرج ومنحدر ومسار أخضر متصل ببوابة زرقاء",
+    aiExampleLabel: "مثال توضيحي",
+    aiStairsLabel: "درجات ظاهرة",
+    aiRampLabel: "منحدر ظاهر",
+    aiParkingLabel: "الموقف غير موثّق بهذه الصورة",
+    aiStages: [
+      { title: "صورة المدخل", body: "أضف صورة واضحة للمدخل." },
+      { title: "رصد أولي", body: "نرصد مؤشرات الوصول الظاهرة." },
+      { title: "تأكيد أو تصحيح", body: "تؤكد النتائج أو تصححها." },
+      { title: "مراجعة مُتاح", body: "نراجع الدليل قبل النشر." },
+      { title: "نشر المعلومة", body: "نعرض المعلومات بعد مراجعتها." },
+    ],
+    aiTrustBody: "ما لا يظهر في الصورة يبقى غير مؤكد.",
     publishAfterReview: "النشر بعد المراجعة",
     contributeEyebrow: "المجتمع جزء من الثقة",
     contributeTitle: "معلومة واحدة قد تفتح الطريق لشخص آخر",
@@ -126,14 +139,23 @@ export const HOME_COPY: Record<HomeLocale, HomeCopy> = {
         body: "Evidence is reviewed before publication for accuracy and trust.",
       },
     ],
-    aiKicker: "From image to a clearer decision",
-    aiTitle: "AI observes. Humans verify.",
-    aiBody:
-      "MUTAH extracts visible access evidence from images, keeps uncertainty explicit, and requires human review before publication.",
-    aiObserves: "AI observes only what is visible in the evidence.",
-    humansVerify: "A person verifies the evidence and its context before publication.",
-    notVisiblePrinciple: "Not Visible does not mean Absent.",
-    noAutoPublish: "No automatic publishing and no global accessibility score.",
+    aiKicker: "MUTAH Intelligence",
+    aiTitleLines: ["AI observes.", "Humans verify."],
+    aiDecision: "The decision is yours.",
+    aiBody: "From place photos to clear access indicators, confirmed by contributors and reviewed by people before publication.",
+    aiSceneAlt: "Illustration of a building entrance, stairs, ramp, and a green path leading to a blue gateway",
+    aiExampleLabel: "Illustrative example",
+    aiStairsLabel: "Stairs visible",
+    aiRampLabel: "Ramp visible",
+    aiParkingLabel: "Parking not documented by this image",
+    aiStages: [
+      { title: "Entrance photo", body: "Add a clear photo of the entrance." },
+      { title: "Initial observation", body: "We observe visible access indicators." },
+      { title: "Confirm or correct", body: "Confirm or correct the findings." },
+      { title: "MUTAH review", body: "We review the evidence before publishing." },
+      { title: "Publish information", body: "We display information after review." },
+    ],
+    aiTrustBody: "What is not visible in the image remains unconfirmed.",
     publishAfterReview: "Published after review",
     contributeEyebrow: "Community builds trust",
     contributeTitle: "One piece of information can open the way for someone else",

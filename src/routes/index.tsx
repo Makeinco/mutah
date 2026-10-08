@@ -4,11 +4,13 @@ import {
   ArrowRight,
   Camera,
   CircleCheck,
-  Eye,
+  Cpu,
+  FileCheck2,
   MapPin,
+  ParkingCircle,
   Search,
   ShieldCheck,
-  Sparkles,
+  UsersRound,
 } from "lucide-react";
 import { type CSSProperties, useState } from "react";
 import { MutahLogo } from "@/components/mutah/Logo";
@@ -38,6 +40,7 @@ export const Route = createFileRoute("/")({
 });
 
 const stepIcons = [Search, Camera, ShieldCheck] as const;
+const aiStageIcons = [Camera, Cpu, CircleCheck, UsersRound, FileCheck2] as const;
 
 const HOME_TOKEN_STYLE = {
   "--home-content-max": MUTAH_DESIGN_TOKENS.layout.contentMax,
@@ -260,39 +263,7 @@ function Home() {
             </div>
           </section>
 
-          <section className="relative overflow-hidden bg-white">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -start-32 top-12 size-80 rounded-full bg-primary-soft/35 blur-3xl"
-            />
-            <div className="relative mx-auto grid max-w-[var(--home-content-max)] items-center gap-10 px-4 py-[var(--home-ai-padding-mobile)] sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20 lg:px-8 lg:py-[var(--home-ai-padding-desktop)]">
-              <EvidenceBecomesAccess />
-
-              <div className="max-w-[590px]">
-                <p className="text-xs font-extrabold tracking-[0.14em] text-primary md:text-sm">
-                  {copy.aiKicker}
-                </p>
-                <h2 className="mt-3 text-[length:var(--home-h2-mobile)] font-bold leading-tight tracking-[-0.025em] text-slate-950 md:text-[length:var(--home-h2-desktop)]">
-                  {copy.aiTitle}
-                </h2>
-                <p className="mt-4 leading-7 text-slate-600 md:text-lg md:leading-8">
-                  {copy.aiBody}
-                </p>
-                <ul className="mt-6 divide-y divide-slate-100 border-y border-slate-100">
-                  <Principle icon={Eye} text={copy.aiObserves} />
-                  <Principle icon={ShieldCheck} text={copy.humansVerify} />
-                  <Principle icon={CircleCheck} text={copy.notVisiblePrinciple} />
-                </ul>
-                <div className="mt-5 flex flex-wrap items-center gap-3">
-                  <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-access-soft px-4 text-sm font-bold text-access-strong">
-                    <CircleCheck className="size-4" aria-hidden="true" />
-                    {copy.publishAfterReview}
-                  </span>
-                  <span className="text-sm font-semibold text-slate-500">{copy.noAutoPublish}</span>
-                </div>
-              </div>
-            </div>
-          </section>
+          <AiShowcase copy={copy} locale={locale} />
 
           <section className="bg-white px-4 pb-[var(--home-contribution-padding-mobile)] sm:px-6 lg:px-8 lg:pb-[var(--home-contribution-padding-desktop)]">
             <div className="relative mx-auto flex max-w-[var(--home-content-max)] flex-col justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[linear-gradient(110deg,rgba(238,246,255,0.88)_0%,rgba(248,251,255,0.96)_58%,rgba(239,255,243,0.72)_100%)] px-6 py-7 shadow-[0_24px_70px_-60px_rgba(0,102,255,0.45)] sm:px-8 md:flex-row md:items-center md:justify-between md:gap-10 lg:min-h-[140px] lg:px-10 lg:py-7">
@@ -522,49 +493,71 @@ function SectionHeading({
   );
 }
 
-function EvidenceBecomesAccess() {
+function AiShowcase({ copy, locale }: { copy: HomeCopy; locale: "ar" | "en" }) {
   return (
-    <div
-      aria-hidden="true"
-      className="relative min-h-[250px] overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[radial-gradient(circle_at_74%_42%,rgba(0,255,0,0.1)_0%,transparent_24%),linear-gradient(145deg,#f9fbff_0%,#eef5ff_100%)] shadow-[0_28px_80px_-60px_rgba(0,102,255,0.55)] md:min-h-[310px]"
-    >
-      <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(0,102,255,0.16)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(90deg,#000,transparent_58%)]" />
+    <section aria-labelledby="home-ai-title" className="bg-white px-2 py-[var(--home-ai-padding-mobile)] sm:px-4 lg:py-[var(--home-ai-padding-desktop)]">
+      <div className="mx-auto max-w-[1440px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_55px_-45px_rgba(15,23,42,0.35)]">
+        <div className="relative overflow-hidden">
+          <picture className="block w-full">
+            <source media="(min-width: 1024px)" srcSet={MUTAH_ASSETS.ai.sceneWeb} />
+            <img
+              src={MUTAH_ASSETS.ai.sceneMobile}
+              width={1086}
+              height={1448}
+              alt={copy.aiSceneAlt}
+              loading="lazy"
+              className="block h-auto w-full"
+            />
+          </picture>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[43%] bg-gradient-to-b from-white/85 via-white/55 to-transparent lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-[43%] lg:bg-gradient-to-r lg:from-white/95 lg:via-white/70 lg:to-transparent" />
 
-      <div className="absolute start-[8%] top-[20%] flex w-[43%] items-center gap-2.5 rounded-full border border-white bg-white/78 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.45)] backdrop-blur-sm">
-        <span className="size-2 shrink-0 rounded-full bg-slate-400" />
-        <span className="h-px flex-1 bg-gradient-to-r from-slate-300 to-primary/20" />
-      </div>
-      <div className="absolute start-[13%] top-[39%] flex w-[38%] items-center gap-2.5 rounded-full border border-primary/10 bg-white/82 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(0,102,255,0.5)] backdrop-blur-sm">
-        <span className="size-2 shrink-0 rounded-full bg-primary" />
-        <span className="h-px flex-1 bg-gradient-to-r from-primary/45 to-primary/10" />
-      </div>
-      <div className="absolute start-[18%] top-[58%] flex w-[33%] items-center gap-2.5 rounded-full border border-white bg-white/78 px-3 py-2 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.45)] backdrop-blur-sm">
-        <span className="size-2 shrink-0 rounded-full bg-slate-400" />
-        <span className="h-px flex-1 bg-gradient-to-r from-slate-300 to-primary/20" />
-      </div>
+          <div dir={locale === "ar" ? "rtl" : "ltr"} className="absolute left-[4%] right-[4%] top-[7%] z-10 text-start lg:left-[3%] lg:right-auto lg:top-[7%] lg:w-[30%]">
+            <p className="text-xs font-extrabold text-[#0066FF] sm:text-sm lg:text-base">{copy.aiKicker}</p>
+            <h2 id="home-ai-title" className="mt-1 text-[clamp(1.35rem,5.3vw,2rem)] font-extrabold leading-[1.18] tracking-tight text-[#09164b] lg:mt-3 lg:text-[clamp(2rem,2.7vw,2.6rem)]">
+              {copy.aiTitleLines.map((line) => <span key={line} className="block">{line}</span>)}
+              <span className="block text-[#0066FF]">{copy.aiDecision}</span>
+            </h2>
+            <p className="mt-2 max-w-[32rem] text-[clamp(0.75rem,3.1vw,0.95rem)] leading-[1.45] text-[#253a71] lg:mt-4 lg:text-[clamp(0.95rem,1.3vw,1.2rem)] lg:leading-[1.55]">{copy.aiBody}</p>
+          </div>
 
-      <div className="absolute bottom-[17%] end-[13%] h-[61%] w-[30%] rounded-t-[999px] bg-primary p-[9px] shadow-[0_20px_50px_-30px_rgba(0,102,255,0.8)]">
-        <div className="relative size-full overflow-hidden rounded-t-[999px] bg-white/95">
-          <div className="absolute bottom-0 end-[12%] h-[76%] w-[48%] rounded-t-full bg-[var(--home-access)]" />
-          <div className="absolute inset-y-0 start-0 w-1/2 bg-gradient-to-r from-white to-transparent" />
+          <span className="absolute right-[2%] top-[2%] z-10 inline-flex items-center gap-1.5 rounded-lg bg-white/85 px-2.5 py-1.5 text-[10px] font-bold text-[#253a71] shadow-sm sm:text-xs lg:px-3 lg:py-2">
+            <FileCheck2 className="size-4 text-[#0066FF]" aria-hidden="true" />{copy.aiExampleLabel}
+          </span>
+
+          <span className="absolute left-[4%] top-[72%] z-10 inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-2 py-1.5 text-[10px] font-bold text-[#09164b] shadow-sm sm:text-xs lg:left-[35%] lg:top-[64%] lg:px-3 lg:py-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-4 text-[#0066FF]" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3" /></svg>{copy.aiStairsLabel}
+          </span>
+          <span className="absolute left-[49%] top-[71%] z-10 inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-2 py-1.5 text-[10px] font-bold text-[#09164b] shadow-sm sm:text-xs lg:left-[57%] lg:top-[65%] lg:px-3 lg:py-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-4 text-[#0066FF]" aria-hidden="true"><path d="M3 19h18M3 17l18-10v10H3Z" /></svg>{copy.aiRampLabel}
+          </span>
+          <span dir={locale === "ar" ? "rtl" : "ltr"} className="absolute bottom-[2%] right-[2%] z-10 inline-flex max-w-[62%] items-center gap-1.5 rounded-lg bg-white/90 px-2 py-1.5 text-[10px] font-bold text-[#09164b] shadow-sm sm:text-xs lg:max-w-none lg:px-3 lg:py-2">
+            <ParkingCircle className="size-4 shrink-0 text-[#0066FF]" aria-hidden="true" />{copy.aiParkingLabel}
+          </span>
+          <div className="absolute bottom-[2%] left-[2%] z-10 hidden items-center gap-2 rounded-lg bg-[#ecf8ee]/95 px-4 py-2 text-sm text-[#12652a] shadow-sm lg:flex" dir={locale === "ar" ? "rtl" : "ltr"}>
+            <ShieldCheck className="size-6 shrink-0" aria-hidden="true" />
+            <div><strong className="block">{copy.publishAfterReview}</strong><span className="text-xs text-[#335d3e]">{copy.aiTrustBody}</span></div>
+          </div>
+        </div>
+
+        <ol dir={locale === "ar" ? "rtl" : "ltr"} className="divide-y divide-slate-100 px-3 py-2 sm:px-5 lg:grid lg:grid-cols-5 lg:divide-x lg:divide-y-0 lg:px-1 lg:py-5">
+          {copy.aiStages.map((stage, index) => {
+            const Icon = aiStageIcons[index] ?? Camera;
+            return <li key={stage.title} className="flex min-h-16 items-center gap-3 py-2.5 lg:min-h-32 lg:flex-col lg:gap-2 lg:px-3 lg:py-1 lg:text-center">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-[#0066FF]/25 text-sm font-bold text-[#0066FF]">{index + 1}</span>
+              <span className="relative flex size-8 shrink-0 items-center justify-center text-[#0066FF] lg:size-9">
+                <Icon className="size-7 stroke-[1.7] lg:size-8" aria-hidden="true" />
+                {index === 1 && <span aria-hidden="true" className="absolute text-[8px] font-extrabold leading-none lg:text-[9px]">AI</span>}
+              </span>
+              <div className="min-w-0"><h3 className="text-sm font-extrabold text-[#09164b] lg:text-base">{stage.title}</h3><p className="mt-0.5 text-xs leading-5 text-[#52648a] lg:text-sm">{stage.body}</p></div>
+            </li>;
+          })}
+        </ol>
+        <div className="mx-2 mb-2 flex items-center gap-2 rounded-lg bg-[#ecf8ee] px-3 py-2 text-[#12652a] lg:hidden" dir={locale === "ar" ? "rtl" : "ltr"}>
+          <ShieldCheck className="size-6 shrink-0" aria-hidden="true" />
+          <div><strong className="block text-sm">{copy.publishAfterReview}</strong><span className="text-xs text-[#335d3e]">{copy.aiTrustBody}</span></div>
         </div>
       </div>
-      <div className="absolute bottom-[17%] end-[6%] h-3 w-[45%] origin-right -skew-x-[28deg] bg-[var(--home-access)]/50 blur-[0.25px]" />
-      <div className="absolute bottom-[9%] end-[9%] flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-2 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-sm">
-        <Sparkles className="size-4 text-primary" aria-hidden="true" />
-        <span className="h-3 w-px bg-slate-200" />
-        <ShieldCheck className="size-4 text-access-strong" aria-hidden="true" />
-      </div>
-    </div>
-  );
-}
-
-function Principle({ icon: Icon, text }: { icon: typeof Eye; text: string }) {
-  return (
-    <li className="flex items-start gap-3 py-3.5 text-sm font-semibold leading-6 text-slate-700">
-      <Icon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-      <span>{text}</span>
-    </li>
+    </section>
   );
 }
 

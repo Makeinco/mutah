@@ -22,6 +22,8 @@ export type MutahAssetRegistry = {
   };
   ai: {
     evidenceVisual: FutureAsset;
+    sceneWeb: AssetPath;
+    sceneMobile: AssetPath;
   };
   review: {
     emptyState: FutureAsset;
@@ -52,6 +54,8 @@ export const ASSETS = {
   },
   ai: {
     evidenceVisual: null,
+    sceneWeb: "/assets/home/mutah-ai-web.png",
+    sceneMobile: "/assets/home/mutah-ai-mobile.png",
   },
   review: {
     emptyState: null,
