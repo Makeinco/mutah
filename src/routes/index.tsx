@@ -521,8 +521,8 @@ function AiShowcase({ copy, locale }: { copy: HomeCopy; locale: "ar" | "en" }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[43%] bg-gradient-to-b from-white/85 via-white/55 to-transparent lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-[41%] lg:bg-gradient-to-r lg:from-white/88 lg:via-white/55 lg:to-transparent" />
 
           <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[9] size-full lg:hidden" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
-            <path d="M 18 77 L 29 74 M 52 77 L 48 75" stroke="#0066FF" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-            <circle cx="29" cy="74" r="0.8" fill="#0066FF" />
+            <path d="M 18 77 L 36 75 M 52 77 L 48 75" stroke="#0066FF" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+            <circle cx="36" cy="75" r="0.8" fill="#0066FF" />
             <circle cx="48" cy="75" r="0.8" fill="#0066FF" />
           </svg>
           <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[9] hidden size-full lg:block" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
