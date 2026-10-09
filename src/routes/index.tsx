@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Camera,
   CircleCheck,
-  Cpu,
   FileCheck2,
   MapPin,
   ParkingCircle,
@@ -40,7 +39,17 @@ export const Route = createFileRoute("/")({
 });
 
 const stepIcons = [Search, Camera, ShieldCheck] as const;
-const aiStageIcons = [Camera, Cpu, CircleCheck, UsersRound, FileCheck2] as const;
+const aiStageIcons = [Camera, AiChipIcon, CircleCheck, UsersRound, FileCheck2] as const;
+
+function AiChipIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4.5" y="4.5" width="15" height="15" rx="2" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8 1.5v3m4-3v3m4-3v3M8 19.5v3m4-3v3m4-3v3M1.5 8h3m-3 4h3m-3 4h3m15-8h3m-3 4h3m-3 4h3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <text x="12" y="12.1" textAnchor="middle" dominantBaseline="middle" fill="currentColor" fontSize="7" fontWeight="800" stroke="none">AI</text>
+    </svg>
+  );
+}
 
 const HOME_TOKEN_STYLE = {
   "--home-content-max": MUTAH_DESIGN_TOKENS.layout.contentMax,
@@ -512,17 +521,17 @@ function AiShowcase({ copy, locale }: { copy: HomeCopy; locale: "ar" | "en" }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[43%] bg-gradient-to-b from-white/85 via-white/55 to-transparent lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-[41%] lg:bg-gradient-to-r lg:from-white/88 lg:via-white/55 lg:to-transparent" />
 
           <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[9] size-full lg:hidden" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
-            <path d="M 18 77 L 29 80 M 66 77 L 51 80" stroke="#0066FF" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+            <path d="M 18 77 L 29 80 M 50 76 L 44 75" stroke="#0066FF" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
             <circle cx="29" cy="80" r="0.8" fill="#0066FF" />
-            <circle cx="51" cy="80" r="0.8" fill="#0066FF" />
+            <circle cx="44" cy="75" r="0.8" fill="#0066FF" />
           </svg>
           <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[9] hidden size-full lg:block" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
-            <path d="M 39 70 L 42 79 M 63 70 L 57 79" stroke="#0066FF" strokeWidth="1.8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+            <path d="M 39 70 L 42 79 M 63 70 L 56 77" stroke="#0066FF" strokeWidth="1.8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
             <circle cx="42" cy="79" r="0.45" fill="#0066FF" />
-            <circle cx="57" cy="79" r="0.45" fill="#0066FF" />
+            <circle cx="56" cy="77" r="0.45" fill="#0066FF" />
           </svg>
 
-          <div dir={locale === "ar" ? "rtl" : "ltr"} className="absolute left-[4%] right-[4%] top-[7%] z-10 text-start lg:left-[3%] lg:right-auto lg:top-[7%] lg:w-[30%]">
+          <div dir={locale === "ar" ? "rtl" : "ltr"} className="absolute left-[4%] right-[4%] top-[15%] z-10 text-start lg:left-[3%] lg:right-auto lg:top-[7%] lg:w-[30%]">
             <p className="text-xs font-extrabold text-[#0066FF] sm:text-sm lg:text-base">{copy.aiKicker}</p>
             <h2 id="home-ai-title" className="mt-1 text-[clamp(1.35rem,5.3vw,2rem)] font-extrabold leading-[1.18] tracking-tight text-[#09164b] lg:mt-3 lg:text-[clamp(2rem,2.7vw,2.6rem)]">
               {copy.aiTitleLines.map((line) => <span key={line} className="block">{line}</span>)}
@@ -550,15 +559,15 @@ function AiShowcase({ copy, locale }: { copy: HomeCopy; locale: "ar" | "en" }) {
           </div>
         </div>
 
-        <ol dir={locale === "ar" ? "rtl" : "ltr"} className="relative divide-y divide-slate-100 px-3 py-2 sm:px-5 lg:grid lg:grid-cols-5 lg:divide-x lg:divide-y-0 lg:px-1 lg:py-5">
-          <span aria-hidden="true" className="pointer-events-none absolute inset-x-[10%] top-[2.125rem] hidden h-px bg-[#0066FF]/20 lg:block" />
+        <ol dir={locale === "ar" ? "rtl" : "ltr"} className="relative divide-y divide-slate-100 px-3 py-2 sm:px-5 lg:grid lg:grid-cols-5 lg:divide-y-0 lg:px-1 lg:py-5">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-[10%] top-[2.375rem] hidden h-px bg-[#0066FF]/20 lg:block" />
           {copy.aiStages.map((stage, index) => {
             const Icon = aiStageIcons[index] ?? Camera;
             return <li key={stage.title} className="relative flex min-h-16 items-center gap-3 py-2.5 lg:min-h-32 lg:flex-col lg:gap-2 lg:px-3 lg:py-1 lg:text-center">
+              {index > 0 && <span aria-hidden="true" className="pointer-events-none absolute bottom-2 start-0 top-12 hidden w-px bg-slate-100 lg:block" />}
               <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border border-[#0066FF]/25 bg-white text-sm font-bold text-[#0066FF]">{index + 1}</span>
               <span className="relative flex size-8 shrink-0 items-center justify-center text-[#0066FF] lg:size-9">
                 <Icon className="size-7 stroke-[1.7] lg:size-8" aria-hidden="true" />
-                {index === 1 && <span aria-hidden="true" className="absolute text-[8px] font-extrabold leading-none lg:text-[9px]">AI</span>}
               </span>
               <div className="min-w-0"><h3 className="text-sm font-extrabold text-[#09164b] lg:text-base">{stage.title}</h3><p className="mt-0.5 text-xs leading-5 text-[#52648a] lg:text-sm">{stage.body}</p></div>
             </li>;
